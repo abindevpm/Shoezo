@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SHOEZO - Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-900 m-0 p-0">
+
+  <div class="min-h-screen flex items-center justify-center">
+    <div class="w-full h-screen">
+
+      <div class="grid grid-cols-1 md:grid-cols-2 w-full h-full bg-white overflow-hidden">
+
+        <!-- LEFT PANEL -->
+        <div class="bg-white p-12 md:p-16 flex flex-col justify-center items-center">
+          <div class="w-full max-w-sm">
+
+            <h1 class="text-5xl md:text-6xl font-black italic text-black mb-8 tracking-tight">SHOEZO</h1>
+            <h2 class="text-2xl font-bold text-black mb-8 tracking-widest">LOGIN</h2>
+
+            <form id="loginForm" method="POST" action="/login" class="w-full">
+
+              <!-- Email -->
+              <div class="mb-6 w-full">
+                <div class="flex items-center bg-gray-400 rounded-2xl px-5 py-4 hover:bg-gray-500 transition">
+                  <input type="email" name="email" placeholder="Email"
+                    class="flex-1 bg-transparent text-black placeholder-gray-700 outline-none font-medium">
+                </div>
+              </div>
+
+              <!-- Password -->
+              <div class="mb-2 w-full">
+                <div class="flex items-center bg-gray-400 rounded-2xl px-5 py-4 hover:bg-gray-500 transition">
+                  <input type="password" name="password" placeholder="Password" 
+                    class="flex-1 bg-transparent text-black placeholder-gray-700 outline-none font-medium">
+                </div>
+              </div>
+
+              <!-- 🔥 ERROR MESSAGE SHOW HERE -->
+              <% if (typeof message !== "undefined") { %>
+                <p class="text-red-600 font-semibold text-center mt-2 mb-4">
+                  <%= message %>
+                </p>
+              <% } %>
+
+              <!-- Buttons -->
+              <div class="flex gap-4 mb-6 mt-8 justify-center">
+                <button type="submit"
+                  class="bg-black text-white font-bold py-3 px-8 rounded-full hover:bg-gray-900 transition">
+                  Login Now
+                </button>
+
+                <button type="button"
+                  class="bg-black text-white font-bold py-3 px-8 rounded-full hover:bg-gray-900 transition"
+                  onclick="handleSignup()">
+                  Sign up
+                </button>
+              </div>
+            </form>
+
+            <div class="text-center mb-8 mt-4">
+              <a href="#forgot" class="text-gray-600 text-sm hover:text-black transition font-medium">
+                forgot password
+              </a>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="bg-gradient-to-br from-gray-500 to-gray-400 flex items-center justify-center w-full h-full overflow-hidden">
+          <img src="/images/login page.jpg"
+            alt="Nike Shoe"
+            class="w-full h-full object-cover drop-shadow-2xl">
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
+
+
+  <script>
+    function handleSignup() {
+      alert('Redirecting to signup page');
+    }
+
+    function handleGoogleLogin(e) {
+      e.preventDefault();
+      alert('Google login integration would go here');
+    }
+  </script>
+
+</body>
+</html>

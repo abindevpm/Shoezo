@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHOEZO - OTP Verification</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Geist', sans-serif;
+        }
+        
+        .italic-brand {
+            font-style: italic;
+            font-weight: 700;
+        }
+
+        /* OTP Input Styling */
+        .otp-input {
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background-color: #f3f4f6;
+            transition: all 0.3s ease;
+        }
+
+        .otp-input:focus {
+            outline: none;
+            border-color: #000000e4;
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Hide number input arrows/spinners */
+        .otp-input::-webkit-outer-spin-button,
+        .otp-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .otp-input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        /* Timer Animation */
+        @keyframes pulse-timer {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .timer-pulse {
+            animation: pulse-timer 1s infinite;
+        }
+    </style>
+</head>
+<body class="bg-white">
+    <div class="flex h-screen">
+        <div class="hidden md:flex w-1/2 bg-gradient-to-br from-gray-300 to-gray-400 items-center justify-center relative overflow-hidden">
+            <div class="relative w-full h-full flex items-center justify-center">
+              <img 
+    src="/images/otppage.jpeg" 
+    alt="Black Nike Shoe with White Swoosh" 
+    class="w-full h-full object-cover drop-shadow-2xl" 
+>
+            </div>
+        </div>
+
+
+        <div class="w-full md:w-1/2 flex flex-col justify-center px-8 md:px-16 py-12 bg-white">
+            <div class="max-w-sm mx-auto w-full">
+                <h1 class="text-4xl md:text-5xl font-bold italic-brand text-black mb-8">SHOEZO</h1>
+                
+                <h2 class="text-2xl font-bold text-black mb-4"> Sign Up OTP Verification</h2>
+                
+                <p class="text-gray-600 text-sm mb-8">Enter OTP sent to bill*****@example.com</p>
+                
+                <form id="otpForm" action="/otp" method="POST" class="space-y-8" onsubmit="return validateOTPForm()">
+                    <div class="flex items-center justify-between">
+                        <span class="text-lg font-bold text-gray-800 timer-pulse" id="timer">1:42</span>
+                    </div>
+                    
+                    <div class="flex gap-4 justify-center">
+                        <input type="number" name="otp1" maxlength="1" placeholder="" class="otp-input"  inputmode="numeric">
+                        <input type="number" name="otp2" maxlength="1" placeholder="" class="otp-input"  inputmode="numeric">
+                        <input type="number" name="otp3" maxlength="1" placeholder="" class="otp-input"  inputmode="numeric">
+                        <input type="number" name="otp4" maxlength="1" placeholder="" class="otp-input"  inputmode="numeric">
+                    </div>
+                    
+                    <button 
+                        type="submit" 
+                        class="bg-black hover:bg-gray-900 text-white font-semibold py-2 px-4 rounded-xl transition duration-200 w-40 mx-auto block"
+                    >
+                        Confirm
+                    </button>
+                </form>
+                
+                <div class="text-center mt-6">
+                    <button 
+                        type="button"
+                        onclick="handleResendOTP()"
+                        class="text-sm text-gray-600 hover:text-gray-800 font-medium transition"
+                    >
+                        Resend OTP
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+
+    const otpInputs = document.querySelectorAll('.otp-input');
+    const otpForm = document.getElementById('otpForm');
+    
+  let timerInterval = null;
+    let timeLeft = 102; 
+
+    
+   function updateTimer() {
+    const timerEl = document.getElementById('timer');
+
+    if (timerInterval) {
+        clearInterval(timerInterval);  // stop old timer
+    }
+
+    timerInterval = setInterval(() => {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+
+        timerEl.textContent = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            timerEl.classList.remove("timer-pulse");
+            timerEl.style.color = "#ef4444";
+        }
+
+        timeLeft--;
+    }, 1000);
+}
+
+
+    
+    otpInputs.forEach((input, index) => {
+
+        input.addEventListener('input', (e) => {
+            const value = e.target.value;
+
+            if (value.length === 1 && index < otpInputs.length - 1) {
+                otpInputs[index + 1].focus();
+            }
+
+            if (!/^\d*$/.test(value)) {
+                e.target.value = '';
+            }
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
+                otpInputs[index - 1].focus();
+            }
+        });
+
+        input.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const paste = (e.clipboardData || window.clipboardData).getData('text');
+            const digits = paste.replace(/\D/g, '').slice(0, 4);
+
+            digits.split('').forEach((digit, i) => {
+                if (otpInputs[i]) otpInputs[i].value = digit;
+            });
+
+            const nextEmpty = [...otpInputs].find(input => !input.value);
+            if (nextEmpty) nextEmpty.focus();
+        });
+    });
+
+    
+    function validateOTPForm() {
+        const enteredOtp = Array.from(otpInputs)
+                                .map(input => input.value)
+                                .join("");
+
+        if (enteredOtp.length !== 4) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Incomplete OTP',
+                text: 'Please enter all 4 digits.',
+            });
+            return false;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/otp",
+            data: { otp: enteredOtp },
+            success: function (response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'OTP Verified Successfully',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = response.redirectUrl;
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Invalid OTP Please Try Again",
+                        text: response.message
+                    });
+                }
+            },
+            error: function () {
+                Swal.fire({
+                    icon: "error",
+                    title: "Server Error",
+                    text: "Please try again."
+                });
+            }
+        });
+
+        return false;
+    }
+
+    //---------------- RESEND OTP ----------------//
+
+    function handleResendOTP() {
+    timeLeft = 102;
+    updateTimer();
+
+    const timerEl = document.getElementById('timer');
+    timerEl.classList.add('timer-pulse');
+    timerEl.style.color = '#1f2937';
+
+    otpInputs.forEach(input => input.value = '');
+    otpInputs[0].focus();
+
+    $.ajax({
+        type: "POST",
+        url: "/resend-otp",
+        success: function (response) {
+            if (response.success) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'New OTP Sent!',
+                    toast: true,
+                    position: 'top-end',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            }
+        },
+        error: function () {
+            Swal.fire({
+                icon: "error",
+                title: "Error sending OTP",
+                text: "Please try again."
+            });
+        }
+    });
+}
+
+   
+</script>
+
+</body>
+</html>

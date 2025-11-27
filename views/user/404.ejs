@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Optional: Use a common sans-serif font like Inter for a modern look */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff; /* White background */
+            /* Ensure the content is centered vertically and horizontally */
+            display: flex;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="flex flex-col items-center justify-center text-center px-4 py-16">
+        
+        <p class="text-sm tracking-widest text-black mb-4 font-semibold uppercase">
+            Oops! Page Not Found
+        </p>
+
+        <div class="text-[12rem] sm:text-[15rem] font-extrabold text-black leading-none" style="font-family: Arial, sans-serif;">
+            404
+        </div>
+
+        <p class="text-lg font-medium text-black max-w-lg mt-8 mb-10 uppercase">
+            We are sorry, but the page you requested was not found
+        </p>
+        
+        <a 
+            href="/" 
+            class="
+                mt-4 
+                px-8 py-3 
+                border-2 
+                border-black 
+                text-base 
+                font-medium 
+                rounded-md 
+                text-white 
+                bg-black 
+                hover:bg-gray-800 
+                hover:border-gray-800
+                transition-colors 
+                duration-300
+                uppercase
+                tracking-wider
+            "
+        >
+            Return to Home Page
+        </a>
+        </div>
+</body>
+</html>

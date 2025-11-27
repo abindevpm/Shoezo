@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHOEZO Admin Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font for 'SHOEZO' or a similar look, if standard sans-serif isn't enough */
+        /* For the exact look, you might need a specific, bold, uppercase-friendly font. 
+           We'll rely on Tailwind's default bold/extrabold sans for a close approximation. */
+        
+        /* Optional: Custom styling for the image side to perfectly crop/position the shoe */
+        .image-side {
+            background-image: url('/images/signup2.jpg'); /* Replace with your actual image path */
+            background-size: cover;
+            background-position: center center;
+            /* Optional: Add a dark overlay gradient if the image isn't naturally dark enough */
+            box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.2); 
+        }
+
+        /* Styling to match the specific rounded corners and subtle shadow of the inputs */
+        .custom-input {
+            height: 50px; /* Adjust height to match the visual size */
+        }
+        
+        /* Ensure the body takes up the full viewport height */
+        body {
+            height: 100vh;
+            margin: 0;
+            display: flex; /* Ensures the content centers or fills the page */
+        }
+    </style>
+</head>
+<body class="bg-white">
+    <div class="flex w-full h-full">
+        
+        <div class="flex flex-col items-start justify-center p-8 sm:p-16 lg:p-24 w-full lg:w-1/2">
+            
+            <h1 class="text-4xl sm:text-5xl font-extrabold tracking-widest text-black mb-8 sm:mb-12">
+                SHOEZO
+            </h1>
+
+            <h2 class="text-xl sm:text-2xl font-bold text-black mb-10 sm:mb-16">
+                ADMIN LOGIN
+            </h2>
+
+            <form action="/admin/login" method="POST" class="w-full max-w-sm">
+                
+                <div class="mb-4">
+                    <div class="relative custom-input flex items-center bg-gray-300 rounded-lg shadow-sm">
+                        <i class="fas fa-envelope ml-4 text-gray-500 hidden"></i> <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="email"
+                            class="custom-input w-full bg-transparent text-gray-800 placeholder-gray-500 font-medium focus:outline-none px-5 py-2 rounded-lg"
+                            required
+                        >
+                        </div>
+                </div>
+
+                <div class="mb-2">
+                    <div class="relative custom-input flex items-center bg-gray-300 rounded-lg shadow-sm">
+                        <i class="fas fa-lock ml-4 text-gray-500 hidden"></i> <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="password"
+                            class="custom-input w-full bg-transparent text-gray-800 placeholder-gray-500 font-medium focus:outline-none px-5 py-2 rounded-lg"
+                            required
+                        >
+                    </div>
+                </div>
+                
+                <div class="flex justify-end mb-8">
+                    <a href="/forgot-password" class="text-xs text-gray-600 hover:text-black">
+                        forgot password
+                    </a>
+                </div>
+
+                <button
+                    type="submit"
+                    class="h-10 w-32 bg-black text-white text-sm font-semibold rounded-md shadow-md hover:bg-gray-800 transition duration-300"
+                >
+                    Login Now
+                </button>
+            </form>
+        </div>
+
+        <div class="hidden lg:block lg:w-1/2 bg-black image-side">
+            </div>
+
+    </div>
+</body>
+</html>
