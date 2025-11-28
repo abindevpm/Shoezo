@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SHOEZO - User Management</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .page-btn.active { background-color: #010714; color: white; }
+  </style>
+</head>
+
+<body class="bg-gray-100">
+
+  <div class="flex h-screen">
+
+    <!-- Sidebar -->
+    <%- include("../../views/partials/admin/sidebar.ejs") %>
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-y-auto">
+
+      <!-- Navbar -->
+      <%- include("../../views/partials/admin/navbar.ejs") %>
+
+      <!-- Page Content -->
+      <div class="p-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">User Management</h1>
+
+        <!-- Search -->
+        <div class="flex justify-between items-center mb-8">
+          <input
+            type="text"
+            id="searchInput"
+            class="w-96 px-5 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+            placeholder="Search by name, email or phone..." />
+
+          <button class="bg-gray-900 text-white px-6 py-3 rounded-xl font-medium flex items-center space-x-2">
+            <i class="fas fa-plus"></i>
+            <span>Add User</span>
+          </button>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <table class="w-full">
+            <thead class="bg-gray-800 text-white">
+              <tr>
+                <th class="px-6 py-5 text-left">S.No</th>
+                <th class="px-6 py-5 text-left">Name</th>
+                <th class="px-6 py-5 text-left">Email</th>
+                <th class="px-6 py-5 text-left">Mobile</th>
+                <th class="px-6 py-5 text-center">Status</th>
+              </tr>
+            </thead>
+
+            <tbody id="userTableBody" class="divide-y divide-gray-200">
+
+              <!-- DYNAMIC USERS USING FOR LOOP -->
+              <% if (customers && customers.length > 0) { %>
+
+                <% for (let i = 0; i < customers.length; i++) { 
+                     let user = customers[i]; %>
+
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-5"><%= i + 1 %></td>
+                    <td class="px-6 py-5 font-medium"><%= user.name %></td>
+                    <td class="px-6 py-5"><%= user.email %></td>
+                    <td class="px-6 py-5"><%= user.mobile %></td>
+
+                    <td class="px-6 py-5 text-center">
+                      <% if (!user.isBlocked) { %>
+
+                        <a href="/admin/blockcustomer?id=<%= user._id %>"
+                          class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition inline-block">
+                          Block
+                        </a>
+
+                      <% } else { %>
+
+                        <a href="/admin/unblockcustomer?id=<%= user._id %>"
+                          class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition inline-block">
+                          Unblock
+                        </a>
+
+                      <% } %>
+                    </td>
+                  </tr>
+
+                <% } %>
+
+              <% } else { %>
+
+                <tr>
+                  <td colspan="5" class="px-6 py-10 text-center text-gray-500">
+                    No users found.
+                  </td>
+                </tr>
+
+              <% } %>
+
+            </tbody>
+          </table>
+        </div> <!-- END TABLE BOX -->
+
+      </div> <!-- END PAGE CONTENT -->
+
+      <!-- PAGINATION BELOW TABLE -->
+      <div class="mt-8 mb-10 flex justify-center">
+        <div class="flex items-center space-x-2">
+
+          <!-- Prev -->
+          <a
+            href="?page=<%= currentPage - 1 %>&search=<%= search %>"
+            class="px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-100
+            <%= currentPage == 1 ? 'opacity-40 pointer-events-none' : '' %>">
+            <i class="fas fa-chevron-left text-sm"></i>
+          </a>
+
+          <!-- Page Numbers -->
+          <% for (let i = 1; i <= totalPages; i++) { %>
+            <a href="?page=<%= i %>&search=<%= search %>"
+              class="page-btn px-3 py-2 rounded-lg text-sm font-medium
+              <%= currentPage == i ? 'active bg-gray-900 text-white' : 'hover:bg-gray-200' %>">
+              <%= i %>
+            </a>
+          <% } %>
+
+          <!-- Next -->
+          <a
+            href="?page=<%= currentPage + 1 %>&search=<%= search %>"
+            class="px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-100
+            <%= currentPage == totalPages ? 'opacity-40 pointer-events-none' : '' %>">
+            <i class="fas fa-chevron-right text-sm"></i>
+          </a>
+
+        </div>
+      </div>
+
+    </div> <!-- END flex-1 -->
+
+  </div> <!-- END FLEX -->
+
+  <!-- Search Script -->
+  <script>
+    document.getElementById('searchInput').addEventListener('keyup', function () {
+      let filter = this.value.toLowerCase();
+      let rows = document.querySelectorAll('#userTableBody tr');
+
+      rows.forEach(row => {
+        let name = row.cells[1]?.textContent.toLowerCase() || "";
+        let email = row.cells[2]?.textContent.toLowerCase() || "";
+        let mobile = row.cells[3]?.textContent.toLowerCase() || "";
+
+        row.style.display =
+          name.includes(filter) || email.includes(filter) || mobile.includes(filter)
+            ? '' : 'none';
+      });
+    });
+  </script>
+
+</body>
+
+</html>
