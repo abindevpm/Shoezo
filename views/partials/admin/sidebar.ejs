@@ -1,0 +1,141 @@
+<div class="sidebar">
+    <div class="sidebar-nav">
+
+        <a href="/admin/dashboard" class="nav-item">
+            <span class="nav-icon">⊞</span>
+            <span>Dashboard</span>
+        </a>
+
+        <a href="/admin/customers" class="nav-item">
+            <span class="nav-icon">👥</span>
+            <span>Customers</span>
+        </a>
+
+        <a href="/admin/products" class="nav-item">
+            <span class="nav-icon">📦</span>
+            <span>Products</span>
+        </a>
+
+        <a href="/admin/orders" class="nav-item">
+            <span class="nav-icon">🛒</span>
+            <span>Orders</span>
+        </a>
+
+        <a href="/admin/coupons" class="nav-item">
+            <span class="nav-icon">⭐</span>
+            <span>Coupon Management</span>
+        </a>
+
+        <a href="/admin/sales-report" class="nav-item">
+            <span class="nav-icon">📊</span>
+            <span>Sales Report</span>
+        </a>
+
+        <a href="/admin/category" class="nav-item">
+            <span class="nav-icon">🏷️</span>
+            <span>Category</span>
+        </a>
+
+        <a href="/admin/offers" class="nav-item">
+            <span class="nav-icon">%</span>
+            <span>offers</span>
+        </a>
+    </div>
+
+    <div class="sidebar-bottom">
+        <a href="/admin/settings" class="nav-item">
+            <span class="nav-icon">⚙️</span>
+            <span>Settings</span>
+        </a>
+
+        <a href="/admin/logout" class="nav-item">
+            <span class="nav-icon">🚪</span>
+            <span>Logout</span>
+        </a>
+    </div>
+</div>
+
+
+
+<style>
+
+/* ===== SIDEBAR ===== */
+
+
+   .sidebar {
+    width: 240px;
+    background-color: #fff;
+    border-right: 1px solid #e0e0e0;
+    padding: 25px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: calc(100vh - 70px);
+    position: fixed;
+    top: 70px; 
+    left: 0;
+    overflow: hidden;  /* scroll removed */
+}
+
+
+/* Navigation items */
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 25px;
+    background-color: #2d3436;
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s;
+    white-space: nowrap;
+    border: none;
+}
+
+.nav-item:hover {
+    background-color: #1f2729;
+    transform: translateX(5px);
+}
+
+.nav-icon {
+    font-size: 16px;
+    width: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Bottom section */
+.sidebar-bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 12px;
+    margin-top: auto;
+}
+
+.main-wrapper {
+    margin-left: 240px;   /* sidebar width */
+    width: calc(100% - 240px);
+}
+
+
+
+
+
+
+
+
+</style>
+

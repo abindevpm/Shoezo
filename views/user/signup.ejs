@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - SHOEZO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .background-image-container {
+            background: linear-gradient(to right, #e0f2fe, #f0f9ff);
+            min-height: 100vh;
+        }
+        .input-field {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0.4rem 0;
+            outline: none;
+        }
+        .input-field:focus {
+            border-color: #3b82f6;
+        }
+        .shoe-image {
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+        }
+        .error-message {
+            color: red;
+            font-size: 0.75rem;
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-white min-h-screen">
+    <div class="flex w-full min-h-screen">
+        <div class="hidden lg:block lg:w-1/2 background-image-container relative overflow-hidden p-0">
+            <img
+                src="/images/ssign.png"
+                alt="White low-top sneaker with flying laces"
+                class="shoe-image absolute inset-0"
+            >
+        </div>
+
+        <div class="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-8">
+            <div class="w-full max-w-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-4xl font-extrabold tracking-widest text-black">SHOEZO</h1>
+                    <span class="text-sm text-gray-600">English (UK)</span>
+                </div>
+
+                <h2 class="text-2xl font-semibold mb-6 text-gray-900">Create Account</h2>
+
+                <form id="signform" class="space-y-4" method="POST" action="/signup">
+                    <div>
+                        <input type="text" placeholder="Full Name" class="input-field w-full text-base placeholder-gray-500" name="name">
+                        <div id="error1" class="error-message"></div>
+                    </div>
+
+                    <div>
+                        <input type="email" placeholder="Email Address" class="input-field w-full text-base placeholder-gray-500" name="email">
+                        <div id="error2" class="error-message"></div>
+                    </div>
+
+                    <div>
+                        <input type="tel" placeholder="phone number" class="input-field w-full text-base placeholder-gray-500" name="phone">
+                        <div id="error3" class="error-message"></div>
+                    </div>
+
+                    <div>
+                        <input type="password" placeholder="Password" class="input-field w-full text-base placeholder-gray-500" name="password">
+                        <div id="error4" class="error-message"></div>
+                    </div>
+
+                    <% if (typeof message !== "undefined") { %>
+                        <p class="text-red-600 font-semibold text-center mt-2 mb-4"><%= message %></p>
+                    <% } %>
+
+                    <div>
+                        <input type="password" placeholder="Confirm Password" class="input-field w-full text-base placeholder-gray-500" name="confirmPassword">
+                        <div id="error5" class="error-message"></div>
+                    </div>
+
+                    <div>
+                        <input type="text" placeholder="Enter your Referral Code" class="input-field w-full text-base placeholder-gray-500" style="border-bottom: 1px solid #e5e7eb;" name="referalCode">
+                        <div id="error6" class="error-message"></div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-black hover:bg-gray-800 text-white font-semibold py-3 mt-6 transition duration-200">
+                        Create Account
+                    </button>
+
+                    <div class="flex items-center justify-center my-4">
+                        <span class="text-gray-400 text-sm font-medium">– OR –</span>
+                    </div>
+
+                    <a href="/auth/google" class="w-full">
+                        <button type="button" class="w-full flex items-center justify-center gap-2 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3 transition duration-200 shadow-sm">
+                            <img src="/images/googlelogo.jpeg" alt="Google logo" class="w-4 h-4">
+                            <span>Sign up with Google</span>
+                        </button>
+                    </a>
+                </form>
+
+                <p class="text-center text-sm mt-6 text-gray-600">
+                    Already have an account?
+                    <a href="/login" class="font-bold hover:text-gray-800">Log in</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const nameid = document.querySelector('input[name="name"]');
+        const emailid = document.querySelector('input[name="email"]');
+        const phoneid = document.querySelector('input[name="phone"]');
+        const passwordid = document.querySelector('input[name="password"]');
+        const confirmpasswordid = document.querySelector('input[name="confirmPassword"]');
+        const referalCodeid = document.querySelector('input[name="referalCode"]');
+
+        const error1 = document.getElementById("error1");
+        const error2 = document.getElementById("error2");
+        const error3 = document.getElementById("error3");
+        const error4 = document.getElementById("error4");
+        const error5 = document.getElementById("error5");
+        const error6 = document.getElementById("error6");
+        const signform = document.getElementById("signform");
+
+        function displayError(element, message) {
+            element.innerHTML = message;
+            element.style.display = message ? 'block' : 'none';
+        }
+
+        function nameValidateChecking() {
+            const nameval = nameid.value.trim();
+            const pattern = /^[A-Za-z\s]+$/;
+            if (nameval === "") {
+                displayError(error1, "Please enter your full name");
+                return false;
+            } else if (!pattern.test(nameval)) {
+                displayError(error1, "Name can contain only alphabets and spaces");
+                return false;
+            } else {
+                displayError(error1, "");
+                return true;
+            }
+        }
+
+        function emailValidateChecking() {
+            const emailval = emailid.value.trim();
+            const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailval === "") {
+                displayError(error2, "Please enter your email address");
+                return false;
+            } else if (!pattern.test(emailval)) {
+                displayError(error2, "Please enter a valid email");
+                return false;
+            } else {
+                displayError(error2, "");
+                return true;
+            }
+        }
+
+        function phoneValidateChecking() {
+            const phoneval = phoneid.value.trim();
+            if (phoneval === "") {
+                displayError(error3, "");
+                return true;
+            } else if (phoneval.length !== 10) {
+                displayError(error3, "Phone number must be exactly 10 digits");
+                return false;
+            } else if (!/^\d+$/.test(phoneval)) {
+                displayError(error3, "Phone must contain numbers only");
+                return false;
+            } else {
+                displayError(error3, "");
+                return true;
+            }
+        }
+
+        function passValidateChecking() {
+            const pass = passwordid.value;
+            if (pass.length === 0) {
+                displayError(error4, "Please enter a password");
+                return false;
+            } else if (pass.length < 8) {
+                displayError(error4, "Password must be at least 8 characters");
+                return false;
+            } else if (!/[A-Za-z]/.test(pass) || !/\d/.test(pass)) {
+                displayError(error4, "Password must contain letters & numbers");
+                return false;
+            } else {
+                displayError(error4, "");
+                return true;
+            }
+        }
+
+        function confirmPassValidateChecking() {
+            const pass = passwordid.value;
+            const cpass = confirmpasswordid.value;
+            if (cpass.length === 0) {
+                displayError(error5, "Please confirm your password");
+                return false;
+            } else if (pass !== cpass) {
+                displayError(error5, "Passwords do not match");
+                return false;
+            } else {
+                displayError(error5, "");
+                return true;
+            }
+        }
+
+        function referalValidateChecking() {
+            const ref = referalCodeid.value.trim();
+            if (ref !== "" && !/^[A-Za-z0-9]+$/.test(ref)) {
+                displayError(error6, "Referral code must be alphanumeric only");
+                return false;
+            } else {
+                displayError(error6, "");
+                return true;
+            }
+        }
+
+        nameid.addEventListener('blur', nameValidateChecking);
+        emailid.addEventListener('blur', emailValidateChecking);
+        phoneid.addEventListener('blur', phoneValidateChecking);
+        passwordid.addEventListener('blur', passValidateChecking);
+        confirmpasswordid.addEventListener('blur', confirmPassValidateChecking);
+        passwordid.addEventListener('input', confirmPassValidateChecking);
+        referalCodeid.addEventListener('blur', referalValidateChecking);
+
+        signform.addEventListener("submit", function(e) {
+            const isNameValid = nameValidateChecking();
+            const isEmailValid = emailValidateChecking();
+            const isPhoneValid = phoneValidateChecking();
+            const isPasswordValid = passValidateChecking();
+            const isConfirmPasswordValid = confirmPassValidateChecking();
+            const isReferalValid = referalValidateChecking();
+
+            if (!isNameValid || !isEmailValid || !isPasswordValid || !isConfirmPasswordValid || !isReferalValid) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>

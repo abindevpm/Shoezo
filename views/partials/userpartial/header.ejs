@@ -1,0 +1,58 @@
+
+
+<header class="bg-white sticky top-0 z-50 shadow-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row justify-between items-center">
+
+        <a href="/" class="flex items-center space-x-2 text-3xl font-extrabold tracking-widest text-black">
+            <span>SHOEZO</span>
+        </a>
+
+        <nav class="flex space-x-6 text-gray-600 font-medium">
+            <a href="/" class="hover:text-black">Home</a>
+            <a href="/shop" class="hover:text-black">Shop</a>
+            <a href="/orders" class="hover:text-black">Orders</a>
+        </nav>
+        <div class="relative hidden lg:block">
+    <input type="text" placeholder="Search" class="border border-gray-300 rounded-full py-2 pl-4 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-gray-700 transition duration-150 w-64">
+    <button class="absolute right-0 top-0 mt-2 mr-3 text-gray-500 hover:text-black">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z">
+            </path>
+        </svg>
+    </button>
+</div>
+
+
+        <div class="flex items-center space-x-6">
+
+            <% if (locals.user) { %>
+
+                <!-- USER LOGGED IN -->
+                <div class="dropdown">
+                    <a class="font-semibold cursor-pointer">
+                        <%= locals.user.name %> ⬇
+                    </a>
+
+                    <div class="dropdown-content">
+                        <a href="/user/profile">My Profile</a>
+                        <a href="/logout">Logout</a>
+                    </div>
+                </div>
+
+            <% } else { %>
+
+                <!-- USER NOT LOGGED IN -->
+                <a href="/login" class="font-medium text-gray-700 hover:text-blue-600">
+                    Login
+                </a>
+
+                <a href="/signup" class="font-medium text-gray-700 hover:text-blue-600">
+                    Signup
+                </a>
+
+            <% } %>
+
+        </div>
+    </div>
+</header>

@@ -1,0 +1,92 @@
+<div class="navbar">
+    <div class="navbar-left">
+        <div class="navbar-logo">SHOEZO</div>
+    </div>
+
+    <div class="navbar-right">
+        <div class="navbar-icons">
+            <button class="icon-button">🔔</button>
+            <button class="icon-button">👤</button>
+        </div>
+
+        <div class="user-profile">
+            ABHEEH
+            <div class="user-avatar">A</div>
+        </div>
+    </div>
+</div>
+
+<style>
+.navbar {
+    width: 100%;
+    background-color: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 0 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2000;
+}
+
+.navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.navbar-logo {
+    font-size: 24px;
+    font-weight: 900;
+    color: #000;
+    letter-spacing: -1px;
+}
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.navbar-icons {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: #666;
+    transition: color 0.3s;
+}
+
+.icon-button:hover {
+    color: #000;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+}
+</style>

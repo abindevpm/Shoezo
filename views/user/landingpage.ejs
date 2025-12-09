@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHOEZO - Comfort & Style</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f7f7;
+        }
+
+        /* Custom overrides to match original design */
+        .navbar-brand {
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: 0.2em;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            color: #4b5563 !important;
+        }
+        .nav-link:hover {
+            color: #000 !important;
+        }
+
+        .btn-login, .btn-signup {
+            font-weight: 500;
+            color: #374151;
+            text-decoration: none;
+        }
+        .btn-login:hover, .btn-signup:hover {
+            color: #2563eb;
+        }
+
+        .form-control-search {
+            border-radius: 9999px;
+            padding-left: 1rem;
+            padding-right: 3rem;
+        }
+
+        .btn-search {
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .hero-overlay {
+            background: linear-gradient(to right, rgba(31, 41, 55, 0.8), rgba(17, 24, 39, 0.9));
+            height: 650px;
+            border-radius: 0 0 1rem 1rem;
+        }
+
+        .cta-button {
+            background: linear-gradient(to right, #1f2937, #111827);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .cta-button:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+            color: white;
+        }
+
+        .category-circle {
+            width: 100px;
+            height: 100px;
+            border: 6px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        @media (min-width: 768px) {
+            .category-circle {
+                width: 130px;
+                height: 130px;
+            }
+        }
+        .category-circle:hover {
+            border-color: #000;
+            transform: translateY(-8px);
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .wishlist-btn {
+            background-color: rgba(255,255,255,0.7);
+            backdrop-filter: blur(4px);
+        }
+        .wishlist-btn:hover svg {
+            stroke: #ef4444;
+        }
+
+        .feature-icon {
+            width: 32px;
+            height: 32px;
+            color: #111827;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        footer a {
+            color: #9ca3af;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        footer a:hover {
+            color: #fff;
+        }
+
+        .text-gray-400 { color: #9ca3af; }
+        .text-gray-700 { color: #374151; }
+    </style>
+</head>
+<body>
+
+<% 
+    const products = [
+        { id: 1, name: "Nike Air Max", price: 109.99, rating: 4.5, reviews: 250, discount: 30, image: 'https://placehold.co/400x300/111827/fff?text=NIKE+AIR+MAX' },
+        { id: 2, name: "Nike Kybrid S2", price: 179.99, rating: 4.2, reviews: 180, discount: 20, image: 'https://placehold.co/400x300/111827/fff?text=NIKE+KYBRID+S2' },
+        { id: 3, name: "Adidas Orange", price: 129.99, rating: 4.5, reviews: 200, discount: 30, image: 'https://placehold.co/400x300/f97316/fff?text=ADIDAS+ORANGE' },
+        { id: 4, name: "Cinderella Red", price: 89.99, rating: 4.9, reviews: 300, discount: 30, image: 'https://placehold.co/400x300/ef4444/fff?text=RED+HEEL' },
+        { id: 5, name: "Nike Krypton", price: 159.99, rating: 4.0, reviews: 150, discount: 30, image: 'https://placehold.co/400x300/a35400/fff?text=NIKE+KRYPTO' },
+        { id: 6, name: "Puma Retro", price: 99.99, rating: 4.8, reviews: 220, discount: 30, image: 'https://placehold.co/400x300/0d9488/fff?text=PUMA+RETRO' },
+    ];
+
+    const generateStars = (rating) => {
+        const full = Math.floor(rating);
+        let html = '';
+        for (let i = 0; i < 5; i++) {
+            if (i < full) {
+                html += `<svg class="w-4 h-4 text-warning fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+            } else {
+                html += `<svg class="w-4 h-4 text-secondary fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+            }
+        }
+        return html;
+    };
+%>
+
+<!-- Header -->
+<header class="bg-white sticky-top shadow-sm border-bottom">
+    <div class="container py-3">
+        <div class="row align-items-center">
+            <div class="col-md-3 text-center text-md-start">
+                <a href="/" class="navbar-brand text-black d-flex align-items-center justify-content-center justify-content-md-start gap-2 text-decoration-none">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 18H4a2 2 0 01-2-2v-4a2 2 0 012-2h12a3 3 0 013 3v1a3 3 0 01-3 3H10z"/><path d="M6 14h4M6 16h4"/><path d="M22 12h-4M22 8h-3M22 16h-3"/></svg>
+                    <span>SHOEZO</span>
+                </a>
+            </div>
+
+            <div class="col-md-6 text-center my-3 my-md-0">
+                <nav class="d-flex justify-content-center gap-5">
+                    <a href="#" class="nav-link">Home</a>
+                    <a href="#" class="nav-link">Shop</a>
+                    <a href="#" class="nav-link">Orders</a>
+                </nav>
+            </div>
+
+            <div class="col-md-3 text-center text-md-end">
+                <div class="d-flex align-items-center justify-content-center justify-content-md-end gap-3">
+                    <form class="position-relative d-none d-lg-block">
+                        <input type="text" class="form-control form-control-search" placeholder="Search">
+                        <button class="btn btn-search position-absolute border-0 bg-transparent">
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </button>
+                    </form>
+                    <a href="/login" class="btn-login">Login</a>
+                    <a href="/signup" class="btn-signup">Signup</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="container-fluid px-4 px-md-5">
+
+    <!-- Hero Section -->
+    <section class="position-relative hero-overlay mb-5 overflow-hidden rounded-4">
+        <img src="/images/ADIDAS.jpg" alt="Hero" class="position-absolute w-100 h-100 object-fit-cover" onerror="this.src='https://placehold.co/1400x650/111827/fff?text=SHOEZO+HERO+IMAGE'">
+        <div class="position-relative h-100 d-flex align-items-center">
+            <div class="container">
+                <div class="text-white col-lg-6">
+                    <p class="text-uppercase tracking-widest mb-2">FOCUS ON COMFORT & STYLE</p>
+                    <h1 class="display-4 fw-bold mb-4">Your Next Level Footwear</h1>
+                    <p class="lead mb-5 text-gray-300">Experience the perfect blend of innovation, quality, and trend-setting design. Step into the future of fashion.</p>
+                    <a href="#" class="cta-button">Shop Collection</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories -->
+    <section class="d-flex justify-content-center flex-wrap gap-4 gap-md-5 mb-5">
+        <% ['MEN', 'KIDS', 'WOMEN'].forEach((cat, i) => { %>
+            <a href="#" class="text-decoration-none text-center">
+                <div class="category-circle rounded-circle overflow-hidden shadow-lg bg-white d-flex align-items-center justify-content-center p-2 mb-3">
+                    <img src="/images/<%= ['shoe.avif','kiddd.jpg','cindrella.jpg'][i] %>" alt="<%= cat %>'S Shoes" class="w-100 h-100 rounded-circle object-fit-cover">
+                </div>
+                <span class="fw-semibold text-gray-700"><%= cat %>'S</span>
+            </a>
+        <% }) %>
+    </section>
+
+    <!-- Mid Season Banner -->
+    <section class="position-relative rounded-4 overflow-hidden mb-5" style="height: 600px;">
+        <img src="/images/pexels-jddaniel-2385477.jpg" alt="Limited Collection" class="w-100 h-100 object-fit-cover position-absolute top-0 start-0">
+        <div class="position-relative h-100 d-flex align-items-center justify-content-center text-center text-white">
+            <div>
+                <h3 class="display-4 fw-bold mb-3">LIMITED TIME COLLECTION</h3>
+                <p class="fs-4">Find exclusive colorways and performance gear.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products -->
+    <h2 class="display-6 fw-bold text-dark mb-4">Featured Products</h2>
+    <div class="row row-cols-2 row-cols-md-3 g-4 mb-5">
+        <% products.forEach(product => { %>
+            <div class="col">
+                <div class="card product-card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="position-relative">
+                        <img src="/images/nike rt.avif" alt="<%= product.name %>" class="card-img-top" onerror="this.src='<%= product.image %>'">
+                        <button class="position-absolute top-0 end-0 m-3 p-2 rounded-circle wishlist-btn border-0 shadow">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                        </button>
+                    </div>
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <h5 class="card-title fw-semibold fs-6 mb-2"><%= product.name %></h5>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="h5 mb-0">$<%= product.price.toFixed(2) %></span>
+                            <small class="text-muted">
+                                <span class="d-inline-flex align-items-center gap-1">
+                                    <%- generateStars(product.rating) %>
+                                </span>
+                                (<%= product.reviews %>)
+                            </small>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-danger fw-medium"><%= product.discount %>% OFF</span>
+                            <a href="#" class="text-dark fw-medium text-decoration-none">
+                                Buy Now
+                                <svg class="w-4 h-4 ms-1 d-inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+
+    <!-- Features -->
+    <div class="border-top border-bottom py-5 mb-5">
+        <div class="row g-5">
+            <% [
+                {icon: "M12 19l9 2-9-18-9 18 9-2zm0 0v-8", title: "FREE SHIPPING", desc: "Orders over $50"},
+                {icon: "M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z", title: "EASY RETURNS", desc: "30 days exchange"},
+                {icon: "M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2l-2 2v-4h3.586a1 1 0 01.707.293L13 15h5a2 2 0 002-2V9a2 2 0 00-2-2h-3", title: "24/7 SUPPORT", desc: "Dedicated customer service"}
+            ].forEach(f => { %>
+                <div class="col-md-4 d-flex">
+                    <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="<%= f.icon %>"></path></svg>
+                    <div>
+                        <h5 class="fw-semibold mb-1"><%= f.title %></h5>
+                        <p class="text-muted mb-0"><%= f.desc %></p>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+
+</main>
+
+<!-- Footer -->
+<footer class="bg-dark text-white pt-5">
+    <div class="container">
+        <div class="row g-5 pb-5">
+            <div class="col-lg-3">
+                <a href="/" class="d-block fs-2 fw-bold tracking-widest mb-3 text-decoration-none" style="text-shadow: 0 0 10px rgba(255,255,255,0.2);">SHOEZO</a>
+                <p class="text-gray-400 small">The ultimate destination for the latest in footwear fashion.</p>
+            </div>
+            <div class="col-6 col-lg-3">
+                <h5 class="text-uppercase fw-bold mb-4">My Account</h5>
+                <ul class="list-unstyled">
+                    <li><a href="#" class="text-gray-400">My Orders</a></li>
+                    <li><a href="#" class="text-gray-400">View Cart</a></li>
+                    <li><a href="#" class="text-gray-400">Wishlist</a></li>
+                    <li><a href="#" class="text-gray-400">Track Order</a></li>
+                    <li><a href="#" class="text-gray-400">Help</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-lg-3">
+                <h5 class="text-uppercase fw-bold mb-4">Information</h5>
+                <ul class="list-unstyled">
+                    <li><a href="#" class="text-gray-400">About Us</a></li>
+                    <li><a href="#" class="text-gray-400">Privacy Policy</a></li>
+                    <li><a href="#" class="text-gray-400">Terms & Conditions</a></li>
+                    <li><a href="#" class="text-gray-400">Delivery Information</a></li>
+                    <li><a href="#" class="text-gray-400">FAQ</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-3">
+                <h5 class="text-uppercase fw-bold mb-4">Contact Us</h5>
+                <div class="small text-gray-400">
+                    <div class="d-flex align-items-start gap-3 mb-3">
+                        <svg class="w-6 h-6 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.828 0l-4.243-4.243m10.606 0a2 2 0 11-2.828-2.828 2 2 0 012.828 2.828z"></path><path d="M12 13V7"></path></svg>
+                        <span>123 Shoe Street, Footwear City, CA 90210</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <svg class="w-6 h-6 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.948V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                        <span>(555) 123-SHOE</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <svg class="w-6 h-6 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m-17 4v6a2 2 0 002 2h14a2 2 0 002-2v-6"></path></svg>
+                        <span>support@shoezo.com</span>
+                    </div>
+                </div>
+                <div class="d-flex gap-4">
+                    <a href="#" class="text-gray-400"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M14 13.5h2.5L17 10h-3v-2c0-1.5 0-2 2-2h1.5V2.14a22.353 22.353 0 00-3.32-.23c-3.23 0-5.5 1.55-5.5 5.5v3.5H7v3.5h3v8.5h4v-8.5z"/></svg></a>
+                    <a href="#" class="text-gray-400"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M16.5 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/><path d="M16.5 16.5a7 7 0 10-9 0"/></svg></a>
+                    <a href="#" class="text-gray-400"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M22 6.923a8.384 8.384 0 01-2.404.664 4.17 4.17 0 001.815-2.316 8.381 8.381 0 01-2.65 1.015 4.17 4.17 0 00-7.086 3.814 11.854 11.854 0 01-8.6-4.352 4.17 4.17 0 001.289 5.56 4.168 4.168 0 01-1.884-.519v.053a4.17 4.17 0 003.342 4.095 4.195 4.195 0 01-1.883.072 4.17 4.17 0 003.882 2.895 8.38 8.38 0 01-5.186 1.782 11.8 11.8 0 006.417 1.873c7.69 0 11.903-6.4 11.903-11.903v-.543a8.514 8.514 0 002.083-2.164z"/></svg></a>
+                </div>
+            </div>
+        </div>
+        <div class="border-top border-secondary pt-4 text-center text-secondary small">
+            &copy; 2024 SHOEZO. All rights reserved. Designed with style and comfort.
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SHOEZO - OTP Verification</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- SweetAlert + jQuery -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap');
+
+  :root { --max-form-width: 420px; } /* a little wider so it matches screenshot */
+
+  html, body { height: 100%; margin: 0; }
+  body { font-family: 'Geist', sans-serif; background: #ffffff; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+
+  /* Page split: left image + right centered form */
+  .page { display:flex; min-height:100vh; width:100%; }
+
+  .left-side, .right-side { flex:1 1 50%; min-width:0; }
+
+  /* Left image - use the uploaded file */
+  .left-side { display:none; }
+  @media (min-width: 768px) { .left-side { display:block; } }
+  .left-image { width:100%; height:100%; object-fit:cover; display:block; }
+
+  /* Right side: perfectly centered vertically, but nudged slightly left so form sits nearer center-right */
+  .right-side {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 24px 48px; /* horizontal padding so form sits a bit inward like screenshot */
+    overflow:auto;
+  }
+
+  .form-wrap {
+    max-width: var(--max-form-width);
+    width:100%;
+    margin:0 auto;
+    text-align:center;
+    transition: transform 220ms ease;
+    transform:none;
+    /* nudge the whole form slightly to the left within the right half so it visually sits like your screenshot */
+    margin-left: 40px; 
+  }
+
+  /* On wider screens, reduce the left nudging so it matches screenshot proportions */
+  @media (min-width:1200px) {
+    .form-wrap { margin-left: 60px; }
+  }
+
+  .italic-brand { font-style: italic; font-weight:700; }
+  h1 { font-size:48px; line-height:1; margin-bottom:.6rem; }
+  h2 { font-size:26px; margin-bottom:.4rem; }
+
+  .otp-input {
+    width:60px; height:60px; font-size:24px; font-weight:600;
+    text-align:center; border:2px solid #e5e7eb; border-radius:8px;
+    background:#f3f4f6; transition:0.18s;
+  }
+  .otp-input:focus { border-color:#000; background:#fff; box-shadow:0 0 0 3px rgba(59,130,246,0.1); outline:none; }
+  .otp-input::-webkit-outer-spin-button,.otp-input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+  .otp-input[type=number]{ -moz-appearance:textfield; }
+
+  @keyframes pulse-timer { 0%,100%{opacity:1} 50%{opacity:0.7} }
+  .timer-pulse { animation: pulse-timer 1s infinite; }
+
+  .confirm-btn { width:160px; border-radius:12px; padding:8px 0; }
+
+  /* Shift up when keyboard opens or input focused (mobile & desktop) */
+  .form-wrap.shift-up { transform: translateY(-28%); }
+  @media (max-width: 767.98px) { .form-wrap.shift-up { transform: translateY(-18%); } .otp-input{width:54px;height:54px;font-size:22px;} }
+
+  /* Mobile adjustments */
+  @media (max-width: 767.98px) {
+    .right-side { padding-left:16px; padding-right:16px; }
+    .form-wrap { margin-left:0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <!-- LEFT IMAGE (hidden on small screens) -->
+  <div class="left-side d-none d-md-block">
+    <!-- use the uploaded image path -->
+    <img src="/images/otpp.jpeg" alt="OTP Shoe" class="left-image" />
+  </div>
+
+  <!-- RIGHT FORM (centered vertically; positioned to match screenshot) -->
+  <div class="right-side">
+    <div class="form-wrap">
+
+      <h1 class="italic-brand">SHOEZO</h1>
+      <h2 class="fw-bold">Sign Up OTP Verification</h2>
+      <p class="text-muted mb-3" style="font-size:14px;">Enter OTP sent to bill*****@example.com</p>
+
+      <form id="otpForm" onsubmit="return validateOTPForm()">
+        <div class="mb-3"><span id="timer" class="fw-bold timer-pulse" style="font-size:20px;">1:42</span></div>
+
+        <div class="d-flex justify-content-between mb-4" style="gap:16px; max-width:340px; margin:0 auto;">
+          <input type="number" name="otp1" maxlength="1" class="otp-input" inputmode="numeric" />
+          <input type="number" name="otp2" maxlength="1" class="otp-input" inputmode="numeric" />
+          <input type="number" name="otp3" maxlength="1" class="otp-input" inputmode="numeric" />
+          <input type="number" name="otp4" maxlength="1" class="otp-input" inputmode="numeric" />
+        </div>
+
+        <button type="submit" class="btn btn-dark confirm-btn fw-semibold">Confirm</button>
+      </form>
+
+      <div class="text-center mt-3">
+        <button class="btn btn-link text-muted" onclick="handleResendOTP()">Resend OTP</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const otpInputs = document.querySelectorAll('.otp-input');
+
+  // Timer
+  let timerInterval = null;
+  let timeLeft = 102;
+  function updateTimer() {
+    const timerEl = document.getElementById('timer');
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      const minutes = Math.floor(timeLeft/60);
+      const seconds = timeLeft % 60;
+      timerEl.textContent = `${minutes}:${String(seconds).padStart(2,'0')}`;
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        timerEl.classList.remove('timer-pulse');
+        timerEl.style.color = '#ef4444';
+      }
+      timeLeft--;
+    }, 1000);
+  }
+  updateTimer();
+
+  // SHIFT-UP handling: focus & visualViewport
+  (function () {
+    const formWrap = document.querySelector('.form-wrap');
+    if (!formWrap) return;
+
+    function anyFocused() {
+      return [...otpInputs].some(i => i === document.activeElement);
+    }
+
+    otpInputs.forEach((input) => {
+      input.addEventListener('focus', (e) => {
+        formWrap.classList.add('shift-up');
+        setTimeout(() => {
+          try { e.target.scrollIntoView({behavior:'smooth', block:'center'}); } catch(_) {}
+        }, 80);
+      });
+      input.addEventListener('blur', () => {
+        setTimeout(() => { if (!anyFocused()) formWrap.classList.remove('shift-up'); }, 80);
+      });
+    });
+
+    if (window.visualViewport) {
+      let lastH = window.visualViewport.height;
+      let t = null;
+      window.visualViewport.addEventListener('resize', () => {
+        clearTimeout(t);
+        t = setTimeout(() => {
+          const h = window.visualViewport.height;
+          if (lastH - h > 80) formWrap.classList.add('shift-up');
+          else if (h - lastH > 80) { if (!anyFocused()) formWrap.classList.remove('shift-up'); }
+          lastH = h;
+        }, 50);
+      });
+    } else {
+      let lastWin = window.innerHeight, tt = null;
+      window.addEventListener('resize', () => {
+        clearTimeout(tt);
+        tt = setTimeout(() => {
+          const h = window.innerHeight;
+          if (lastWin - h > 80) formWrap.classList.add('shift-up');
+          else if (h - lastWin > 80) { if (!anyFocused()) formWrap.classList.remove('shift-up'); }
+          lastWin = h;
+        }, 50);
+      });
+    }
+  })();
+
+  // OTP inputs (auto-next, paste)
+  otpInputs.forEach((input, index) => {
+    input.addEventListener('input', (e) => {
+      const v = e.target.value;
+      if (!/^\d*$/.test(v)) e.target.value = '';
+      if (e.target.value.length === 1 && index < otpInputs.length -1) otpInputs[index+1].focus();
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !e.target.value && index > 0) otpInputs[index-1].focus();
+    });
+    input.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const paste = (e.clipboardData || window.clipboardData).getData('text');
+      const digits = paste.replace(/\D/g,'').slice(0,4);
+      digits.split('').forEach((d,i) => { if (otpInputs[i]) otpInputs[i].value = d; });
+      const nextEmpty = [...otpInputs].find(i => !i.value);
+      if (nextEmpty) nextEmpty.focus();
+    });
+  });
+
+  // Submit
+  function validateOTPForm() {
+    const enteredOtp = [...otpInputs].map(i => i.value).join('');
+    if (enteredOtp.length !== 4) {
+      Swal.fire({ icon:'warning', title:'Incomplete OTP', text:'Please enter all 4 digits.' });
+      return false;
+    }
+    $.post('/otp', { otp: enteredOtp }, (response) => {
+      if (response.success) {
+        Swal.fire({ icon:'success', title:'OTP Verified Successfully', timer:1500, showConfirmButton:false })
+          .then(()=> window.location.href = response.redirectUrl);
+      } else {
+        Swal.fire({ icon:'error', title:'Invalid OTP', text: response.message || 'Please try again.' });
+      }
+    }).fail(()=> {
+      Swal.fire({ icon:'error', title:'Server Error', text:'Please try again.' });
+    });
+    return false;
+  }
+
+  // Resend
+  function handleResendOTP() {
+    timeLeft = 102;
+    updateTimer();
+    document.getElementById('timer').classList.add('timer-pulse');
+    otpInputs.forEach(i=> i.value = '');
+    otpInputs[0].focus();
+    $.post('/resend-otp', (res) => {
+      Swal.fire({ icon:'info', title:'New OTP Sent!', toast:true, position:'top-end', timer:3000, showConfirmButton:false });
+    }).fail(()=> {
+      Swal.fire({ icon:'error', title:'Error sending OTP', text:'Please try again.' });
+    });
+  }
+</script>
+
+</body>
+</html>
