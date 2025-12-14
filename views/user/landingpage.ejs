@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,129 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SHOEZO - Comfort & Style</title>
 
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Inter Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
 
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f7f7f7;
-        }
-
-        /* Custom overrides to match original design */
-        .navbar-brand {
-            font-size: 2rem;
-            font-weight: 900;
-            letter-spacing: 0.2em;
-        }
-
-        .nav-link {
-            font-weight: 500;
-            color: #4b5563 !important;
-        }
-        .nav-link:hover {
-            color: #000 !important;
-        }
-
-        .btn-login, .btn-signup {
-            font-weight: 500;
-            color: #374151;
-            text-decoration: none;
-        }
-        .btn-login:hover, .btn-signup:hover {
-            color: #2563eb;
-        }
-
-        .form-control-search {
-            border-radius: 9999px;
-            padding-left: 1rem;
-            padding-right: 3rem;
-        }
-
-        .btn-search {
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        .hero-overlay {
-            background: linear-gradient(to right, rgba(31, 41, 55, 0.8), rgba(17, 24, 39, 0.9));
-            height: 650px;
-            border-radius: 0 0 1rem 1rem;
-        }
-
-        .cta-button {
-            background: linear-gradient(to right, #1f2937, #111827);
-            color: white;
-            padding: 0.75rem 2rem;
-            border-radius: 9999px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .cta-button:hover {
-            opacity: 0.9;
-            transform: scale(1.05);
-            color: white;
-        }
-
-        .category-circle {
-            width: 100px;
-            height: 100px;
-            border: 6px solid #e5e7eb;
-            transition: all 0.3s ease;
-        }
-        @media (min-width: 768px) {
-            .category-circle {
-                width: 130px;
-                height: 130px;
-            }
-        }
-        .category-circle:hover {
-            border-color: #000;
-            transform: translateY(-8px);
-        }
-
-        .product-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-
-        .wishlist-btn {
-            background-color: rgba(255,255,255,0.7);
-            backdrop-filter: blur(4px);
-        }
-        .wishlist-btn:hover svg {
-            stroke: #ef4444;
-        }
-
-        .feature-icon {
-            width: 32px;
-            height: 32px;
-            color: #111827;
-            margin-right: 12px;
-            flex-shrink: 0;
-        }
-
-        footer a {
-            color: #9ca3af;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        footer a:hover {
-            color: #fff;
-        }
-
-        .text-gray-400 { color: #9ca3af; }
-        .text-gray-700 { color: #374151; }
-    </style>
+   
 </head>
 <body>
+
+    
+     <%- include("../partials/userpartial/header.ejs") %>
 
 <% 
     const products = [
@@ -153,46 +44,12 @@
     };
 %>
 
-<!-- Header -->
-<header class="bg-white sticky-top shadow-sm border-bottom">
-    <div class="container py-3">
-        <div class="row align-items-center">
-            <div class="col-md-3 text-center text-md-start">
-                <a href="/" class="navbar-brand text-black d-flex align-items-center justify-content-center justify-content-md-start gap-2 text-decoration-none">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 18H4a2 2 0 01-2-2v-4a2 2 0 012-2h12a3 3 0 013 3v1a3 3 0 01-3 3H10z"/><path d="M6 14h4M6 16h4"/><path d="M22 12h-4M22 8h-3M22 16h-3"/></svg>
-                    <span>SHOEZO</span>
-                </a>
-            </div>
-
-            <div class="col-md-6 text-center my-3 my-md-0">
-                <nav class="d-flex justify-content-center gap-5">
-                    <a href="#" class="nav-link">Home</a>
-                    <a href="#" class="nav-link">Shop</a>
-                    <a href="#" class="nav-link">Orders</a>
-                </nav>
-            </div>
-
-            <div class="col-md-3 text-center text-md-end">
-                <div class="d-flex align-items-center justify-content-center justify-content-md-end gap-3">
-                    <form class="position-relative d-none d-lg-block">
-                        <input type="text" class="form-control form-control-search" placeholder="Search">
-                        <button class="btn btn-search position-absolute border-0 bg-transparent">
-                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        </button>
-                    </form>
-                    <a href="/login" class="btn-login">Login</a>
-                    <a href="/signup" class="btn-signup">Signup</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</header>
 
 <main class="container-fluid px-4 px-md-5">
 
     <!-- Hero Section -->
     <section class="position-relative hero-overlay mb-5 overflow-hidden rounded-4">
-        <img src="/images/ADIDAS.jpg" alt="Hero" class="position-absolute w-100 h-100 object-fit-cover" onerror="this.src='https://placehold.co/1400x650/111827/fff?text=SHOEZO+HERO+IMAGE'">
+        <img src="/images/productlist.jpeg" alt="Hero" class="position-absolute w-100 h-100 object-fit-cover" onerror="this.src='https://placehold.co/1400x650/111827/fff?text=SHOEZO+HERO+IMAGE'">
         <div class="position-relative h-100 d-flex align-items-center">
             <div class="container">
                 <div class="text-white col-lg-6">

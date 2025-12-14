@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHOEZO - OTP Verification</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="container">
+        <div class="left-panel">
+            <img src="/images/verifyotpimg.jpeg" alt="Green Shoe" class="shoe-image">
+        </div>
+
+        <div class="right-panel">
+            <header class="logo-section">
+                <h1 class="logo">SHOEZO</h1>
+            </header>
+
+            <div class="form-container">
+                <h2 class="title">OTP Verification</h2>
+
+                <p class="instruction-text">
+                    Enter OTP sent to  
+                    <b><%= maskedEmail %></b>
+                </p>
+
+                <% if (message) { %>
+                    <p style="color:red; margin-bottom:10px;"><%= message %></p>
+                <% } %>
+
+                <form action="/verify-otp" method="POST" class="otp-form">
+                    <div class="otp-inputs">
+                        <input type="text" maxlength="1" class="otp-input" required>
+                        <input type="text" maxlength="1" class="otp-input" required>
+                        <input type="text" maxlength="1" class="otp-input" required>
+                        <input type="text" maxlength="1" class="otp-input" required>
+                    </div>
+
+                    <button type="submit" class="confirm-button">Confirm</button>
+
+                    <a href="/resend-otp" class="resend-link">Resend OTP</a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+
+
+
+<style>
+
+
+
+
+    /* ഒരു അടിസ്ഥാന റീസെറ്റ് */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f0f0;
+}
+
+.container {
+    display: flex;
+    width: 100%;
+    max-width: 1200px;
+    height: 90vh;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+/* --- ഇടത് ഭാഗം (Dark Panel) - ഷൂവിൻ്റെ ചിത്രമുള്ളത് --- */
+.left-panel {
+    width: 50%;
+    background-color: #f5f5f5; /* ചിത്രത്തിൽ കാണുന്ന നേരിയ ഗ്രേ പശ്ചാത്തലം */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.shoe-image {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+/* --- വലത് ഭാഗം (White Panel) - ഫോം ഉള്ളത് --- */
+.right-panel {
+    width: 50%;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    padding: 40px;
+}
+
+.logo-section {
+    width: 100%;
+    text-align: right; /* ലോഗോ വലത് മൂലയിൽ */
+    margin-bottom: 80px;
+}
+
+.logo {
+    font-family: Arial, sans-serif; /* ചിത്രത്തിലുള്ള SHONZO ലോഗോയുടെ പ്രത്യേക ഫോണ്ട് */
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #000;
+}
+
+.form-container {
+    max-width: 400px;
+    margin: auto 0 auto 100px; /* വലത് പാനലിൻ്റെ മധ്യഭാഗത്തേക്ക് കൊണ്ടുവരുന്നു */
+    padding-right: 20px;
+    text-align: center; /* ഫോമിനുള്ളിലെ ഘടകങ്ങൾ മധ്യഭാഗത്ത് വരാൻ */
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.instruction-text {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 30px;
+    line-height: 1.5;
+}
+
+/* --- OTP ഇൻപുട്ട് സ്റ്റൈലിംഗ് --- */
+.otp-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.otp-inputs {
+    display: flex;
+    justify-content: center;
+    gap: 15px; /* ഇൻപുട്ട് ബോക്സുകൾ തമ്മിലുള്ള അകലം */
+    margin-bottom: 40px;
+}
+
+.otp-input {
+    width: 55px; /* ചിത്രത്തിലെ വലിപ്പം */
+    height: 70px; /* ചിത്രത്തിലെ വലിപ്പം */
+    font-size: 32px;
+    text-align: center;
+    border: none;
+    border-radius: 5px;
+    background-color: #f0f0f0; /* ബോക്സിൻ്റെ ഇളം ഗ്രേ നിറം */
+    color: #333;
+    font-weight: 700;
+    outline: none;
+}
+
+/* ഇൻപുട്ട് ഫോക്കസ് ചെയ്യുമ്പോൾ */
+.otp-input:focus {
+    box-shadow: 0 0 0 2px #000;
+}
+
+/* --- കൺഫേം ബട്ടൺ --- */
+.confirm-button {
+    width: 100%;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.confirm-button:hover {
+    background-color: #333;
+}
+
+/* --- Resend ലിങ്ക് --- */
+.resend-link {
+    font-size: 12px;
+    color: #666;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.resend-link:hover {
+    color: #000;
+}
+
+/* --- റെസ്പോൺസീവ് ഡിസൈൻ --- */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .left-panel, .right-panel {
+        width: 100%;
+        min-height: 300px;
+    }
+
+    .right-panel {
+        padding: 20px;
+    }
+
+    .form-container {
+        margin: 20px auto;
+        max-width: 100%;
+    }
+
+    .logo-section {
+        margin-bottom: 40px;
+    }
+}
+</style>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const inputs = document.querySelectorAll(".otp-input");
+
+    inputs.forEach((input, index) => {
+        input.addEventListener("input", function () {
+            this.value = this.value.replace(/[^0-9]/g, "");
+
+            if (this.value && index < inputs.length - 1) {
+                inputs[index + 1].focus();
+            }
+        });
+
+        input.addEventListener("keydown", function (e) {
+            if (e.key === "Backspace" && this.value === "" && index > 0) {
+                inputs[index - 1].focus();
+            }
+        });
+    });
+
+    const form = document.querySelector(".otp-form");
+    form.addEventListener("submit", function (e) {
+        let otp = "";
+        inputs.forEach(inp => otp += inp.value);
+
+        if (otp.length !== 4) {
+            e.preventDefault();
+            alert("Please enter all 4 digits of OTP.");
+            return;
+        }
+
+        const hidden = document.createElement("input");
+        hidden.type = "hidden";
+        hidden.name = "otp";
+        hidden.value = otp;
+        form.appendChild(hidden);
+    });
+});
+</script>

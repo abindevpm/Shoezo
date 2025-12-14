@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Product Management - SHOEZO</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    body { background-color: #f8f9fa; padding-top: 60px; overflow-x: hidden; }
+    .sidebar-container { width: 250px; min-height: 100vh; position: fixed; top: 60px; left: 0; z-index: 1020; }
+    .main-content { margin-left: 250px; padding: 20px; width: calc(100% - 250px); min-height: calc(100vh - 60px); }
+    .table-dark-custom th { background-color: #1a1a1a !important; color: white; padding: 15px; font-weight: 500; }
+    .form-check-input:checked { background-color: #2ec946; border-color: #2ec946; }
+  </style>
+</head>
+<body>
+
+  <%- include('../partials/admin/navbar.ejs') %>
+
+  <div class="d-flex w-100">
+    <div class="sidebar-container">
+      <%- include('../partials/admin/sidebar.ejs') %>
+    </div>
+
+    <div class="main-content flex-grow-1">
+      <div class="row mb-4 align-items-center">
+        <div class="col-md-6">
+          <a href="/admin/add-products" class="btn btn-primary btn-lg">Add Product</a>
+        </div>
+
+        <div class="col-md-6 d-flex justify-content-end">
+          <div style="width: 280px;">
+            <div class="input-group shadow-sm">
+              <span class="input-group-text bg-white border-end-0">
+                <i class="fas fa-search text-muted"></i>
+              </span>
+              <input type="text" id="productSearch" class="form-control border-start-0" placeholder="Search...">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end mb-3 align-items-center gap-4">
+        <span class="fw-bold small text-muted">filter by</span>
+       <select id="filterCategory" class="form-select form-select-sm" style="width: 150px;">
+    <option value="">All Categories</option>
+
+    <% categories.forEach(cat => { %>
+        <option value="<%= cat._id %>"><%= cat.name %></option>
+    <% }) %>
+</select>
+
+   
+
+
+
+
+      </div>
+
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+          <table class="table table-hover align-middle mb-0 text-center">
+            <thead class="table-dark-custom">
+              <tr>
+                <th>S.No</th>
+                <th class="text-start">Product Name</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Image</th>
+                <th>Update</th>
+              </tr>
+            </thead>
+
+            <!-- SAFE tbody: only one tbody, no old commented EJS left -->
+            <tbody>
+              <% if (products && products.length > 0) { %>
+                <% products.forEach((product, index) => { %>
+                  <tr>
+                    <td><%= index + 1 %></td>
+
+                    <td class="text-start fw-bold"><%= product?.name || "No Name" %></td>
+
+                    <!-- safe category -->
+                    <td><%= product?.category?.name || "No Category" %></td>
+
+                    <td class="text-muted small"><%= product?.description || "---" %></td>
+
+                    <td>₹<%= product?.price || 0 %></td>
+
+                    <td><%= product?.variants?.[0]?.stock || 0 %></td>
+
+                    <td>
+                      <% if (product?.images && product.images.length > 0) { %>
+                        <img src="/uploads/product-images/<%= product.images[0] %>" style="width:60px; height:60px; object-fit:cover;">
+                      <% } else { %>
+                        No Image
+                      <% } %>
+                    </td>
+<td>
+  <div class="d-flex justify-content-center align-items-center gap-3">
+
+    <!-- EDIT -->
+    <a href="/admin/edit-product/<%= product._id %>" class="text-dark">
+      <i class="fas fa-pencil-alt"></i>
+    </a>
+
+    <!-- DELETE -->
+    <a href="/admin/delete-product" class="text-danger btn-delete" data-id="<%= product._id %>">
+      <i class="fas fa-trash"></i>
+    </a>
+
+  </div>
+</td>
+                    
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="8" class="py-5 text-muted">No products found.</td>
+                </tr>
+              <% } %>
+            </tbody>
+
+          </table>
+        </div>
+      </div>
+
+
+       <!-- PAGINATION (BOTTOM ONLY) -->
+    <div class="pagination-wrapper d-flex justify-content-center">
+      <nav>
+        <ul class="pagination gap-2">
+          <li class="page-item <%= currentPage == 1 ? 'disabled' : '' %>">
+            <a class="page-link" href="?page=<%= currentPage - 1 %>&search=<%= search %>">
+              <i class="fas fa-chevron-left"></i>
+            </a>
+          </li>
+
+          <% for (let i = 1; i <= totalPages; i++) { %>
+            <li class="page-item <%= currentPage == i ? 'active' : '' %>">
+              <a class="page-link" href="?page=<%= i %>&search=<%= search %>"><%= i %></a>
+            </li>
+          <% } %>
+
+          <li class="page-item <%= currentPage == totalPages ? 'disabled' : '' %>">
+            <a class="page-link" href="?page=<%= currentPage + 1 %>&search=<%= search %>">
+              <i class="fas fa-chevron-right"></i>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+         
+
+
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.querySelectorAll(".btn-delete").forEach(btn => {
+    btn.addEventListener("click", async (e) => {
+        e.preventDefault();
+
+        const id = btn.getAttribute("data-id");
+
+        const confirm = await Swal.fire({
+            title: "Are you sure?",
+            text: "This product will be removed!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Delete"
+        });
+
+        if (confirm.isConfirmed) {
+            const response = await fetch(`/admin/delete-product/${id}`, {
+                method: "PATCH"
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                Swal.fire("Deleted!", data.message, "success")
+                    .then(() => window.location.reload());
+            } else {
+                Swal.fire("Error", "Something went wrong!", "error");
+            }
+        }
+    });
+
+
+
+
+
+    // searching
+
+    
+const searchInput = document.querySelector("#productSearch");
+
+searchInput.addEventListener("keyup", () => {
+    const query = searchInput.value.trim();
+
+    window.location.href = `/admin/products?search=${query}`;
+});
+
+document.getElementById("filterCategory").addEventListener("change", () => {
+    const categoryId = document.getElementById("filterCategory").value;
+    const search = document.getElementById("productSearch")?.value || "";
+    
+    window.location.href = `/admin/products?category=${categoryId}&search=${search}`;
+});
+
+
+function applyPriceFilter() {
+
+    const min = document.getElementById("minPrice").value;
+    const max = document.getElementById("maxPrice").value;
+
+    let url = `/admin/products?`;
+
+    if (min) url += `minPrice=${min}&`;
+    if (max) url += `maxPrice=${max}&`;
+
+    window.location.href = url;
+}
+
+
+});
+</script>
+

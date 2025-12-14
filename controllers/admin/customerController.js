@@ -80,11 +80,6 @@ const customerinfo = async (req, res) => {
    }
 
 
-module.exports = {
-  customerinfo,
-  blockUser,
-  unblockUser,
-};
 
 
 module.exports = {
@@ -92,6 +87,8 @@ module.exports = {
   blockUser,
   unblockUser,
 };
+
+
 
 
 

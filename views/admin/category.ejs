@@ -94,7 +94,8 @@
             <div class="d-flex align-items-center gap-3">
                 <div class="search-group">
                     <i class="fa fa-search search-icon"></i>
-                    <input type="text" class="form-control search-input" placeholder="Search...">
+                   <input type="text" class="form-control search-input" placeholder="Search category" value="<%= search %>">
+
                 </div>
                 <button class="btn btn-add" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
                     <i class="fa fa-plus me-1"></i> Add Category
@@ -128,22 +129,23 @@
                                     <td><%= cat.description %></td>
                                     <td><%= cat.categoryOffer ? cat.categoryOffer + "%" : "N/A" %></td>
 
-                                    <td>
-                                        <button class="action-btn btn-edit"
-                                            data-id="<%= cat._id %>"
-                                            data-name="<%= cat.name %>"
-                                            data-brand="<%= cat.brand %>"
-                                            data-description="<%= cat.description %>"
-                                            data-offer="<%= cat.categoryOffer %>"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#editCategoryModal">
-                                            <i class="fa fa-pencil"></i>
-                                        </button>
+                                  <td>
+               <button type="button" class="action-btn btn-edit"
+        data-id="<%= cat._id %>"
+        data-name="<%= cat.name %>"
+        data-brand="<%= cat.brand %>"
+        data-description="<%= cat.description %>"
+        data-offer="<%= cat.categoryOffer %>"
+        data-bs-toggle="modal"
+        data-bs-target="#editCategoryModal">
+        <i class="fa fa-pencil"></i>
+    </button>
 
-                                        <button class="action-btn btn-delete" data-id="<%= cat._id %>">
-                                            <i class="fa fa-trash"></i>
-                                        </button>
-                                    </td>
+    <button type="button" class="action-btn btn-delete" data-id="<%= cat._id %>">
+        <i class="fa fa-trash"></i>
+    </button>
+</td>
+ 
                                 </tr>
                             <% }) %>
 
@@ -154,6 +156,34 @@
                         <% } %>
                     </tbody>
                 </table>
+                            <!-- ⭐ PAGINATION START ⭐ -->
+
+    <div class="pagination-wrapper d-flex justify-content-center">
+                             <nav>
+
+        <ul class="pagination gap-2">
+          <li class="page-item <%= currentPage == 1 ? 'disabled' : '' %>">
+            <a class="page-link" href="?page=<%= currentPage - 1 %>&search=<%= search %>">
+              <i class="fas fa-chevron-left"></i>
+            </a>
+          </li>
+
+          <% for (let i = 1; i <= totalPages; i++) { %>
+            <li class="page-item <%= currentPage == i ? 'active' : '' %>">
+              <a class="page-link" href="?page=<%= i %>&search=<%= search %>"><%= i %></a>
+            </li>
+          <% } %>
+
+          <li class="page-item <%= currentPage == totalPages ? 'disabled' : '' %>">
+            <a class="page-link" href="?page=<%= currentPage + 1 %>&search=<%= search %>">
+              <i class="fas fa-chevron-right"></i>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+
+
 
             </div>
         </div>
@@ -304,6 +334,7 @@ document.querySelectorAll(".btn-delete").forEach(button => {
     });
 });
 
+
 const editForm = document.getElementById('editCategoryForm');
 
 document.querySelectorAll(".btn-edit").forEach(button => {
@@ -313,7 +344,7 @@ document.querySelectorAll(".btn-edit").forEach(button => {
         const name = button.getAttribute("data-name");
         const brand = button.getAttribute("data-brand");
         const description = button.getAttribute("data-description");
-        const offer = button.getAttribute("data-offer") || 0;
+        const offer = button.getAttribute("data-offer") || "";
 
         editForm.setAttribute("data-id", id);
 
@@ -324,20 +355,29 @@ document.querySelectorAll(".btn-edit").forEach(button => {
     });
 });
 
-
 editForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const id = editForm.getAttribute("data-id");
+    const name = editForm.querySelector("input[name='name']").value.trim();
+    const brand = editForm.querySelector("input[name='brand']").value.trim();
+    const description = editForm.querySelector("textarea[name='description']").value.trim();
+    const offer = editForm.querySelector("input[name='categoryOffer']").value.trim();
 
-    const formData = new FormData(editForm);
-    let data = {};
-    formData.forEach((value, key) => data[key] = value);
+    if (!name || !brand || !description || offer === "") {
+        Swal.fire({
+            icon: "error",
+            title: "All fields are required!",
+            text: "Please fill all fields before updating."
+        });
+        return;
+    }
+
+    const id = editForm.getAttribute("data-id");
 
     const response = await fetch(`/admin/edit-category/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
+        body: JSON.stringify({ name, brand, description, categoryOffer: offer })
     });
 
     const result = await response.json();
@@ -349,20 +389,33 @@ editForm.addEventListener("submit", async (e) => {
             timer: 1000,
             showConfirmButton: false
         });
-
         setTimeout(() => location.reload(), 1000);
     } else {
         Swal.fire({
             icon: "error",
-            title: "Error",
+            title: "Error!",
             text: result.message
         });
     }
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+    const input = document.querySelector(".search-input");
+    if (!input) return;
 
+    input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
 
+            const value = this.value.trim();
 
+            const url = new URL(window.location.href);
+            url.searchParams.set("search", value);
+            url.searchParams.set("page", 1);
+
+            window.location.href = url.toString();
+        }
+    });
+});
 
 
 </script>

@@ -1,5 +1,7 @@
 
 const User = require("../../models/userSchema")
+const Product = require("../../models/productSchema");
+
 const env = require("dotenv").config()
 
 const nodemailer = require("nodemailer")
@@ -7,29 +9,35 @@ const bcrypt = require("bcrypt")
 
 const loadHomepage = async (req, res) => {
   try {
+    const userId = req.session.user;
+    let userData = null;
 
-    const userId = req.session.user
-    if (!userId) {
-      return res.render("home");
+    if (userId) {
+      userData = await User.findById(userId);
     }
 
-    
-    const userData = await User.findById(userId);
 
-    const products = [
-      { name: "Nike Air", price: 2999 },
-      { name: "Adidas Ultra", price: 3999 },
-      { name: "Puma Runner", price: 1999 }
-    ];
+    if(userData && userData.isBlocked){
+      req.session.user=null;
+      return res.redirect('/login?isBlocked=true')
+    }
 
-    return res.render("home", { user: userData, products });
+
+    // FEATURED PRODUCTS (optional)
+    const featuredProducts = await Product.find({ isDeleted: false })
+      .sort({ createdAt: -1 })
+      .limit(3);
+
+    return res.render("home", { 
+      user: userData,
+      featuredProducts  // <-- FIXED (NOW AVAILABLE IN EJS)
+    });
 
   } catch (error) {
     console.log("Home page error:", error);
     return res.status(500).send("Server error");
   }
 };
-
 
 
 
@@ -188,7 +196,7 @@ const otp = async (req, res) => {
 
     const { otp } = req.body
 
-    console.log(otp)
+    // console.log(otp)
 
     if (otp == req.session.userOtp) {
 
@@ -221,11 +229,15 @@ const otp = async (req, res) => {
 
 const loadlogin = async (req, res) => {
   try {
+    let message="";
 
+    if(req.query.isBlocked==="true"){
+      message="Your account has been blocked by admin"
+    }
     if (req.session.user) {
       return res.redirect("login")
     } else {
-      res.render("login")
+      res.render("login",{message})
     }
 
   } catch (error) {
@@ -294,7 +306,129 @@ const logout = async (req, res) => {
 
 
 
+const productlist = async(req,res)=>{
 
+  return res.render("productlist")
+}
+
+
+   const loadForgotPage = (req, res) => {
+    res.render("forgot-password", { message: "" });
+};
+
+const sendResetOTP = async (req, res) => {
+  try {
+    const email = req.body.email;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.render("forgot-password", { message: "Email does not exist" });
+    }
+    // Generate OTP
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    console.log("Your OTP is:",otp)
+
+    // Save in session (SAFE)
+    req.session.resetEmail = email;
+    req.session.resetOtp = otp;
+
+    // Send Email
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.NODEMAILER_EMAIL,
+        pass: process.env.NODEMAILER_PASSWORD,
+      },
+    });
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Password Reset OTP",
+      text: `Your OTP is ${otp}`,
+    });
+
+    const maskedEmail = email.replace(/(.{2}).+(@.+)/, "$1****$2");
+
+    return res.render("verify-otp", { message: "", maskedEmail });
+
+  } catch (error) {
+    console.log("OTP Error:", error);
+    res.send("Server Error");
+  }
+};
+
+
+const loadOtpPage = (req, res) => {
+  const email = req.session.resetEmail || "";
+  const maskedEmail = email.replace(/(.{2}).+(@.+)/, "$1****$2");
+
+  res.render("verify-otp", { message: "", maskedEmail });
+};
+
+
+const verifyOtp = (req, res) => {
+  const enteredOtp = req.body.otp;
+  const storedOtp = req.session.resetOtp;
+  const email = req.session.resetEmail;
+
+  if (!email) {
+    return res.redirect("/forgot-password"); // session expired
+  }
+
+  const maskedEmail = email.replace(/(.{2}).+(@.+)/, "$1****$2");
+
+  if (enteredOtp !== storedOtp) {
+    return res.render("verify-otp", { 
+      message: "Invalid OTP",
+      maskedEmail 
+    });
+  }
+
+  return res.redirect("/reset-password");
+};
+
+
+
+
+const loadResetPage = (req, res) => {
+  res.render("reset-password", { message: "" });
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { password, confirmPassword } = req.body;
+    const email = req.session.resetEmail;
+
+    if (!email) {
+      return res.redirect("/forgot-password");
+    }
+
+    if (!password || !confirmPassword) {
+      return res.render("reset-password", { message: "All fields required" });
+    }
+
+    if (password !== confirmPassword) {
+      return res.render("reset-password", { message: "Passwords do not match" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await User.updateOne(
+      { email },
+      { $set: { password: hashedPassword } }
+    );
+
+    // Clear session data
+    delete req.session.resetEmail;
+    delete req.session.resetOtp;
+
+    return res.redirect("/login");
+
+  } catch (error) {
+    console.log("Reset Password Error:", error);
+    res.send("Server Error");
+  }
+};
 
 
 
@@ -310,7 +444,14 @@ module.exports = {
   otp,
   loadlogin,
   login,
-  logout, resendOtp
+  logout, resendOtp,
+  productlist,
+  loadForgotPage,
+sendResetOTP,
+loadOtpPage,
+verifyOtp,
+loadResetPage,
+resetPassword
 
 
 }

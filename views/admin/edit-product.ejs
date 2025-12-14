@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Product - SHOEZO</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 60px;
+            overflow-x: hidden;
+        }
+
+        .sidebar-container {
+            width: 250px;
+            min-height: 100vh;
+            background-color: #343a40 !important;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            z-index: 1020;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            width: calc(100% - 250px);
+        }
+
+        .card-form-variants {
+            border: 1px solid #ddd;
+            padding: 25px;
+            border-radius: 8px;
+            background-color: #fff;
+        }
+
+        .upload-box {
+            border: 2px dashed #ddd;
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            text-align: center;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <%- include('../partials/admin/navbar.ejs') %>
+
+        <div class="d-flex w-100">
+            <div class="sidebar-container">
+                <%- include('../partials/admin/sidebar.ejs') %>
+            </div>
+
+            <div class="main-content">
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="fw-bold">Edit Product</h4>
+                    <a href="/admin/products" class="btn btn-secondary">Back</a>
+                </div>
+
+                <div class="card p-4 shadow-sm border-0">
+
+                    <!-- ⭐ EDIT PRODUCT FORM ⭐ -->
+                <form method="POST" 
+      action="/admin/edit-product/<%= product._id %>" 
+      enctype="multipart/form-data" 
+      onsubmit="return validateForm()">
+
+                        <!-- PRODUCT NAME -->
+                        <div class="row mb-3">
+                            <div class="col-md-3 text-md-end"><label class="form-label">Product Name :</label></div>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control" name="name" value="<%= product.name %>">
+                            </div>
+                        </div>
+
+                        <!-- CATEGORY + BRAND -->
+                        <div class="row mb-3">
+
+                            <!-- CATEGORY -->
+                            <div class="col-md-3 text-md-end"><label class="form-label">Category :</label></div>
+                            <div class="col-md-3">
+                                <select class="form-select" name="category">
+                                    <% categories.forEach(cat=> { %>
+                                       <option value="<%= cat._id %>"
+  <%= (product.category && cat._id.toString() === product.category._id.toString()) ? 'selected' : '' %>>
+    <%= cat.name %>
+</option>
+
+                                        <% }) %>
+                                </select>
+                            </div>
+
+                            <!-- BRAND -->
+                            <div class="col-md-3 text-md-end"><label class="form-label">Brand :</label></div>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" name="brand" value="<%= product.brand %>">
+                            </div>
+
+                        </div>
+
+                        <!-- DESCRIPTION -->
+                        <div class="row mb-3">
+                            <div class="col-md-3 text-md-end"><label class="form-label">Description :</label></div>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control" name="description"
+                                    value="<%= product.description %>">
+                            </div>
+                        </div>
+
+                        <!-- PRICE -->
+                        <div class="row mb-3">
+                            <div class="col-md-3 text-md-end"><label class="form-label">Price :</label></div>
+                            <div class="col-md-9">
+                                <input type="number" class="form-control" name="price" value="<%= product.price %>">
+                            </div>
+                        </div>
+
+                        <!-- OFFER PRICE -->
+                        <div class="row mb-3">
+                            <div class="col-md-3 text-md-end"><label class="form-label">Offer Price :</label></div>
+                            <div class="col-md-9">
+                                <input type="number" class="form-control" name="offerPrice"
+                                    value="<%= product.offerPrice %>">
+                            </div>
+                        </div>
+
+                        <!-- VARIANTS -->
+                        <h5 class="fw-bold mb-3">Product Variants</h5>
+
+                        <div class="card-form-variants">
+                            <div class="row mb-4">
+
+                                <div class="col-4">
+                                    <label class="form-label">Size</label>
+                                    <input type="text" class="form-control" name="size"
+                                        value="<%= product.variants[0].size %>">
+                                </div>
+
+                                <div class="col-4">
+                                    <label class="form-label">Color</label>
+                                    <input type="text" class="form-control" name="color"
+                                        value="<%= product.variants[0].color %>">
+                                </div>
+
+                                <div class="col-4">
+                                    <label class="form-label">Stock</label>
+                                    <input type="number" class="form-control" name="stock"
+                                        value="<%= product.variants[0].stock %>">
+                                </div>
+
+                            </div>
+
+                          <!-- EXISTING IMAGES -->
+                           <!-- EXISTING IMAGES -->
+<label class="form-label">Existing Images:</label>
+<div class="d-flex flex-wrap gap-3 mb-3">
+    <% product.images.forEach((img, index) => { %>
+        <div style="position: relative; width: 100px; height: 100px;">
+            
+            <!-- Image -->
+            <img src="/uploads/product-images/<%= img %>" 
+                 style="width:100%; height:100%; object-fit:cover; border-radius: 8px;">
+
+            <!-- Delete button -->
+            <button type="button"
+                class="btn btn-danger btn-sm delete-image-btn"
+                data-img="<%= img %>"
+                style="
+                    position:absolute;
+                    top:-8px;
+                    right:-8px;
+                    padding:2px 6px;
+                    border-radius:50%;
+                    font-size:12px;
+                ">✕</button>
+
+        </div>
+    <% }) %>
+</div>
+
+
+
+
+                            <!-- UPLOAD NEW -->
+                            <label class="form-label">Upload New Images:</label>
+                            <div class="upload-box w-100 mb-3"
+                                onclick="document.getElementById('imagesInput').click()">
+                                <i class="fas fa-upload text-muted me-2"></i> Click to upload
+                            </div>
+
+                            <input type="file" id="imagesInput" name="images" accept="image/*" multiple hidden>
+                        </div>
+
+                        <!-- SUBMIT -->
+                        <div class="text-center mt-5">
+                            <button type="submit" class="btn btn-dark btn-lg px-5">UPDATE PRODUCT</button>
+                        </div>
+
+                    </form>
+                </div>
+
+            </div>
+        </div>
+
+</body>
+
+</html>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+// DELETE IMAGE FUNCTION
+document.querySelectorAll(".delete-image-btn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+
+        const imgName = btn.getAttribute("data-img");
+        const productId = "<%= product._id %>";
+
+        const response = await fetch(`/admin/delete-product-image/${productId}/${imgName}`, {
+            method: "DELETE"
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            location.reload();
+        }
+    });
+});
+
+
+// ✅ VALIDATION FUNCTION (Global Scope)
+function validateForm() {
+
+    let name = document.querySelector("input[name='name']").value.trim();
+    let category = document.querySelector("select[name='category']").value.trim();
+    let brand = document.querySelector("input[name='brand']").value.trim();
+    let description = document.querySelector("input[name='description']").value.trim();
+    let price = document.querySelector("input[name='price']").value.trim();
+    let offerPrice = document.querySelector("input[name='offerPrice']").value.trim();
+    let size = document.querySelector("input[name='size']").value.trim();
+    let color = document.querySelector("input[name='color']").value.trim();
+    let stock = document.querySelector("input[name='stock']").value.trim();
+
+    if (!name || !category || !brand || !description || !price || !offerPrice || !size || !color || !stock) {
+        Swal.fire({
+            icon: "error",
+            title: "All Fields Required",
+            text: "Please fill all fields before submitting."
+        });
+        return false;
+    }
+
+    return true; // allow submit
+}
+
+</script>

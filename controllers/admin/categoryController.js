@@ -110,53 +110,45 @@ const Category = require("../../models/categorySchema");
 
 
   }
-
-  const editCategory = async(req,res)=>{
+const editCategory = async (req, res) => {
     try {
-       
-      const id = req.params.id;
-      const {name,brand,description,categoryOffer} = req.body;
+        const id = req.params.id;
+        let { name, brand, description, categoryOffer } = req.body;
 
-       if (!name || !brand || !description) {
+        // Trim input values
+        name = name?.trim();
+        brand = brand?.trim();
+        description = description?.trim();
+
+        // VALIDATION
+        if (!name || !brand || !description || categoryOffer === "") {
             return res.json({
                 success: false,
                 message: "All fields are required"
             });
         }
 
+        // UPDATE CATEGORY
+        await Category.findByIdAndUpdate(id, {
+            name,
+            brand,
+            description,
+            categoryOffer
+        });
 
-
-
-
-      await Category.findByIdAndUpdate(id,{
-        name,
-        brand,
-        description,
-        categoryOffer
-      })
-
-
-      return res.json({
-        success:true,
-        message:"Category updated Successfully"
-      })
-      
-
-
+        return res.json({
+            success: true,
+            message: "Category updated successfully"
+        });
 
     } catch (error) {
-
-       console.log("Error in updateCategory",error)
-
-       return res.json({
-        success:false,
-        message:"Internal Server Error"
-       })
-      
+        console.log("Error in updateCategory:", error);
+        return res.json({
+            success: false,
+            message: "Internal Server Error"
+        });
     }
-  }
-
-
+};
 
 
 

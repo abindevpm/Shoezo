@@ -1,0 +1,479 @@
+  <%
+  /* ---------- FALLBACK DEMO DATA (Used if server-side data is missing) ---------- */
+  const demoProduct = {
+    _id: 'demo1',
+    name: "Nike Cryptokick",
+    model: "Custom Shoes",
+    price: 7799,
+    oldPrice: 9999,
+    offerPrice: 5459,
+    discount: 30,
+    description: "Nike Cryptokick — sleek, comfy and futuristic. Example description for demo.",
+    images: [
+      '/images/nike-cryptokick-main.png',
+      '/images/nike-cryptokick-thumb1.png',
+      '/images/nike-cryptokick-thumb2.png'
+    ],
+    variants: [
+      { color: "#000000", size: 6 },
+      { color: "#f97316", size: 7 },
+      { color: "#ef4444", size: 8 }
+    ],
+    rating: 4.8,
+    reviewCount: 45,
+    fitRating: 4.5
+  };
+
+  const demoReviews = [
+    { name: "Abinav George", date: "3 days ago", rating: 4.7, comment: "Great product, very good quality.", verified: true },
+    { name: "Sulochana Sowmaya", date: "2 days ago", rating: 4.9, comment: "Awesome product!", verified: true }
+  ];
+
+  const demoSimilar = [
+    { _id: 's1', name: "JORDAN 7D", price: 4999, oldPrice: 9999, discount: 50, image: 'https://placehold.co/400x300/18181b/fff?text=JORDAN+7D', rating: 4.9 },
+    { _id: 's2', name: "NIKE SPARX", price: 4999, oldPrice: 9999, discount: 50, image: 'https://placehold.co/400x300/60a5fa/fff?text=NIKE+SPARX', rating: 4.5 }
+  ];
+
+  const currentProduct = (typeof product !== 'undefined' && product) ? product : demoProduct;
+  const currentReviews = (typeof reviews !== 'undefined' && reviews) ? reviews : demoReviews;
+  const currentSimilarProducts = (typeof similarProducts !== 'undefined' && similarProducts) ? similarProducts : demoSimilar;
+
+  /* Helpers */
+  function generateStars(rating, size = 'w-4 h-4') {
+    const full = Math.floor(rating || 0);
+    const half = (rating || 0) - full >= 0.5;
+    let html = '';
+    for (let i = 0; i < 5; i++) {
+      const color = (i < full) ? 'text-yellow-400' : (i === full && half) ? 'text-yellow-400 opacity-50' : 'text-gray-300';
+      html += `<svg class="${size} ${color} inline-block fill-current" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+    }
+    return html;
+  }
+
+  function ratingPercentFor(star) {
+    const map = { 5: 70, 4: 15, 3: 10, 2: 3, 1: 2 };
+    return map[star] || 0;
+  }
+
+  function fitPercent(rating) {
+    const r = (typeof rating === 'number') ? rating : (currentProduct.fitRating || 0);
+    return Math.round((r / 5) * 100);
+  }
+
+  /* Image URL helper:
+    - if `img` starts with '/' or 'http' treat as absolute URL already
+    - otherwise assume it's a filename under /uploads/product-images/
+  */
+  function imgUrl(img) {
+    if (!img) return '/images/placeholder-500.png';
+    if (typeof img !== 'string') return '/images/placeholder-500.png';
+    if (img.startsWith('http') || img.startsWith('/')) return img;
+    return '/uploads/product-images/' + img;
+  }
+  %>
+
+  <%
+  function imgUrl(img) {
+    if (!img) return '/images/placeholder-500.png';
+    if (typeof img !== 'string') return '/images/placeholder-500.png';
+    if (img.startsWith('http') || img.startsWith('/')) return img;
+    return '/uploads/product-images/' + img;
+  }
+  %>
+
+
+
+
+  <style>
+    
+    .zoom-container {
+      position: relative;
+      width: 100%;
+      max-width: 500px;
+      overflow: hidden;
+      cursor: zoom-in;
+  }
+
+  .zoom-image {
+      width: 100%;
+      transition: transform 0.2s ease-out;
+  }
+
+  .zoom-container.zoomed .zoom-image {
+      transform: scale(2); /* Zoom level */
+      cursor: zoom-out;
+  }
+
+
+
+
+
+
+
+  </style>
+
+  <!doctype html>
+  <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>SHOEZO — <%= currentProduct.name %></title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+      body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+      .thumb { width:64px; height:64px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid #e5e7eb; }
+      .thumb.active-border { border-color: #111827 !important; }
+      .main-image { max-height:520px; object-fit:contain; width:100%; }
+      .fit-bar-container { position: relative; height: 6px; background: #e5e7eb; border-radius: 9999px; }
+      .fit-dot { position:absolute; top:50%; transform:translate(-50%, -50%); width:12px; height:12px; border:2px solid #fff; box-shadow:0 0 0 1px #1f2937; border-radius:9999px; background:#1f2937; }
+      .review-bar-fill { height:100%; background:#10b981; border-radius:9999px; }
+      .scrollbar-hide::-webkit-scrollbar { display:none; } .scrollbar-hide { -ms-overflow-style:none; scrollbar-width:none; }
+    </style>
+  </head>
+  <body class="antialiased text-gray-900">
+
+    <%- include("../partials/userpartial/header") %>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  <nav class="text-sm text-gray-500 mb-6 flex items-center gap-2">
+    
+    <a href="/" class="hover:text-black">Home</a>
+    <span>›</span>
+
+    <a href="/shop" class="hover:text-black">Shop</a>
+    <span>›</span>
+
+    <!-- FIXED CATEGORY LINK -->
+    <a href="/shop/<%= product?.category?.name ? product.category.name.toLowerCase() : '' %>" 
+       class="hover:text-black">
+        <%= product?.category?.name || '' %>
+    </a>
+    <span>›</span>
+
+    <span class="font-semibold text-black">
+        <%= product.name %>
+    </span>
+</nav>
+
+
+
+
+
+
+  <!-- Product top -->
+    <section class="bg-white rounded-lg shadow-lg p-6 md:p-10 mb-10">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+
+      <!-- LEFT COLUMN: Thumbnails + Main Image -->
+      <div class="flex flex-row gap-4">
+
+        <!-- THUMBNAILS -->
+        <div id="thumbs" class="flex flex-col gap-3">
+          <%
+            const imgs = Array.isArray(currentProduct.images) ? [...currentProduct.images] : [];
+            while (imgs.length < 3) imgs.push(null);
+
+            imgs.slice(0,3).forEach((img, i) => {
+          %>
+            <img 
+              src="<%= img ? imgUrl(img) : 'https://placehold.co/80x80/cccccc/333?text=No+Img' %>"
+              data-full="<%= img ? imgUrl(img) : '' %>"
+              class="thumb w-20 h-20 object-cover rounded-md border 
+                <%= i===0 ? 'border-black' : 'border-gray-300' %>
+                <%= !img ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer' %>"
+              alt="Thumbnail <%= i+1 %>"
+            >
+          <% }) %>
+        </div>
+
+        <!-- MAIN IMAGE -->
+        <div class="flex-1 flex items-center justify-center bg-gray-50 rounded-lg p-4">
+          <div class="zoom-container relative overflow-hidden">
+            <img 
+              id="mainImage"
+              src="<%= imgUrl(currentProduct.images?.[0]) %>"
+              class="main-image zoom-image w-full object-contain"
+              alt="<%= currentProduct.name %>"
+            >
+          </div>
+        </div>
+
+      </div> <!-- END LEFT COLUMN -->
+
+
+      <!-- RIGHT COLUMN: Product Info -->
+      <div class="space-y-6 pt-4">
+
+        <div class="flex justify-between items-start">
+          <div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight"><%= currentProduct.name %></h1>
+            <!-- <p class="text-sm text-gray-500 mt-1"><%= currentProduct.model || 'Product' %></p> -->
+          </div>
+
+          <button class="p-2 text-gray-400 hover:text-red-500">❤️</button>
+        </div>
+
+        <div class="border-t pt-4 space-y-3">
+          <div class="flex items-center gap-4">
+            <% const displayPrice = currentProduct.offerPrice || currentProduct.price; 
+              const originalPrice = currentProduct.oldPrice || currentProduct.price; 
+            %>
+
+            <p class="text-2xl font-bold">₹<%= displayPrice.toLocaleString() %></p>
+
+            <% if (displayPrice < originalPrice) { %>
+              <p class="text-sm text-gray-400 line-through">MRP ₹<%= originalPrice.toLocaleString() %></p>
+            <% } %>
+
+            <% if (currentProduct.discount) { %>
+              <span class="text-red-600 text-sm font-semibold"><%= currentProduct.discount %>% OFF</span>
+            <% } %>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <span><%- generateStars(currentProduct.rating, 'w-5 h-5') %></span>
+            <a href="#reviews" class="text-gray-500 underline">
+              (<%= currentProduct.reviewCount || currentReviews.length %> reviews)
+            </a>
+          </div>
+        </div>
+
+        <p class="text-gray-600"><%= currentProduct.description %></p>
+
+        <!-- COLOR -->
+        <div>
+          <p class="text-sm font-semibold text-gray-700 mb-2">Select Color</p>
+          <div class="flex gap-2">
+            <% (currentProduct.variants || []).forEach((v, idx) => { %>
+              <button 
+                class="w-8 h-8 rounded-full border-2"
+                data-color="<%= v.color %>"
+                style="background:<%= v.color %>; border-color:<%= idx === 0 ? '#111827' : '#e5e7eb' %>"
+              ></button>
+            <% }) %>
+          </div>
+        </div>
+
+        <!-- SIZE -->
+        <div>
+          <p class="text-sm font-semibold text-gray-700 mb-2">Select Size (UK)</p>
+          <div class="flex gap-2 flex-wrap">
+            <% (currentProduct.variants || []).forEach((v, idx) => { %>
+              <button 
+                class="px-4 py-2 border rounded-md text-sm font-medium 
+                  <%= idx===0 ? 'bg-black text-white border-black' : '' %>"
+                data-size="<%= v.size %>"
+              ><%= v.size %></button>
+            <% }) %>
+          </div>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="flex gap-3 pt-2">
+          <button class="flex-1 py-3 border border-gray-300 rounded-lg hover:bg-gray-100">
+            Add to Cart
+          </button>
+          <button class="flex-1 py-3 bg-black text-white rounded-lg hover:bg-gray-800">
+            Buy Now
+          </button>
+        </div>
+
+      </div> <!-- END RIGHT COLUMN -->
+
+    </div>
+  </section>
+
+
+    
+      <!-- Reviews / Similar etc (same as earlier, kept concise) -->
+      <section id="reviews" class="mb-10">
+        <h2 class="text-2xl font-bold mb-4">Reviews</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-semibold mb-4">Customer Feedback</h3>
+            <div class="flex items-center gap-4 border-b pb-4">
+              <div class="text-5xl font-extrabold text-black"><%= (currentProduct.rating || 0).toFixed(1) %></div>
+              <div>
+                <div class="flex"><%- generateStars(currentProduct.rating, 'w-6 h-6') %></div>
+                <p class="text-sm text-gray-500">Product Rating</p>
+              </div>
+            </div>
+
+            <div class="mt-4 space-y-2">
+              <% for(let i=5;i>=1;i--){ const pct = ratingPercentFor(i); %>
+                <div class="flex items-center gap-2">
+                  <span class="w-4 text-sm font-medium"><%= i %></span>
+                  <svg class="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                  <div class="flex-1 bg-gray-200 rounded-full h-3 overflow-hidden">
+                    <div class="review-bar-fill" style="width:<%= pct %>%"></div>
+                  </div>
+                  <div class="w-8 text-right text-sm text-gray-500"><%= pct %>%</div>
+                </div>
+              <% } %>
+            </div>
+
+            <div class="mt-6 border-t pt-4">
+              <p class="text-sm font-semibold text-gray-700 mb-2">Fit Rating: <span class="font-bold text-black"><%= (currentProduct.fitRating || 0).toFixed(1) %></span></p>
+              <div class="fit-bar-container mb-2">
+                <div class="fit-dot" style="left:<%= fitPercent(currentProduct.fitRating) %>%"></div>
+              </div>
+              <div class="text-xs text-center text-gray-600 mt-2 font-medium">True to Size</div>
+            </div>
+          </div>
+
+          <div class="md:col-span-2 space-y-6">
+            <div class="bg-white p-6 rounded-lg shadow-lg space-y-6">
+              <h3 class="text-xl font-bold">Reviews</h3>
+              <% (currentReviews || []).forEach(r => { %>
+                <article class="border-b pb-4 last:border-b-0">
+                  <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-gray-900 text-white rounded-full font-bold text-sm"><%= r.name[0] %></div>
+                    <div class="flex-1">
+                      <div class="flex items-center gap-3">
+                        <span class="font-semibold text-base"><%= r.name %></span>
+                        <span class="text-xs text-gray-400">• <%= r.date %></span>
+                      </div>
+                      <div class="flex text-yellow-400 mt-1 mb-2"><%- generateStars(r.rating) %></div>
+                      <p class="text-gray-700 leading-relaxed italic">"<%= r.comment %>"</p>
+                    </div>
+                  </div>
+                </article>
+              <% }) %>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+              <h3 class="text-xl font-bold mb-3">Write a Review</h3>
+              <form id="reviewForm" onsubmit="return false;">
+                <textarea id="reviewText" rows="4" class="w-full border border-gray-300 rounded-lg p-3 text-sm" placeholder="Write your review..."></textarea>
+                <div class="mt-4 flex justify-end">
+                  <button id="submitReviewBtn" class="px-6 py-2 bg-black text-white rounded-md">Submit Review</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-10">
+        <h2 class="text-2xl font-bold mb-4">Similar Products</h2>
+        <div class="flex overflow-x-auto scrollbar-hide space-x-6 pb-4 -mx-4 px-4">
+          <% (currentSimilarProducts || []).forEach(sp => { %>
+            <a href="/product/<%= sp._id %>" class="flex-shrink-0 w-64 block bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition">
+              <div class="relative overflow-hidden aspect-square">
+                <img src="<%= sp.image %>" alt="<%= sp.name %>" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/ddd/333?text=No+Image'">
+              </div>
+              <div class="p-4">
+                <h4 class="font-bold text-lg mb-1 truncate"><%= sp.name %></h4>
+                <div class="flex items-center text-sm text-gray-500 mb-2">
+                  <span class="flex mr-1"><%- generateStars(sp.rating, 'w-4 h-4') %></span>
+                  <span class="font-medium text-black"><%= sp.rating.toFixed(1) %></span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <p class="text-xl font-extrabold text-black">₹<%= sp.price %></p>
+                  <p class="line-through text-sm text-gray-400">₹<%= sp.oldPrice %></p>
+                  <span class="text-red-600 font-semibold text-sm"><%= sp.discount %>% off</span>
+                </div>
+              </div>
+            </a>
+          <% }) %>
+        </div>
+      </section>
+
+
+
+
+
+
+
+
+
+    </main>
+
+    <%- include("../partials/userpartial/footer") %>
+
+    <script>
+      // swap main image when thumb clicked
+      (function () {
+        const thumbs = document.querySelectorAll('#thumbs img');
+        const main = document.getElementById('mainImage');
+
+        thumbs.forEach(t => {
+          t.addEventListener('click', function (e) {
+            const full = t.dataset.full;
+            if (!full) return;
+            main.src = full;
+            thumbs.forEach(x => x.classList.remove('active-border'));
+            t.classList.add('active-border');
+          });
+        });
+
+        // sizes
+        document.querySelectorAll('[data-size]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            document.querySelectorAll('[data-size]').forEach(b => {
+              b.classList.remove('bg-black', 'text-white', 'border-black');
+              b.classList.add('bg-white', 'text-gray-800', 'border-gray-300');
+            });
+            btn.classList.add('bg-black', 'text-white', 'border-black');
+          });
+        });
+
+        // colors
+        document.querySelectorAll('[data-color]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            document.querySelectorAll('[data-color]').forEach(b => b.style.borderColor = '#e5e7eb');
+            btn.style.borderColor = '#111827';
+          });
+        });
+
+        // button handlers
+        document.getElementById('addToCartBtn')?.addEventListener('click', () => {
+          alert('Add to Cart clicked — integrate backend/cart next.');
+        });
+        document.getElementById('buyNowBtn')?.addEventListener('click', () => {
+          alert('Buy Now clicked — integrate checkout flow next.');
+        });
+
+        document.getElementById('submitReviewBtn')?.addEventListener('click', () => {
+          const txt = document.getElementById('reviewText')?.value.trim();
+          if (!txt) return alert('Please write a review before submitting.');
+          alert('Review submitted: "' + txt + '" (Implement backend POST to save it.)');
+        });
+      })();
+
+    
+
+      //  zooming logic
+
+
+      const zoomContainer = document.querySelector('.zoom-container');
+  const zoomImage = document.querySelector('.zoom-image');
+
+  zoomContainer.addEventListener('mousemove', (e) => {
+      const rect = zoomContainer.getBoundingClientRect();
+      const x = e.clientX - rect.left; 
+      const y = e.clientY - rect.top;
+
+      zoomImage.style.transformOrigin = `${x}px ${y}px`;
+  });
+
+  zoomContainer.addEventListener('mouseenter', () => {
+      zoomContainer.classList.add('zoomed');
+  });
+
+  zoomContainer.addEventListener('mouseleave', () => {
+      zoomContainer.classList.remove('zoomed');
+  });
+
+
+
+
+
+    </script>
+  </body>
+  </html>
