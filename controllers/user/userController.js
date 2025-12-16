@@ -167,6 +167,8 @@ const signup = async (req, res) => {
     }
 
     req.session.userOtp = otp;
+    req.session.otpExpiry = Date.now() + 102 * 1000;
+
     req.session.userData = { name, phone, email, password };
 
     res.render("otp");
@@ -196,33 +198,73 @@ const otp = async (req, res) => {
 
     const { otp } = req.body
 
-    // console.log(otp)
-
-    if (otp == req.session.userOtp) {
-
-      const user = req.session.userData
-      const passwordHash = await securePassword(user.password)
-
-      const saveUserData = new User({
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        password: passwordHash,
+    if(!req.session || !req.session.userOtp || !req.session.otpExpiry){
+      return res.status(400).json({
+        success:false,
+        message:"OTP Expired. Please signup again."
       })
-
-      await saveUserData.save();
-      req.session.user = saveUserData._id;
-      res.json({ success: true, redirectUrl: "/" })
-    } else {
-      res.status(400).send({ success: false, message: "Invalid OTP please try Again" })
     }
 
-  } catch (error) {
-    console.error("Error Verifying OTP", error)
-    res.status(500).json({ success: false, message: "An error Occured" })
+    
 
-  }
+    if(Date.now()>req.session.otpExpiry){
 
+      req.session.userOtp = null;
+       req.session.otpExpiry = null;
+       req.session.userData = null;
+
+
+       return res.status(400).json({
+        success:false,
+         message:"OTP expired. please request a new Otp"
+       })
+    }
+
+
+ if(parseInt(otp)!==req.session.userOtp){
+  return res.status(400).json({
+    success:false,
+    message:"Invalid OTP.Please Try Again." 
+  })
+ }
+
+ const user = req.session.userData;
+ const passwordHash =  await securePassword(user.password);
+
+
+
+const saveUserData = new User({
+  name: user.name,
+  email: user.email,
+  phone: user.phone,
+  password: passwordHash
+});
+
+await saveUserData.save();
+
+req.session.userOtp = null;
+req.session.otpExpiry = null;
+req.session.userData = null;
+
+req.session.user = saveUserData._id;
+
+res.json({ success: true, redirectUrl: "/" });
+
+
+
+
+    
+
+}catch(error){
+
+ console.error("Error in Verify Otp",error);
+
+ res.status(500).json({
+  success:false,
+  message:"Internal Server Error"
+ })
+
+}
 }
 
 
