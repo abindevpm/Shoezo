@@ -10,7 +10,7 @@ const loadShopPage = async (req, res) => {
         const userId = req.session.user;
         let userData = await User.findById(userId);
         
-        let filter = {};
+        let filter = {isDeleted:false};
 
         if (req.query.search && req.query.search.trim() !== "") {
             const searchText = req.query.search.trim();

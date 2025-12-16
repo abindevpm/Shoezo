@@ -221,7 +221,7 @@ const otp = async (req, res) => {
     }
 
 
- if(parseInt(otp)!==req.session.userOtp){
+ if(otp!==req.session.userOtp){
   return res.status(400).json({
     success:false,
     message:"Invalid OTP.Please Try Again." 
