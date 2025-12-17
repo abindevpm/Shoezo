@@ -85,6 +85,7 @@
                             <div class="col-md-3 text-md-end"><label class="form-label">Product Name :</label></div>
                             <div class="col-md-9">
                                 <input type="text" class="form-control" name="name">
+                                <small class="text-danger" id="nameError"></small>
                             </div>
                         </div>
 
@@ -101,13 +102,16 @@
                                             <%= cat.name %>
                                         </option>
                                         <% }) %>
+                                     
                                 </select>
+                                   <small class="text-danger" id="categoryError"></small>
                             </div>
 
                             <!-- BRAND -->
                             <div class="col-md-3 text-md-end"><label class="form-label">Brand :</label></div>
                             <div class="col-md-3">
                                 <input type="text" class="form-control" name="brand">
+                                <small class="text-danger" id="brandError"></small>
                             </div>
 
                         </div>
@@ -117,6 +121,7 @@
                             <div class="col-md-3 text-md-end"><label class="form-label">Description :</label></div>
                             <div class="col-md-9">
                                 <input type="text" class="form-control" name="description">
+                                <small class="text-danger" id="descriptionError"></small>
                             </div>
                         </div>
 
@@ -125,6 +130,7 @@
                             <div class="col-md-3 text-md-end"><label class="form-label">Price :</label></div>
                             <div class="col-md-9">
                                 <input type="number" class="form-control" name="price">
+                                <small class="text-danger" id="priceError"></small>
                             </div>
                         </div>
 
@@ -133,6 +139,7 @@
                             <div class="col-md-3 text-md-end"><label class="form-label">Offer Price :</label></div>
                             <div class="col-md-9">
                                 <input type="number" class="form-control" name="offerPrice">
+                                <small class="text-danger" id="offerpriceError"></small>
                             </div>
                         </div>
 
@@ -145,16 +152,19 @@
                                 <div class="col-4">
                                     <label class="form-label">Size</label>
                                     <input type="number" class="form-control" name="size">
+                                  <small class="text-danger" id="sizeError"></small>
                                 </div>
 
                                 <div class="col-4">
                                     <label class="form-label">Color</label>
                                     <input type="text" class="form-control" name="color">
+                                    <small class="text-danger" id="colorError"></small>
                                 </div>
 
                                 <div class="col-4">
                                     <label class="form-label">Stock</label>
                                     <input type="number" class="form-control" name="stock">
+                                    <small class="text-danger"  id="stockError"></small>
                                 </div>
 
                             </div>
@@ -176,6 +186,8 @@
 
         <!-- PREVIEW -->
         <div id="previewContainer" class="d-flex flex-wrap gap-2 mt-3"></div>
+
+        <small class="text-danger" id="imageError"></small>
 
     </div>
 </div>
@@ -416,49 +428,84 @@ document.getElementById("applyCrop").onclick = function () {
   //  validation 
 
 
-  function validateForm() {
-    let name = document.querySelector("input[name='name']").value.trim();
-    let category = document.querySelector("select[name='category']").value.trim();
-    let brand = document.querySelector("input[name='brand']").value.trim();
-    let description = document.querySelector("input[name='description']").value.trim();
-    let price = document.querySelector("input[name='price']").value.trim();
-    let offerPrice = document.querySelector("input[name='offerPrice']").value.trim();
-    let size = document.querySelector("input[name='size']").value.trim();
-    let color = document.querySelector("input[name='color']").value.trim();
-    let stock = document.querySelector("input[name='stock']").value.trim();
+   function validateForm(){
+    document.querySelectorAll("small.text-danger").forEach(element=>element.innerHTML = "");
 
-    // Images validation (cropped images)
+     let isValid = true;
+
+
+     const name = document.querySelector("input[name ='name']").value.trim();
+  const category = document.querySelector("select[name='category']").value.trim();
+  const brand = document.querySelector("input[name='brand']").value.trim();
+  const description = document.querySelector("input[name='description']").value.trim();
+  const price = document.querySelector("input[name='price']").value.trim();
+  const offerPrice = document.querySelector("input[name='offerPrice']").value.trim();
+  const size = document.querySelector("input[name='size']").value.trim();
+  const color = document.querySelector("input[name='color']").value.trim();
+  const stock = document.querySelector("input[name='stock']").value.trim();
+
+
+    if (!name) {
+    document.getElementById("nameError").innerText = "Product name is required";
+    isValid = false;
+  }
+
+  if(!category){
+    document.getElementById("categoryError").innerText = "Category is required";
+    isValid = false;
+  }
+  if(!brand){
+    document.getElementById("brandError").innerText ="Brand is required";
+     isValid = false;
+  }
+
+  if(!description){
+    document.getElementById("descriptionError").innerText = "Desciption  is required";
+    isValid = false;
+  }
+
+
+
+  if(!price){
+    document.getElementById("priceError").innerText = "Price is required";
+    isValid = false;
+  }
+
+  if(!offerPrice){
+    document.getElementById("offerpriceError").innerText = "OfferPrice is required ";
+    isValid = false;
+  }
+
+  if(!size){
+    document.getElementById("sizeError").innerText = "Size is required";
+    isValid = false;
+  }
+
+  if(!color){
+     document.getElementById("colorError").innerText = "Color is required";
+     isValid = false;
+  }
+
+  if(!stock){
+    document.getElementById("stockError").innerText = "Stock is required";
+    isValid =false;
+  }
+
+
     if (selectedFiles.length === 0) {
-        Swal.fire({
-            icon: "error",
-            title: "Fill all fields",
-            text: "All fields are Required."
-        });
-        return false;
-    }
-
-    if (!name || !category || !brand || !description || !price || !offerPrice || !size || !color || !stock) {
-        Swal.fire({
-            icon: "error",
-            title: "All Fields Required",
-            text: "Please fill all fields before submitting."
-        });
-        return false;
-    }
-
-    return true; // allow form to submit
-}
+    document.getElementById("imageError").innerText = "At least 3 image is required";
+    isValid = false;
+  }
 
 
-  function updateInputFiles() {
-    const dataTransfer = new DataTransfer();
+return isValid
 
-    selectedFiles.forEach(file => {
-        dataTransfer.items.add(file);
-    });
 
-    input.files = dataTransfer.files;
-}
+
+   }
+
+
+
 
 
 

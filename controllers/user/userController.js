@@ -120,6 +120,8 @@ const resendOtp = async (req, res) => {
     const newOtp = generateOtp();
     req.session.userOtp = newOtp;
 
+     req.session.otpExpiry = Date.now() + (2 * 60 * 1000); 
+
     const email = req.session.userData.email;
 
     const sent = await sendVerificationEmail(email, newOtp);
@@ -167,7 +169,7 @@ const signup = async (req, res) => {
     }
 
     req.session.userOtp = otp;
-    req.session.otpExpiry = Date.now() + 102 * 1000;
+    req.session.otpExpiry = Date.now() + 10 * 1000;
 
     req.session.userData = { name, phone, email, password };
 
@@ -193,79 +195,69 @@ const securePassword = async (password) => {
 
 
 
+
+
 const otp = async (req, res) => {
   try {
+    const { otp } = req.body;
 
-    const { otp } = req.body
-
-    if(!req.session || !req.session.userOtp || !req.session.otpExpiry){
+    
+    if (!req.session.userOtp || !req.session.otpExpiry) {
       return res.status(400).json({
-        success:false,
-        message:"OTP Expired. Please signup again."
-      })
+        success: false,
+        message: "OTP expired. Please request a new OTP."
+      });
     }
 
     
-
-    if(Date.now()>req.session.otpExpiry){
-
+    if (Date.now() > req.session.otpExpiry) {
       req.session.userOtp = null;
-       req.session.otpExpiry = null;
-       req.session.userData = null;
+      req.session.otpExpiry = null;
 
-
-       return res.status(400).json({
-        success:false,
-         message:"OTP expired. please request a new Otp"
-       })
+      return res.status(400).json({
+        success: false,
+        message: "OTP expired. Please request a new OTP."
+      });
     }
 
-
- if(otp!==req.session.userOtp){
-  return res.status(400).json({
-    success:false,
-    message:"Invalid OTP.Please Try Again." 
-  })
- }
-
- const user = req.session.userData;
- const passwordHash =  await securePassword(user.password);
-
-
-
-const saveUserData = new User({
-  name: user.name,
-  email: user.email,
-  phone: user.phone,
-  password: passwordHash
-});
-
-await saveUserData.save();
-
-req.session.userOtp = null;
-req.session.otpExpiry = null;
-req.session.userData = null;
-
-req.session.user = saveUserData._id;
-
-res.json({ success: true, redirectUrl: "/" });
-
-
-
+    
+    if (otp !== req.session.userOtp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP"
+      });
+    }
 
     
+    const user = req.session.userData;
+    const passwordHash = await securePassword(user.password);
 
-}catch(error){
+    const saveUserData = new User({
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      password: passwordHash
+    });
 
- console.error("Error in Verify Otp",error);
+    await saveUserData.save();
 
- res.status(500).json({
-  success:false,
-  message:"Internal Server Error"
- })
+    
+    req.session.userOtp = null;
+    req.session.otpExpiry = null;
+    req.session.userData = null;
 
-}
-}
+    req.session.user = saveUserData._id;
+
+    res.json({ success: true, redirectUrl: "/" });
+
+  } catch (error) {
+    console.error("OTP Verify Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+};
 
 
 
