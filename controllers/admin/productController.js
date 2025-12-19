@@ -1,5 +1,7 @@
     const Product = require("../../models/productSchema");
     const Category = require("../../models/categorySchema");
+    const Brand = require("../../models/brandSchema");
+
     const fs = require("fs")
 
     const sharp = require("sharp");
@@ -42,6 +44,7 @@
             
             const products = await Product.find(query)
                 .populate("category")
+                .populate("brand")
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit);
@@ -127,36 +130,56 @@
 
 
 
+
+
     const loadAddProducts = async (req, res) => {
-        try {
-            const categories = await Category.find({ isDeleted: false });
-            res.render("add-products", { categories });
+  try {
+    const categories = await Category.find({ isDeleted: false, isListed: true });
+    const brands = await Brand.find({ isDeleted: false, isListed: true });
 
-        } catch (error) {
-            console.log("Load Add product Error:", error);
-            res.status(500).send("Internal Server Error");
-        }
-    };
+    res.render("add-products", {
+      categories,
+      brands
+    });
+
+  } catch (error) {
+    console.log("Load Add product Error:", error);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+const loadEditProduct = async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    const product = await Product.findById(id)
+      .populate("category")
+      .populate("brand"); // ✅ IMPORTANT
+
+    const categories = await Category.find({ isDeleted: false });
+    const brands = await Brand.find({ isDeleted: false });
+
+    res.render("edit-product", {
+      product,
+      categories,
+      brands
+    });
+
+  } catch (error) {
+    console.log("Edit product error:", error);
+    res.status(500).send("Internal Server Error");
+  }
+};
 
 
 
 
-    const loadEditProduct = async (req, res) => {
-    try {
-        const id = req.params.id;
-
-        const product = await Product.findById(id).populate("category");
-        const categories = await Category.find({ isDeleted: false }); // FIXED
-
-        
-        res.render("edit-product", { product, categories });
 
 
-    } catch (error) {
-        console.log("Edit product error:", error);
-        res.status(500).send("Internal Server Error");
-    }
-    };
+
+
+
+
 
 
 

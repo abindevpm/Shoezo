@@ -36,9 +36,14 @@
             <span>Category</span>
         </a>
 
+        <a href="/admin/brand" class="nav-item">
+            <span class="nav-icon">🏷️</span>
+            <span>Brands</span>
+        </a>
+
         <a href="/admin/offers" class="nav-item">
             <span class="nav-icon">%</span>
-            <span>offers</span>
+            <span>Offers</span>
         </a>
     </div>
 
@@ -56,13 +61,25 @@
 </div>
 
 
+<script>
+    const currentPath = window.location.pathname;
+    const navItems = document.querySelectorAll(".nav-item");
+
+    navItems.forEach(item => {
+        if (item.getAttribute("href") === currentPath) {
+            item.classList.add("active");
+        }
+    });
+</script>
+
+
+
+
 
 <style>
 
-/* ===== SIDEBAR ===== */
-
-
-   .sidebar {
+/* Sidebar container */
+.sidebar {
     width: 240px;
     background-color: #fff;
     border-right: 1px solid #e0e0e0;
@@ -72,61 +89,60 @@
     gap: 12px;
     height: calc(100vh - 70px);
     position: fixed;
-    top: 70px; 
+    top: 70px;
     left: 0;
-    overflow: hidden;  /* scroll removed */
 }
 
-
-/* Navigation items */
+/* Navigation wrapper */
 .sidebar-nav {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
 }
 
+/* Nav item */
 .nav-item {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    border-radius: 25px;
+    border-radius: 10px;
     background-color: #2d3436;
-    color: #fff;
+    color: #ffffff;
     text-decoration: none;
-    cursor: pointer;
     font-size: 14px;
     font-weight: 500;
-    transition: all 0.3s;
-    white-space: nowrap;
-    border: none;
 }
 
+/* Hover (simple) */
 .nav-item:hover {
     background-color: #1f2729;
-    transform: translateX(5px);
 }
 
+/* Active item */
+.nav-item.active {
+    background-color: #ffffff;
+    color: #2d3436;
+    border: 1px solid #e0e0e0;
+    font-weight: 600;
+}
+
+/* Icon */
 .nav-icon {
-    font-size: 16px;
     width: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    text-align: center;
 }
 
 /* Bottom section */
 .sidebar-bottom {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    border-top: 1px solid #e0e0e0;
-    padding-top: 12px;
     margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid #e0e0e0;
 }
 
+/* Main content */
 .main-wrapper {
-    margin-left: 240px;   /* sidebar width */
+    margin-left: 240px;
     width: calc(100% - 240px);
 }
 
@@ -137,5 +153,7 @@
 
 
 
+
 </style>
+
 

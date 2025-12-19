@@ -4,6 +4,7 @@ const adminController = require("../controllers/admin/adminController");
 const {userAuth,adminAuth} = require("../middlewares/auth")
 const customerController = require("../controllers/admin/customerController")
 const categoryController = require("../controllers/admin/categoryController")
+const brandController  = require("../controllers/admin/brandController")
 const productController = require("../controllers/admin/productController")
 const upload = require("../middlewares/multer");
 
@@ -32,6 +33,15 @@ router.get("/dashboard", adminController.dashboard)
  router.post("/addCategory",adminAuth,categoryController.addCategory)
  router.post("/edit-category/:id",adminAuth,categoryController.editCategory)
  router.post("/delete-category/:id",adminAuth,categoryController.deleteCategory)
+
+ // brand management
+
+  router.get("/brand",adminAuth,brandController.loadBrands)
+  router.post("/add-brand", adminAuth, brandController.addBrand);
+  router.post("/edit-brand/:id",adminAuth,brandController.editBrand)
+  router.patch("/toggle-brand/:id",adminAuth,brandController.toggleBrand);
+
+
 
 
   //  product managemant

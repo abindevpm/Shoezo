@@ -33,46 +33,64 @@ const Category = require("../../models/categorySchema");
  }
 
 
- const addCategory = async(req,res)=>{
+ const addCategory = async (req, res) => {
+  try {
+    let { name, description, categoryOffer } = req.body;
 
-    try {
-
-        const {name,brand,description,categoryOffer} = req.body
-
-
-        if (!name || !brand || !description) {
-            return res.json({
-                success: false,
-                message: "All fields are required"
-            });
-        }
-
-
-
-
-        const exists = await Category.findOne({name})
-
-        if(exists)return res.json({success:false,message:"Category already exists"})
-        
-    await Category.create({
-    name,
-    brand,
-    description,
-    categoryOffer,
-    isListed: true,   // or false
-    isDeleted: false
-});
-
-     res.json({success:true,message:"Category added Successfully"})
-
-
-    } catch (error) {
-        console.log(error);
-        res.json({success:false,message:"Internal Server error"})
-        
+    if (!name || !description) {
+      return res.json({
+        success: false,
+        message: "All fields are required"
+      });
     }
 
- }
+    name = name.trim();
+
+    const exists = await Category.findOne({
+      name: { $regex: `^${name}$`, $options: "i" }
+    });
+
+    if (exists) {
+      return res.json({
+        success: false,
+        message: "Category already exists"
+      });
+    }
+
+    await Category.create({
+      name,
+      description,
+      categoryOffer,
+      isListed: true,
+      isDeleted: false
+    });
+
+    return res.json({
+      success: true,
+      message: "Category added successfully"
+    });
+
+  } catch (error) {
+    console.error("Add category error:", error);
+
+    // ✅ handle duplicate key properly
+    if (error.code === 11000) {
+      return res.json({
+        success: false,
+        message: "Category already exists"
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+};
+
+
+
+
 
   const deleteCategory = async(req,res)=>{
 

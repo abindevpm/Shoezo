@@ -25,7 +25,7 @@
         .sidebar-container {
             width: 250px;
             min-height: 100vh;
-            background-color: #343a40 !important;
+            background-color: hsl(210, 100%, 98%) !important;
             position: fixed;
             top: 60px;
             left: 0;
@@ -90,31 +90,51 @@
                         </div>
 
                         <!-- CATEGORY + BRAND -->
-                        <div class="row mb-3">
 
-                            <!-- CATEGORY -->
-                            <div class="col-md-3 text-md-end"><label class="form-label">Category :</label></div>
-                            <div class="col-md-3">
-                                <select class="form-select" name="category">
-                                    <option value="">Select Category</option>
-                                    <% categories.forEach(cat=> { %>
-                                        <option value="<%= cat._id %>">
-                                            <%= cat.name %>
-                                        </option>
-                                        <% }) %>
-                                     
-                                </select>
-                                   <small class="text-danger" id="categoryError"></small>
-                            </div>
+                        <!-- CATEGORY (LEFT) + BRAND (RIGHT) -->
 
-                            <!-- BRAND -->
-                            <div class="col-md-3 text-md-end"><label class="form-label">Brand :</label></div>
-                            <div class="col-md-3">
-                                <input type="text" class="form-control" name="brand">
-                                <small class="text-danger" id="brandError"></small>
-                            </div>
+                        <!-- CATEGORY + BRAND WITH LABELS -->
+<div class="row mb-3">
 
-                        </div>
+  <!-- empty column for alignment -->
+  <div class="col-md-2"></div>
+
+  <!-- CATEGORY -->
+
+   <!-- CATEGORY + BRAND -->
+<div class="row mb-3 align-items-center">
+
+  <!-- CATEGORY -->
+  <div class="col-md-2 text-md-end">
+    <label class="form-label">Category :</label>
+  </div>
+  <div class="col-md-4">
+    <select class="form-select form-select-sm" name="category" >
+      <option value="">Select Category</option>
+      <% categories.forEach(cat => { %>
+        <option value="<%= cat._id %>"><%= cat.name %></option>
+      <% }) %>
+    </select>
+  </div>
+
+  <!-- BRAND -->
+  <div class="col-md-2 text-md-end">
+    <label class="form-label">Brand :</label>
+  </div>
+  <div class="col-md-4">
+    <select class="form-select form-select-sm" name="brand" >
+      <option value="">Select Brand</option>
+      <% brands.forEach(brand => { %>
+        <option value="<%= brand._id %>"><%= brand.name %></option>
+      <% }) %>
+    </select>
+  </div>
+
+</div>
+
+
+
+                                      
 
                         <!-- DESCRIPTION -->
                         <div class="row mb-3">

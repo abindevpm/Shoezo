@@ -487,5 +487,4 @@ verifyOtp,
 loadResetPage,
 resetPassword
 
-
 }
