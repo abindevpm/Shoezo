@@ -10,10 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
-    body {
-      background-color: #f8f9fa;
-      overflow-x: hidden;
-    }
+    body { background-color: #f8f9fa; overflow-x: hidden; }
 
     .content-area {
       margin-left: 260px;
@@ -23,9 +20,7 @@
     }
 
     @media (max-width: 991px) {
-      .content-area {
-        margin-left: 0;
-      }
+      .content-area { margin-left: 0; }
     }
 
     .page-header {
@@ -42,16 +37,14 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     }
 
-    /* ACTION ICON */
     .icon-btn {
       background: none;
       border: none;
       font-size: 16px;
-      color: #2563eb;
+      color: #034ff3;
       cursor: pointer;
     }
 
-    /* TOGGLE SWITCH */
     .switch {
       position: relative;
       display: inline-block;
@@ -59,15 +52,10 @@
       height: 24px;
     }
 
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
+    .switch input { opacity: 0; width: 0; height: 0; }
 
     .slider {
       position: absolute;
-      cursor: pointer;
       inset: 0;
       background-color: #d1d5db;
       transition: 0.4s;
@@ -75,8 +63,8 @@
     }
 
     .slider::before {
-      position: absolute;
       content: "";
+      position: absolute;
       height: 18px;
       width: 18px;
       left: 3px;
@@ -86,22 +74,99 @@
       border-radius: 50%;
     }
 
-    input:checked + .slider {
-      background-color: #22c55e;
-    }
 
-    input:checked + .slider::before {
-      transform: translateX(20px);
-    }
 
-    .btn-add {
-      background: #000;
+
+
+
+  .pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.custom-pagination {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+}
+
+.custom-pagination .page-link {
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background-color: #f1f3f5;
+  color: #333333;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.custom-pagination .page-link:hover {
+  background-color: #e0e7ff;
+  color: #1d4ed8;
+}
+
+.custom-pagination .active .page-link {
+  background-color: #2563eb;
+  color: #fff;
+}
+
+.custom-pagination .disabled .page-link {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+
+
+    input:checked + .slider { background-color: #22c55e; }
+    input:checked + .slider::before { transform: translateX(20px); }
+
+    .btn-add { background: #000000; color: #fff; }
+    .btn-add:hover { background: #333; }
+
+    /* Pagination styling */
+    .pagination .page-item.active .page-link {
+      background-color: #000;
+      border-color: #000;
       color: #fff;
     }
 
-    .btn-add:hover {
-      background: #333;
+    .pagination .page-link {
+      color: #000;
+      border: 1px solid #ddd;
     }
+
+
+
+    .search-group {
+  position: relative;
+  width: 260px;
+}
+
+.search-input {
+  padding-left: 38px;
+  height: 42px;
+  border-radius: 8px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.search-btn {
+  height: 42px;
+  padding: 0 18px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
   </style>
 </head>
 
@@ -112,14 +177,39 @@
 
 <main class="content-area">
 
+  <!-- HEADER -->
   <div class="page-header">
     <h3 class="fw-bold">Brand Management</h3>
 
-    <button class="btn btn-add" data-bs-toggle="modal" data-bs-target="#addBrandModal">
-      <i class="fa fa-plus me-1"></i> Add Brand
-    </button>
+    <div class="d-flex gap-3 align-items-center">
+      <!-- SEARCH -->
+
+<form method="GET" action="/admin/brand" class="d-flex align-items-center gap-2">
+  <div class="search-group">
+    <i class="fa fa-search search-icon"></i>
+    <input
+      type="text"
+      name="search"
+      class="form-control search-input"
+      placeholder="Search brand"
+      value="<%= search %>"
+    >
   </div>
 
+  <button type="submit" class="btn btn-primary search-btn">
+    Search
+  </button>
+</form>
+
+
+      <!-- ADD -->
+      <button class="btn btn-add" data-bs-toggle="modal" data-bs-target="#addBrandModal">
+        <i class="fa fa-plus me-1"></i> Add Brand
+      </button>
+    </div>
+  </div>
+
+  <!-- TABLE -->  
   <div class="custom-card">
     <div class="table-responsive">
       <table class="table table-hover align-middle">
@@ -136,30 +226,30 @@
           <% if (brands && brands.length > 0) { %>
             <% brands.forEach((brand, index) => { %>
               <tr>
-                <td><%= index + 1 %></td>
+                <td><%= (currentPage - 1) * 5 + index + 1 %></td>
                 <td><%= brand.name %></td>
                 <td><%= brand.description || "—" %></td>
 
                 <td class="d-flex align-items-center gap-3">
-
                   <!-- EDIT -->
-                 <button class="icon-btn edit-brand-btn"
-  data-id="<%= brand._id %>"
-  data-name="<%= brand.name %>"
-  data-description="<%= brand.description %>">
-  <i class="fa fa-pen"></i>
-</button>
+                  <button
+                    class="icon-btn edit-brand-btn"
+                    data-id="<%= brand._id %>"
+                    data-name="<%= brand.name %>"
+                    data-description="<%= brand.description %>">
+                    <i class="fa fa-pen"></i>
+                  </button>
 
-
-                  <!-- TOGGLE LIST / UNLIST -->
+                  <!-- TOGGLE -->
                   <label class="switch">
-                    <input type="checkbox"
-                      class="toggle-brand"
-                      data-id="<%= brand._id %>"
-                      <%= brand.isListed ? "checked" : "" %>>
+<input
+  type="checkbox"
+  class="toggle-brand"
+  data-id="<%= brand._id %>"
+  <%= brand.isListed ? "checked" : "" %>
+>
                     <span class="slider"></span>
                   </label>
-
                 </td>
               </tr>
             <% }) %>
@@ -168,14 +258,15 @@
               <td colspan="4" class="text-center text-muted">No brands found</td>
             </tr>
           <% } %>
+
+
+
         </tbody>
+
       </table>
-    </div>
-  </div>
 
-</main>
 
-<!-- ADD BRAND MODAL -->
+      <!-- ADD BRAND MODAL -->
 <div class="modal fade" id="addBrandModal">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -190,15 +281,15 @@
 
           <div class="mb-3">
             <label>Brand Name</label>
-            <input type="text" name="name" class="form-control" >
+            <input type="text" name="name" id="brandName" class="form-control" >
           </div>
 
           <div class="mb-3">
             <label>Description</label>
-            <textarea name="description" class="form-control"></textarea>
+            <textarea name="description" id="brandDescription" class="form-control" ></textarea>
           </div>
 
-          <button class="btn btn-dark w-100">Create Brand</button>
+          <button class="btn btn-dark w-100" >Add Brand</button>
         </form>
       </div>
 
@@ -206,8 +297,11 @@
   </div>
 </div>
 
-<!-- EDIT BRAND MODAL -->
 
+
+      
+
+                 <!-- EDIT BRAND MODAL -->
 <div class="modal fade" id="editBrandModal">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -224,18 +318,15 @@
 
           <div class="mb-3">
             <label>Brand Name</label>
-            <input type="text" id="editBrandName" class="form-control">
+            <input type="text" id="editBrandName" class="form-control" >
           </div>
 
           <div class="mb-3">
             <label>Description</label>
-            <textarea id="editBrandDescription" class="form-control"></textarea>
+            <textarea id="editBrandDescription" class="form-control" ></textarea>
           </div>
 
-          <button type="submit" class="btn btn-primary w-100">
-            Update Brand
-          </button>
-
+          <button class="btn btn-primary w-100">Update Brand</button>
         </form>
       </div>
 
@@ -245,126 +336,209 @@
 
 
 
+
+
+
+
+
+      
+<nav class="pagination-wrapper">
+  <ul class="pagination custom-pagination">
+
+    <!-- Previous -->
+    <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+      <a class="page-link"
+         href="?page=<%= currentPage - 1 %>&search=<%= search || '' %>">
+        ‹
+      </a>
+    </li>
+
+    <!-- Page Numbers -->
+    <% for(let i = 1; i <= totalPages; i++) { %>
+      <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+        <a class="page-link"
+           href="?page=<%= i %>&search=<%= search || '' %>">
+          <%= i %>
+        </a>
+      </li>
+    <% } %>
+
+    <!-- Next -->
+    <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+      <a class="page-link"
+         href="?page=<%= currentPage + 1 %>&search=<%= search || '' %>">
+        ›
+      </a>
+    </li>
+
+  </ul>
+</nav>
+
+
+
+
+
+    </div>
+  </div>
+
+</main>
+
+    </div>
+  </div>
+
+
+</main>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 
+
+
 <script>
+/* SEARCH */
+// const brandSearch = document.getElementById("brandSearch");
+// brandSearch.addEventListener("keyup", e => {
+//   if (e.key === "Enter") {
+//     window.location.href = `?search=${encodeURIComponent(brandSearch.value.trim())}`;
+//   }
+// });
+
+/* ADD BRAND */
+
 const addBrandForm = document.getElementById("addBrandForm");
 
-addBrandForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
+if (addBrandForm) {
+  addBrandForm.addEventListener("submit", async e => {
+    e.preventDefault();
 
-  const name = addBrandForm.name.value.trim();
-  const description = addBrandForm.description.value.trim();
+    const data = Object.fromEntries(new FormData(addBrandForm).entries());
 
-  const res = await fetch("/admin/add-brand", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, description })
+    const res = await fetch("/admin/add-brand", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+      Swal.fire({
+        icon: "success",
+        title: "Brand Added",
+        timer: 1000,
+        showConfirmButton: false
+      });
+
+      setTimeout(() => location.reload(), 1000);
+    } else {
+      Swal.fire("Error", result.message, "error");
+    }
   });
-
-  const data = await res.json();
-
-  if (data.success) {
-    Swal.fire("Success", data.message, "success")
-      .then(() => location.reload());
-  } else {
-    Swal.fire("Error", data.message, "error");
-  }
-});
+}
 
 
 
-// ======== EDIT BRAND ========== */
-const editBrandModal = new bootstrap.Modal(
-  document.getElementById("editBrandModal")
-);
 
+
+
+
+
+/* EDIT BRAND */
+const editModal = new bootstrap.Modal(document.getElementById("editBrandModal"));
 document.querySelectorAll(".edit-brand-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-
-    document.getElementById("editBrandId").value = btn.dataset.id;
-    document.getElementById("editBrandName").value = btn.dataset.name;
-    document.getElementById("editBrandDescription").value =
-      btn.dataset.description || "";
-
-    editBrandModal.show();
-  });
+  btn.onclick = () => {
+    editBrandId.value = btn.dataset.id;
+    editBrandName.value = btn.dataset.name;
+    editBrandDescription.value = btn.dataset.description || "";
+    editModal.show();
+  };
 });
 
-
-
-document.getElementById("editBrandForm").addEventListener("submit", async (e) => {
+document.getElementById("editBrandForm").addEventListener("submit", async e => {
   e.preventDefault();
-
-  const id = document.getElementById("editBrandId").value;
-  const name = document.getElementById("editBrandName").value.trim();
-  const description = document.getElementById("editBrandDescription").value.trim();
-
-  if (!name || !description) {
-    Swal.fire("Error", "All fields are required", "error");
-    return;
-  }
+  const id = editBrandId.value;
 
   const res = await fetch(`/admin/edit-brand/${id}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, description })
+    body: JSON.stringify({
+      name: editBrandName.value.trim(),
+      description: editBrandDescription.value.trim()
+    })
   });
 
-  const data = await res.json();
+  const result = await res.json();
+  result.success
+    ? Swal.fire("Updated", result.message, "success").then(() => location.reload())
+    : Swal.fire("Error", result.message, "error");
+});
 
-  if (data.success) {
-    editBrandModal.hide();
-    Swal.fire("Updated", data.message, "success")
-      .then(() => location.reload());
-  } else {
-    Swal.fire("Error", data.message, "error");
-  }
-})
-
-
+/* TOGGLE LIST / UNLIST */
 
 
 document.querySelectorAll(".toggle-brand").forEach(toggle => {
-  toggle.addEventListener("change", async () => {
 
-    const brandId = toggle.dataset.id;
+  let previousState = toggle.checked; // store initial state
 
-    const res = await fetch(`/admin/toggle-brand/${brandId}`, {
-      method: "PATCH"
-    });
+  toggle.addEventListener("change", () => {
 
-    const data = await res.json();
+    const newState = toggle.checked; // browser already toggled
 
-    if (data.success) {
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: data.message,
-        timer: 1500,
-        showConfirmButton: false
+    Swal.fire({
+      title: newState ? "List brand?" : "Unlist brand?",
+      text: newState
+        ? "This brand will be visible to users."
+        : "This brand will be hidden from users.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: newState ? "#22c55e" : "#d33",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: newState ? "Yes, list" : "Yes, unlist",
+      cancelButtonText: "Cancel"
+    }).then(result => {
+
+      if (!result.isConfirmed) {
+        // ❌ revert checkbox
+        toggle.checked = previousState;
+        return;
+      }
+
+      toggle.disabled = true;
+
+      fetch(`/admin/toggle-brand/${toggle.dataset.id}`, {
+        method: "PATCH"
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (!data.success) {
+          toggle.checked = previousState;
+          Swal.fire("Error", "Something went wrong", "error");
+          return;
+        }
+
+        // ✅ backend decides final truth
+        toggle.checked = data.isListed;
+        previousState = data.isListed;
+
+        Swal.fire({
+          icon: "success",
+          title: data.isListed ? "Brand Listed" : "Brand Unlisted",
+          timer: 800,
+          showConfirmButton: false
+        });
+      })
+      .catch(() => {
+        toggle.checked = previousState;
+        Swal.fire("Error", "Server error", "error");
+      })
+      .finally(() => {
+        toggle.disabled = false;
       });
-    } else {
-      Swal.fire("Error", data.message, "error");
-      toggle.checked = !toggle.checked; // rollback
-    }
+    });
   });
 });
 
-
-
-
-
 </script>
-
-
-
-
-
-
-
-
 
 </body>
 </html>

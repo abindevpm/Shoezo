@@ -91,57 +91,48 @@
 <section class="filter-container">
     <div class="filter-bar">
 
+     
+
+
         <!-- CATEGORY FILTER -->
-        <div class="md:w-1/4">
-            <p class="filter-title">Category</p>
-            <div class="filter-checklist">
+<div class="md:w-1/4">
+  <p class="filter-title">Category</p>
+  <div class="filter-checklist">
 
-                <label>
-                    <input type="checkbox" name="category" value="Men"
-                        <%= selectedCategory.includes("Men") ? "checked" : "" %>>
-                    Men
-                </label>
+    <% categories.forEach(cat => { %>
+      <label>
+        <input type="checkbox"
+               name="category"
+               value="<%= cat.name %>"
+               <%= selectedCategory.includes(cat.name) ? "checked" : "" %>>
+        <%= cat.name %>
+      </label>
+    <% }) %>
 
-                <label>
-                    <input type="checkbox" name="category" value="Women"
-                        <%= selectedCategory.includes("Women") ? "checked" : "" %>>
-                    Women
-                </label>
+  </div>
+</div>
 
-                <label>
-                    <input type="checkbox" name="category" value="Kids"
-                        <%= selectedCategory.includes("Kids") ? "checked" : "" %>>
-                    Kids
-                </label>
 
-            </div>
-        </div>
+<!-- BRAND FILTER -->
+<div class="md:w-1/4">
+  <p class="filter-title">Brand</p>
+  <div class="filter-checklist">
 
-        <!-- BRAND FILTER -->
-        <div class="md:w-1/4">
-            <p class="filter-title">Brand</p>
-            <div class="filter-checklist">
+    <% brands.forEach(br => { %>
+      <label>
+        <input type="checkbox"
+               name="brand"
+               value="<%= br.name %>"
+               <%= selectedBrand.includes(br.name) ? "checked" : "" %>>
+        <%= br.name %>
+      </label>
+    <% }) %>
 
-                <label>
-                    <input type="checkbox" name="brand" value="Nike"
-                        <%= selectedBrand.includes("Nike") ? "checked" : "" %>>
-                    Nike
-                </label>
+  </div>
+</div>
 
-                <label>
-                    <input type="checkbox" name="brand" value="Adidas"
-                        <%= selectedBrand.includes("Adidas") ? "checked" : "" %>>
-                    Adidas
-                </label>
 
-                <label>
-                    <input type="checkbox" name="brand" value="Puma"
-                        <%= selectedBrand.includes("Puma") ? "checked" : "" %>>
-                    Puma
-                </label>
 
-            </div>
-        </div>
 
         <!-- SORT FILTER -->
         <div class="md:w-1/4">

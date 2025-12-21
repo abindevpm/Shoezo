@@ -12,8 +12,8 @@ router.get("/pageNotFound",userController.pageNotFound)
 
  // user 
  router.get("/",userController.loadHomepage)
- router.get("/landingpage",userController.landingpage)
- router.get("/pageNotFound",userController.pageNotFound)
+ router.get("/landingpage",userAuth,userController.landingpage)
+ router.get("/pageNotFound",userAuth,userController.pageNotFound)
  router.get("/signup",userController.loadSignup)
  router.post("/signup",userController.signup)
  router.post("/otp",userController.otp)
@@ -41,12 +41,12 @@ router.get("/auth/google/callback", passport.authenticate("google", { failureRed
 
    //   product list  
 
-   router.get("/productlist",productlistController.loadShopPage)
+   router.get("/productlist",userAuth,productlistController.loadShopPage)
 
 
    // productdetails
 
-router.get("/productdetails/:id",productDetailsController.loadProductDetails)
+router.get("/productdetails/:id",userAuth,productDetailsController.loadProductDetails)
 
 
 //  forgot pass

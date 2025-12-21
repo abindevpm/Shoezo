@@ -12,7 +12,7 @@ const userAuth = (req, res, next) => {
 
         req.session.destroy(err=>{
           if(err) console.log("Session destroy ",err);
-          return res.redirect("/login?blocked=true")
+          return res.redirect("/login")
 
         })
 
