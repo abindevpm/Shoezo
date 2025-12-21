@@ -51,17 +51,35 @@
 
                 <form id="signform" class="space-y-4" method="POST" action="/signup">
                     <div>
-                        <input type="text" placeholder="Full Name" class="input-field w-full text-base placeholder-gray-500" name="name">
+                        <!-- <input type="text" placeholder="Full Name" class="input-field w-full text-base placeholder-gray-500" name="name"> -->
+                                <input type="text"
+  placeholder="Full Name"
+  class="input-field w-full text-base placeholder-gray-500"
+  name="name"
+  value="<%= formData ? formData.name : '' %>">
+
                         <div id="error1" class="error-message"></div>
                     </div>
 
                     <div>
-                        <input type="email" placeholder="Email Address" class="input-field w-full text-base placeholder-gray-500" name="email">
+                        <!-- <input type="email" placeholder="Email Address" class="input-field w-full text-base placeholder-gray-500" name="email"> -->
+                         <input type="email"
+  placeholder="Email Address"
+  class="input-field w-full text-base placeholder-gray-500"
+  name="email"
+  value="<%= formData ? formData.email : '' %>">
+
                         <div id="error2" class="error-message"></div>
                     </div>
 
                     <div>
-                        <input type="tel" placeholder="phone number" class="input-field w-full text-base placeholder-gray-500" name="phone">
+                        <!-- <input type="tel" placeholder="phone number" class="input-field w-full text-base placeholder-gray-500" name="phone"> -->
+                         <input type="tel"
+  placeholder="phone number"
+  class="input-field w-full text-base placeholder-gray-500"
+  name="phone"
+  value="<%= formData ? formData.phone : '' %>">
+
                         <div id="error3" class="error-message"></div>
                     </div>
 
