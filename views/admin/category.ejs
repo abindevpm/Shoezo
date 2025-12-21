@@ -56,13 +56,133 @@
       border-radius: 6px;
       border: none;
       color: #fff;
-      margin-right: 5px;
     }
 
     .btn-edit { background: #3b82f6; }
-    .btn-delete { background: #6b7280; }
     .btn-add { background: #000; color: #fff; }
-    .btn-add:hover { background: #333; }
+
+    /* TOGGLE SWITCH */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 46px;
+      height: 24px;
+    }
+
+    .switch input { opacity: 0; width: 0; height: 0; }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+
+
+
+
+    .pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.custom-pagination {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+}
+
+.custom-pagination .page-link {
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background-color: #f1f3f5;
+  color: #333;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.custom-pagination .page-link:hover {
+  background-color: #e0e7ff;
+  color: #1d4ed8;
+}
+
+.custom-pagination .active .page-link {
+  background-color: #2563eb;
+  color: #fff;
+}
+
+.custom-pagination .disabled .page-link {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #d1d5db; /* grey OFF */
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #22c55e; /* green ON */
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+
+
+    input:checked + .slider { background-color: #22c55e; }
+    input:checked + .slider:before { transform: translateX(22px); }
   </style>
 </head>
 
@@ -75,12 +195,28 @@
 
   <div class="page-header">
     <h3 class="fw-bold">Category Management</h3>
+      
 
-    <div class="d-flex gap-3 align-items-center">
-      <div class="search-group">
-        <i class="fa fa-search search-icon"></i>
-        <input type="text" class="form-control search-input" placeholder="Search category" value="<%= search %>">
-      </div>
+
+
+  <form method="GET" action="/admin/category">
+  <div class="d-flex gap-3 align-items-center">
+    <div class="search-group position-relative">
+      <i class="fa fa-search search-icon"></i>
+
+      <input type="text"
+             name="search"
+             class="form-control search-input"
+             placeholder="Search category"
+             value="<%= search %>">
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+      Search
+    </button>
+  </div>
+</form>
+
 
       <button class="btn btn-add" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
         <i class="fa fa-plus me-1"></i> Add Category
@@ -109,21 +245,47 @@
                 <td><%= cat.name %></td>
                 <td><%= cat.description %></td>
                 <td><%= cat.categoryOffer ? cat.categoryOffer + "%" : "N/A" %></td>
-                <td>
-                  <button class="action-btn btn-edit"
-                    data-id="<%= cat._id %>"
-                    data-name="<%= cat.name %>"
-                    data-description="<%= cat.description %>"
-                    data-offer="<%= cat.categoryOffer %>"
-                    data-bs-toggle="modal"
-                    data-bs-target="#editCategoryModal">
-                    <i class="fa fa-pencil"></i>
-                  </button>
 
-                  <button class="action-btn btn-delete" data-id="<%= cat._id %>">
-                    <i class="fa fa-trash"></i>
-                  </button>
-                </td>
+
+
+          <td class="d-flex align-items-center gap-2">
+
+  <!-- EDIT -->
+  <button class="action-btn btn-edit"
+    data-id="<%= cat._id %>"
+    data-name="<%= cat.name %>"
+    data-description="<%= cat.description %>"
+    data-offer="<%= cat.categoryOffer %>"
+    data-bs-toggle="modal"
+    data-bs-target="#editCategoryModal">
+    <i class="fa fa-pencil"></i>
+  </button>
+
+  <!-- LIST / UNLIST TOGGLE -->
+
+
+  <label class="switch">
+  <input 
+    type="checkbox"
+    <%= cat.isListed ? "checked" : "" %>
+    onchange="toggleCategory(this, '<%= cat._id %>')"
+
+  >
+  <span class="slider"></span>
+</label>
+
+
+  
+
+  
+
+
+</td>
+
+
+
+
+              
               </tr>
             <% }) %>
           <% } else { %>
@@ -133,6 +295,46 @@
           <% } %>
         </tbody>
       </table>
+
+                  
+
+
+<nav class="pagination-wrapper">
+  <ul class="pagination custom-pagination">
+
+    <!-- Previous -->
+    <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+      <a class="page-link"
+         href="?page=<%= currentPage - 1 %>&search=<%= search || '' %>">
+        ‹
+      </a>
+    </li>
+
+    <!-- Page Numbers -->
+    <% for(let i = 1; i <= totalPages; i++) { %>
+      <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+        <a class="page-link"
+           href="?page=<%= i %>&search=<%= search || '' %>">
+          <%= i %>
+        </a>
+      </li>
+    <% } %>
+
+    <!-- Next -->
+    <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+      <a class="page-link"
+         href="?page=<%= currentPage + 1 %>&search=<%= search || '' %>">
+        ›
+      </a>
+    </li>
+
+  </ul>
+</nav>
+
+
+
+
+
     </div>
   </div>
 
@@ -151,12 +353,12 @@
         <form id="addCategoryForm">
           <div class="mb-3">
             <label>Category Name</label>
-            <input type="text" name="name" class="form-control">
+            <input type="text" name="name" class="form-control" >
           </div>
 
           <div class="mb-3">
             <label>Description</label>
-            <textarea name="description" class="form-control"></textarea>
+            <textarea name="description" class="form-control" ></textarea>
           </div>
 
           <div class="mb-3">
@@ -184,12 +386,12 @@
         <form id="editCategoryForm">
           <div class="mb-3">
             <label>Category Name</label>
-            <input type="text" name="name" class="form-control">
+            <input type="text" name="name" class="form-control" >
           </div>
 
           <div class="mb-3">
             <label>Description</label>
-            <textarea name="description" class="form-control"></textarea>
+            <textarea name="description" class="form-control" ></textarea>
           </div>
 
           <div class="mb-3">
@@ -210,7 +412,6 @@
 /* ADD CATEGORY */
 document.getElementById("addCategoryForm").addEventListener("submit", async e => {
   e.preventDefault();
-
   const data = Object.fromEntries(new FormData(e.target).entries());
 
   const res = await fetch("/admin/addCategory", {
@@ -220,32 +421,12 @@ document.getElementById("addCategoryForm").addEventListener("submit", async e =>
   });
 
   const result = await res.json();
-
   if (result.success) {
     Swal.fire({ icon: "success", title: "Category Added", timer: 1000, showConfirmButton: false });
     setTimeout(() => location.reload(), 1000);
   } else {
     Swal.fire({ icon: "error", title: "Error", text: result.message });
   }
-});
-
-/* DELETE CATEGORY */
-document.querySelectorAll(".btn-delete").forEach(btn => {
-  btn.onclick = async () => {
-    const id = btn.dataset.id;
-
-    const confirm = await Swal.fire({
-      title: "Are you sure?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33"
-    });
-
-    if (!confirm.isConfirmed) return;
-
-    await fetch(`/admin/delete-category/${id}`, { method: "POST" });
-    location.reload();
-  };
 });
 
 /* EDIT CATEGORY */
@@ -260,29 +441,93 @@ document.querySelectorAll(".btn-edit").forEach(btn => {
   };
 });
 
+
+
 editForm.addEventListener("submit", async e => {
   e.preventDefault();
-
   const id = editForm.dataset.id;
-  const data = {
-    name: editForm.name.value.trim(),
-    description: editForm.description.value.trim(),
-    categoryOffer: editForm.categoryOffer.value
-  };
 
-  if (!data.name || !data.description || data.categoryOffer === "") {
-    Swal.fire({ icon: "error", title: "All fields required" });
-    return;
-  }
-
-  await fetch(`/admin/edit-category/${id}`, {
+  const res = await fetch(`/admin/edit-category/${id}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+    body: JSON.stringify({
+      name: editForm.name.value,
+      description: editForm.description.value,
+      categoryOffer: editForm.categoryOffer.value
+    })
   });
 
-  location.reload();
+  const result = await res.json();
+
+  if (result.success) {
+    Swal.fire({
+      icon: "success",
+      title: "Category Updated",
+      timer: 1000,
+      showConfirmButton: false
+    });
+    setTimeout(() => location.reload(), 1000);
+  } else {
+    Swal.fire("Error", result.message, "error");
+  }
 });
+
+
+
+/* TOGGLE LIST / UNLIST */
+
+function toggleCategory(toggle, id) {
+
+  // If turning OFF → confirm
+  if (!toggle.checked) {
+    Swal.fire({
+      title: "Unlist category?",
+      text: "This category will be hidden from users.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, unlist",
+      cancelButtonText: "Cancel"
+    }).then(result => {
+      if (!result.isConfirmed) {
+        toggle.checked = true; // revert
+        return;
+      }
+      performToggle(toggle, id);
+    });
+  } else {
+    // Turning ON → no confirm
+    performToggle(toggle, id);
+  }
+}
+
+function performToggle(toggle, id) {
+  fetch(`/admin/toggle-category/${id}`, { method: "PATCH" })
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) {
+        toggle.checked = !toggle.checked;
+        Swal.fire("Error", "Something went wrong", "error");
+        return;
+      }
+
+      // backend is source of truth
+      toggle.checked = data.isListed;
+
+      Swal.fire({
+        icon: "success",
+        title: data.isListed ? "Category Listed" : "Category Unlisted",
+        timer: 900,
+        showConfirmButton: false
+      });
+    })
+    .catch(() => {
+      toggle.checked = !toggle.checked;
+      Swal.fire("Error", "Server error", "error");
+    });
+}
+
 </script>
 
 </body>

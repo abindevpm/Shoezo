@@ -32,7 +32,7 @@ router.get("/dashboard", adminController.dashboard)
  router.get("/category",adminAuth,categoryController.categoryInfo)
  router.post("/addCategory",adminAuth,categoryController.addCategory)
  router.post("/edit-category/:id",adminAuth,categoryController.editCategory)
- router.post("/delete-category/:id",adminAuth,categoryController.deleteCategory)
+ router.patch("/toggle-category/:id",adminAuth,categoryController.toggleCategory)
 
  // brand management
 

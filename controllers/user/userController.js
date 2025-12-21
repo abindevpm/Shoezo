@@ -24,7 +24,7 @@ const loadHomepage = async (req, res) => {
 
 
     // FEATURED PRODUCTS (optional)
-    const featuredProducts = await Product.find({ isDeleted: false })
+    const featuredProducts = await Product.find({ isDeleted:true,isListed:true })
       .sort({ createdAt: -1 })
       .limit(3);
 
@@ -93,14 +93,66 @@ async function sendVerificationEmail(email, otp) {
     })
 
     const info = await transporter.sendMail({
-      from: process.env.NODEMAILER_EMAIL,
-      to: email,
-      subject: "Verify your account",
-      text: `Your OTP is ${otp}`,
-      html: `<b>Your OTP :${otp}</b>`,
+  from: `"Shoezo 👟" <${process.env.NODEMAILER_EMAIL}>`,
+  to: email,
+  subject: "Verify your Shoezo account",
+  html: `
+  <div style="font-family: Arial, sans-serif; background-color:#f4f4f4; padding:20px;">
+    <div style="max-width:500px; margin:auto; background:#ffffff; border-radius:8px; overflow:hidden;">
+      
+      <!-- Header -->
+      <div style="background:#000; padding:20px; text-align:center;">
+        <h1 style="color:#ffffff; margin:0; letter-spacing:2px;">SHOEZO</h1>
+        <p style="color:#cccccc; margin:5px 0 0;">Step into Style</p>
+      </div>
 
+      <!-- Body -->
+      <div style="padding:30px; color:#333;">
+        <h2 style="margin-top:0;">Verify Your Account</h2>
+        <p>
+          Thank you for signing up with <strong>Shoezo</strong> 👟  
+          Please use the OTP below to verify your account.
+        </p>
 
-    })
+        <div style="margin:30px 0; text-align:center;">
+          <span style="
+            display:inline-block;
+            background:#f0f0f0;
+            padding:15px 30px;
+            font-size:28px;
+            letter-spacing:6px;
+            font-weight:bold;
+            border-radius:6px;
+          ">
+            ${otp}
+          </span>
+        </div>
+
+        <p style="font-size:14px; color:#666;">
+          ⏰ This OTP is valid for a limited time only.  
+          Please do not share this code with anyone.
+        </p>
+
+        <p style="margin-top:20px;">
+          If you didn’t request this, you can safely ignore this email.
+        </p>
+
+        <p style="margin-top:30px;">
+          Happy shopping! 🛒 <br/>
+          <strong>— Team Shoezo</strong>
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div style="background:#f9f9f9; text-align:center; padding:15px; font-size:12px; color:#999;">
+        © ${new Date().getFullYear()} Shoezo. All rights reserved.
+      </div>
+
+    </div>
+  </div>
+  `
+});
+
     return info.accepted.length > 0
 
   } catch (error) {
@@ -120,7 +172,7 @@ const resendOtp = async (req, res) => {
     const newOtp = generateOtp();
     req.session.userOtp = newOtp;
 
-     req.session.otpExpiry = Date.now() + (2 * 60 * 1000); 
+     req.session.otpExpiry = Date.now() + (101* 1000); 
 
     const email = req.session.userData.email;
 
@@ -304,7 +356,11 @@ const login = async (req, res) => {
     if (!passwordMatch) {
       return res.render("login", { message: "Incorrect Password" })
     }
-    req.session.user = findUser._id
+    req.session.user = {
+      _id:findUser._id,
+      name:findUser.name,
+      email:findUser.email
+    }
 
      await User.findByIdAndUpdate(findUser._id, {
       lastLogin: new Date()

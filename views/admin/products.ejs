@@ -226,21 +226,26 @@ document.querySelectorAll(".toggle-delete").forEach(toggle => {
 
     // searching
 
+
+      const searchInput = document.getElementById("productSearch");
+
+  // set existing search value (important)
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("search")) {
+    searchInput.value = params.get("search");
+  }
+
+  // search on Enter key
+  searchInput.addEventListener("keyup", (e) => {
+    if (e.key === "Enter") {
+      const value = searchInput.value.trim();
+      window.location.href = `?search=${encodeURIComponent(value)}`;
+    }
+  });
+
+
     
-const searchInput = document.querySelector("#productSearch");
 
-searchInput.addEventListener("keyup", () => {
-    const query = searchInput.value.trim();
-
-    window.location.href = `/admin/products?search=${query}`;
-});
-
-document.getElementById("filterCategory").addEventListener("change", () => {
-    const categoryId = document.getElementById("filterCategory").value;
-    const search = document.getElementById("productSearch")?.value || "";
-    
-    window.location.href = `/admin/products?category=${categoryId}&search=${search}`;
-});
 
 
 function applyPriceFilter() {
@@ -255,6 +260,37 @@ function applyPriceFilter() {
 
     window.location.href = url;
 }
+
+
+
+const categorySelect = document.getElementById("filterCategory");
+
+
+if (params.get("category")) {
+  categorySelect.value = params.get("category");
+}
+
+
+categorySelect.addEventListener("change", () => {
+  const category = categorySelect.value;
+  const search = params.get("search") || "";
+
+  let url = `?`;
+
+  if (search) url += `search=${encodeURIComponent(search)}&`;
+  if (category) url += `category=${category}`;
+
+  window.location.href = url;
+});
+
+
+
+
+
+
+
+
+
 
 
 });

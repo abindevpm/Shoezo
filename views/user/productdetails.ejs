@@ -115,14 +115,16 @@
   <!doctype html>
   <html lang="en">
   <head>
+
+
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>SHOEZO — <%= currentProduct.name %></title>
+    <title> — <%= currentProduct.name %></title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <style>
+    <!-- <style>
       body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
       .thumb { width:64px; height:64px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid #e5e7eb; }
       .thumb.active-border { border-color: #111827 !important; }
@@ -131,21 +133,23 @@
       .fit-dot { position:absolute; top:50%; transform:translate(-50%, -50%); width:12px; height:12px; border:2px solid #fff; box-shadow:0 0 0 1px #1f2937; border-radius:9999px; background:#1f2937; }
       .review-bar-fill { height:100%; background:#10b981; border-radius:9999px; }
       .scrollbar-hide::-webkit-scrollbar { display:none; } .scrollbar-hide { -ms-overflow-style:none; scrollbar-width:none; }
-    </style>
+    </style> -->
   </head>
   <body class="antialiased text-gray-900">
 
-    <%- include("../partials/userpartial/header") %>
+         <%- include("../partials/userpartial/header.ejs") %>
+
+   
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-  <nav class="text-sm text-gray-500 mb-6 flex items-center gap-2">
+  <!-- <nav class="text-sm text-gray-500 mb-6 flex items-center gap-2">
     
     <a href="/" class="hover:text-black">Home</a>
     <span>›</span>
 
     <a href="/shop" class="hover:text-black">Shop</a>
-    <span>›</span>
+    <span>›</span> -->
 
     <!-- FIXED CATEGORY LINK -->
     <a href="/shop/<%= product?.category?.name ? product.category.name.toLowerCase() : '' %>" 
@@ -395,6 +399,7 @@
     </main>
 
     <%- include("../partials/userpartial/footer") %>
+    
 
     <script>
       // swap main image when thumb clicked
@@ -476,4 +481,4 @@
 
     </script>
   </body>
-  </html>
+

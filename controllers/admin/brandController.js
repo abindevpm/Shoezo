@@ -1,20 +1,58 @@
 const Brand = require("../../models/brandSchema");
+const { search } = require("../../routes/adminRoute");
+
 
 const loadBrands = async (req, res) => {
   try {
-    const brands = await Brand.find({ isDeleted: false })
-      .sort({ createdAt: -1 });
-    res.render("brand", { brands });
+
+     let search = req.query.search || "";
+    let page = parseInt(req.query.page) || 1;
+    let limit = 3; 
+    let skip = (page - 1) * limit;
+
+
+
+      // 🔑 SEARCH QUERY
+    const query = {
+      isDeleted: false,
+      name: { $regex: search, $options: "i" }
+    };
+
+    const totalBrands = await Brand.countDocuments(query);
+    const totalPages = Math.ceil(totalBrands / limit);
+
+    const brands = await Brand.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.render("brand", {
+      brands,
+      currentPage: page,
+      totalPages,
+      search
+    });
+
   } catch (error) {
     console.log("Load Brands Error:", error);
+    res.status(500).send("Internal Server Error");
   }
 };
+
+
+
+
+
+
 
 const addBrand = async (req, res) => {
   try {
     let { name, description } = req.body;
 
-    if (!name || !description) {
+        name = name ? name.trim() : "";
+    description = description ? description.trim() : "";
+
+    if (!name || !description ) {
       return res.json({
         success: false,
         message: "All fields are required"
@@ -71,6 +109,9 @@ const editBrand = async (req, res) => {
     const { id } = req.params;
     let { name, description } = req.body;
 
+     name = name.trim();
+    description = description.trim()
+
     if (!name || !description) {
       return res.json({
         success: false,
@@ -78,9 +119,10 @@ const editBrand = async (req, res) => {
       });
     }
 
-    name = name.trim();
+  
 
-    // check duplicate (except current brand)
+
+   
     const exists = await Brand.findOne({
       _id: { $ne: id },
       name: { $regex: `^${name}$`, $options: "i" },
@@ -132,9 +174,8 @@ const toggleBrand = async (req, res) => {
 
     res.json({
       success: true,
-      message: brand.isListed
-        ? "Brand listed successfully"
-        : "Brand unlisted successfully"
+      isListed: brand.isListed
+       
     });
 
   } catch (error) {

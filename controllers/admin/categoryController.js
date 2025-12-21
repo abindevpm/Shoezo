@@ -4,7 +4,7 @@ const Category = require("../../models/categorySchema");
     try{
         let search = req.query.search || "";
         let page = parseInt(req.query.page) || 1;
-         let limit = 5;
+         let limit = 3;
 
          const query = {
             isDeleted:false,
@@ -35,7 +35,14 @@ const Category = require("../../models/categorySchema");
 
  const addCategory = async (req, res) => {
   try {
+
+
     let { name, description, categoryOffer } = req.body;
+
+       name = name ? name.trim() : "";
+    description = description ? description.trim() : "";
+    categoryOffer = categoryOffer ? categoryOffer.trim() : "";
+
 
     if (!name || !description) {
       return res.json({
@@ -73,7 +80,7 @@ const Category = require("../../models/categorySchema");
   } catch (error) {
     console.error("Add category error:", error);
 
-    // ✅ handle duplicate key properly
+    
     if (error.code === 11000) {
       return res.json({
         success: false,
@@ -90,56 +97,81 @@ const Category = require("../../models/categorySchema");
 
 
 
+// const toggleCategory = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     const category = await Category.findById(id);
+//     if (!category) {
+//       return res.json({ success: false, message: "Category not found" });
+//     }
+
+//     category.isListed = !category.isListed; // 🔁 toggle
+//     await category.save();
+
+//     res.json({
+//       success: true,
+//       message: category.isListed ? "Category Listed" : "Category Unlisted",
+//       isListed: category.isListed
+//     });
+
+//   } catch (error) {
+//     console.log("Toggle Category Error:", error);
+//     res.json({
+//       success: false,
+//       message: "Internal Server Error"
+//     });
+//   }
+// };
 
 
-  const deleteCategory = async(req,res)=>{
+const toggleCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-
-    try {
-
-          const id = req.params.id;
-
-          const category = await Category.findById(id)
-
-          if(!category){
-            return res.json({success:false,message:"Category not found"})
-
-
-          }
-           await Category.findByIdAndUpdate(id,{isDeleted:true});
-           
-           res.json({
-            success:true,
-            message:"Category Deleted Successfully"
-           })
-
-        
-    } catch (error) {
-
-      console.log("Delete Category Error"+error)
-
-      res.json({
-        success:false,
-        message:"Internal Server Error"
-      })
-        
+    const category = await Category.findById(id);
+    if (!category) {
+      return res.json({ success: false });
     }
 
+    category.isListed = !category.isListed;
+    await category.save();
 
+    return res.json({
+      success: true,
+      isListed: category.isListed
+    });
 
+  } catch (err) {
+    console.log("Toggle Category Error:", err);
+    res.status(500).json({ success: false });
   }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
 const editCategory = async (req, res) => {
     try {
         const id = req.params.id;
-        let { name, brand, description, categoryOffer } = req.body;
+        let { name, description, categoryOffer } = req.body;
 
         // Trim input values
         name = name?.trim();
-        brand = brand?.trim();
+    
         description = description?.trim();
 
         // VALIDATION
-        if (!name || !brand || !description || categoryOffer === "") {
+        if (!name ||!description || categoryOffer === "") {
             return res.json({
                 success: false,
                 message: "All fields are required"
@@ -149,7 +181,6 @@ const editCategory = async (req, res) => {
         // UPDATE CATEGORY
         await Category.findByIdAndUpdate(id, {
             name,
-            brand,
             description,
             categoryOffer
         });
@@ -174,7 +205,7 @@ const editCategory = async (req, res) => {
 module.exports = { 
     categoryInfo,
     addCategory,
-    deleteCategory,
+    toggleCategory,
     editCategory
 
  };
