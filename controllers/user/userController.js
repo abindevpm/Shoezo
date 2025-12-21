@@ -62,7 +62,9 @@ const pageNotFound = async (req, res) => {
 
 const loadSignup = async (req, res) => {
   try {
-    return res.render("signup")
+    return res.render("signup",{
+      formData:{}
+    })
 
   } catch (error) {
     console.log("signup not found")
@@ -200,24 +202,25 @@ const signup = async (req, res) => {
     const { name, phone, email, password, confirmPassword } = req.body;
 
     if (!email || !password || !confirmPassword) {
-      return res.render("signup", { message: "All required fields must be filled" });
+      return res.render("signup", { message: "All required fields must be filled",formData:req.body });
     }
 
     if (password !== confirmPassword) {
-      return res.render("signup", { message: "Password does not match" });
+      return res.render("signup", { message: "Password does not match",formData:req.body });
     }
 
     const findUser = await User.findOne({ email });
 
     if (findUser) {
-      return res.render("signup", { message: "User already exists" });
+      return res.render("signup", { message: "User already exists",formData:req.body });
+
     }
 
     const otp = generateOtp();
     const emailSent = await sendVerificationEmail(email, otp);
 
     if (!emailSent) {
-      return res.render("signup", { message: "Email sending failed" });
+      return res.render("signup", { message: "Email sending failed",formData:req.body });
     }
 
     req.session.userOtp = otp;
