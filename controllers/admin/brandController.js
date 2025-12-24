@@ -59,6 +59,17 @@ const addBrand = async (req, res) => {
       });
     }
 
+
+      const nameRegex = /^[A-Za-z]+$/;
+    if (!nameRegex.test(name)) {
+      return res.json({
+        success: false,
+        message: "Brand name should contain only letters"
+      });
+    }
+
+
+
     name = name.trim();
 
     const exists = await Brand.findOne({
@@ -111,6 +122,14 @@ const editBrand = async (req, res) => {
 
      name = name.trim();
     description = description.trim()
+
+      const nameRegex = /^[A-Za-z]+$/;
+    if (!nameRegex.test(name)) {
+      return res.json({
+        success: false,
+        message: "Brand name should contain only letters"
+      });
+    }
 
     if (!name || !description) {
       return res.json({

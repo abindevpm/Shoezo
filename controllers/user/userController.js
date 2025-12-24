@@ -465,7 +465,7 @@ const verifyOtp = (req, res) => {
   const email = req.session.resetEmail;
 
   if (!email) {
-    return res.redirect("/forgot-password"); // session expired
+    return res.redirect("/forgot-password"); 
   }
 
   const maskedEmail = email.replace(/(.{2}).+(@.+)/, "$1****$2");

@@ -88,7 +88,9 @@
         
             const productExists = await Product.findOne({ name: data.name });
             if (productExists) {
-                return res.status(400).send("Product already exists");
+                 return res.redirect("/admin/add-products?status=exists");
+
+
             }
 
             
@@ -96,7 +98,7 @@
 
             if (req.files && req.files.length > 0) {
                 req.files.forEach(file => {
-                    images.push(file.filename); // <-- just push
+                    images.push(file.filename); 
                 });
             }
 
@@ -164,7 +166,7 @@ const loadEditProduct = async (req, res) => {
     const product = await Product.findOne({
       _id: id,
       isDeleted: false,
-      isListed: true
+    
     })
       .populate("category")
       .populate("brand");
@@ -202,42 +204,41 @@ const loadEditProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const id = req.params.id;
+    const data = req.body;
 
-    const product = await Product.findByOne({
-      _id:id,
-      isDeleted:false,
-      isListed:true
-    });
-
+    const product = await Product.findById(id);
     if (!product) {
       return res.status(404).send("Product not found");
     }
 
-    // Update basic fields
-    product.name = req.body.name;
-    product.brand = req.body.brand;
-    product.description = req.body.description;
-    product.price = req.body.price;
-    product.offerPrice = req.body.offerPrice;
-    product.category = req.body.category;
-    product.variants = [
-      {
-        size: req.body.size,
-        color: req.body.color,
-        stock: req.body.stock
-      }
-    ];
+    
+    let variants = [];
+
+    if (data.variants) {
+      variants = Array.isArray(data.variants)
+        ? data.variants
+        : Object.values(data.variants);
+    }
+
+    const updateData = {
+      name: data.name,
+      brand: data.brand,
+      description: data.description,
+      price: data.price,
+      offerPrice: data.offerPrice,
+      category: data.category,
+      variants: variants   
+    };
 
     
     if (req.files && req.files.length > 0) {
       const newImages = req.files.map(file => file.filename);
-      product.images.push(...newImages);
+      updateData.images = [...product.images, ...newImages];
     }
 
-    await product.save();
+    await Product.findByIdAndUpdate(id, updateData);
 
-   return res.redirect("/admin/products");
-
+    res.redirect("/admin/products");
 
   } catch (error) {
     console.log("Product Update Error:", error);
@@ -246,25 +247,22 @@ const updateProduct = async (req, res) => {
 };
 
 
+const deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
 
+    await Product.findByIdAndUpdate(id, {
+      isDeleted: true,
+      isListed: false
+    });
 
-    const deleteProduct = async(req,res)=>{
+    res.json({ success: true });
 
+  } catch (error) {
+    res.status(500).json({ success: false });
+  }
+};
 
-        try {
-        const { id } = req.params;
-        const { isDeleted } = req.body;
-
-        await Product.findByIdAndUpdate(id, { isDeleted:true,isListed:false });
-
-        res.json({ success: true });
-
-    } catch (error) {
-        console.log("Toggle product error:", error);
-        res.status(500).json({ success: false });
-    }
-    
-    }
 
 
 
@@ -300,6 +298,28 @@ const updateProduct = async (req, res) => {
     };
 
 
+    const toggleProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.json({ success: false });
+    }
+
+    product.isListed = !product.isListed;
+    await product.save();
+
+    res.json({ success: true, isListed: product.isListed });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ success: false });
+  }
+};
+
+
+
 
 
 
@@ -313,5 +333,6 @@ const updateProduct = async (req, res) => {
         loadEditProduct,
         updateProduct,
         deleteProduct,
-        deleteProductImage
+        deleteProductImage,
+        toggleProduct
     };

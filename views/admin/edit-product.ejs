@@ -1,446 +1,536 @@
-<!DOCTYPE html>
-<html lang="en">
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Edit Product - SHOEZO</title>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Edit Product - SHOEZO</title>
+    <!-- Bootstrap -->
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://unpkg.com/cropperjs/dist/cropper.js"></script>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-  <style>
-    body {
-      background-color: #f8f9fa;
-      padding-top: 60px;
-      overflow-x: hidden;
-    }
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
-    .sidebar-container {
-      width: 250px;
-      min-height: 100vh;
-      background-color: #ffffff !important;
-      position: fixed;
-      top: 60px;
-      left: 0;
-      z-index: 1020;
-    }
+    <style>
+      body { background:#f8f9fa; padding-top:60px; }
+      .sidebar-container { width:250px; position:fixed; top:60px; left:0; min-height:100vh; }
+      .main-content { margin-left:250px; padding:20px; }
+      .upload-box {
+        border:2px dashed #ccc;
+        height:120px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        cursor:pointer;
+        border-radius:10px;
+      }
 
-    .main-content {
-      margin-left: 250px;
-      padding: 20px;
-      width: calc(100% - 250px);
-    }
 
-    .card-form-variants {
-      border: 1px solid #ddd;
-      padding: 20px;
-      border-radius: 8px;
-      background-color: #fff;
-    }
+      #cropImage {
+  max-width: 100%;
+  height: auto;
+}
 
-    .upload-box {
-      border: 2px dashed #ddd;
-      height: 120px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      text-align: center;
-      border-radius: 10px;
-    }
 
-    .form-label {
-      font-weight: 500;
-      margin-bottom: 0;
-    }
-  </style>
-</head>
+.existing-thumb {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+}
 
-<body>
+      
+    
+    </style>
+  </head>
+
+  <body>
 
   <%- include('../partials/admin/navbar.ejs') %>
 
-  <div class="d-flex w-100">
-
+  <div class="d-flex">
     <div class="sidebar-container">
       <%- include('../partials/admin/sidebar.ejs') %>
     </div>
 
     <div class="main-content">
+      <h4 class="fw-bold mb-3">Edit Product</h4>
 
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold">Edit Product</h4>
-        <a href="/admin/products" class="btn btn-secondary btn-sm">Back</a>
-      </div>
+      <form method="POST"
+            action="/admin/edit-product/<%= product._id %>"
+            enctype="multipart/form-data"
+            onsubmit="return validateForm()">
 
-      <div class="card p-4 shadow-sm border-0">
+        <!-- NAME -->
+        <div class="mb-3">
+          <label>Product Name</label>
+          <input type="text" class="form-control" name="name" value="<%= product.name %>">
+          <small class="text-danger" id="nameError"></small>
+        </div>
 
-        <!-- EDIT PRODUCT FORM -->
-        <form method="POST"
-          action="/admin/edit-product/<%= product._id %>"
-          enctype="multipart/form-data"
-          onsubmit = "return validateForm()">
+        <!-- CATEGORY + BRAND -->
 
-          <!-- PRODUCT NAME -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2 text-md-end">
-              <label class="form-label">Product Name :</label>
-            </div>
-            <div class="col-md-10">
-              <input type="text"
-                class="form-control form-control-sm"
-                name="name"
-                value="<%= product.name %>" >
-            </div>
-          </div>
+        <div class="row mb-3">
+  <div class="col-md-6">
+    <label class="form-label">Category</label>
+    <select class="form-select" name="category">
+      <% categories.forEach(cat => { %>
+        <option value="<%= cat._id %>"
+          <%= String(product.category) === String(cat._id) ? "selected" : "" %>>
+          <%= cat.name %>
+        </option>
+      <% }) %>
+    </select>
+    <small class="text-danger" id="categoryError"></small>
+  </div>
 
-          <!-- CATEGORY + BRAND -->
-          <div class="row mb-3 align-items-center">
-
-            <div class="col-md-2 text-md-end">
-              <label class="form-label">Category :</label>
-            </div>
-            <div class="col-md-4">
-              <select class="form-select form-select-sm" name="category" >
-                <% categories.forEach(cat => { %>
-                  <option value="<%= cat._id %>"
-                    <%= product.category && cat._id.toString() === product.category._id.toString() ? "selected" : "" %>>
-                    <%= cat.name %>
-                  </option>
-                <% }) %>
-              </select>
-            </div>
-
-            <div class="col-md-2 text-md-end">
-              <label class="form-label">Brand :</label>
-            </div>
-            <div class="col-md-4">
-              <select class="form-select form-select-sm" name="brand" >
-                <option value="">Select Brand</option>
-                <% brands.forEach(brand => { %>
-                  <option value="<%= brand._id %>"
-                    <%= product.brand &&
-                    (product.brand._id ? product.brand._id.toString() : product.brand.toString()) === brand._id.toString()
-                      ? "selected" : "" %>>
-                    <%= brand.name %>
-                  </option>
-                <% }) %>
-              </select>
-            </div>
-
-          </div>
-
-          <!-- DESCRIPTION -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2 text-md-end">
-              <label class="form-label">Description :</label>
-            </div>
-            <div class="col-md-10">
-              <input type="text"
-                class="form-control form-control-sm"
-                name="description"
-                value="<%= product.description %>">
-            </div>
-          </div>
-
-          <!-- PRICE -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2 text-md-end">
-              <label class="form-label">Price :</label>
-            </div>
-            <div class="col-md-10">
-              <input type="number"
-                class="form-control form-control-sm"
-                name="price"
-                value="<%= product.price %>">
-            </div>
-          </div>
-
-          <!-- OFFER PRICE -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2 text-md-end">
-              <label class="form-label">Offer Price :</label>
-            </div>
-            <div class="col-md-10">
-              <input type="number"
-                class="form-control form-control-sm"
-                name="offerPrice"
-                value="<%= product.offerPrice %>">
-            </div>
-          </div>
-
-          <!-- VARIANTS -->
-          <h5 class="fw-bold mb-3">Product Variants</h5>
-
-          <div class="card-form-variants mb-4">
-            <div class="row g-3">
-
-              <div class="col-md-4">
-                <label class="form-label">Size</label>
-                <input type="text" class="form-control form-control-sm"
-                  name="size" value="<%= product.variants[0].size %>">
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label">Color</label>
-                <input type="text" class="form-control form-control-sm"
-                  name="color" value="<%= product.variants[0].color %>">
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label">Stock</label>
-                <input type="number" class="form-control form-control-sm"
-                  name="stock" value="<%= product.variants[0].stock %>">
-              </div>
-
-            </div>
-          </div>
-
-          <!-- EXISTING IMAGES -->
-          <label class="form-label mb-2">Existing Images</label>
-          <div class="d-flex flex-wrap gap-3 mb-3">
-            <% product.images.forEach(img => { %>
-              <div style="position:relative;width:100px;height:100px;">
-                <img src="/uploads/product-images/<%= img %>"
-                  style="width:100%;height:100%;object-fit:cover;border-radius:8px;">
-                <button type="button"
-                  class="btn btn-danger btn-sm delete-image-btn"
-                  data-img="<%= img %>"
-                  style="position:absolute;top:-6px;right:-6px;border-radius:50%;font-size:12px;">
-                  ✕
-                </button>
-              </div>
-            <% }) %>
-          </div>
-
-
-
-
-
-
-          <!-- UPLOAD -->
-          <label class="form-label">Upload New Images</label>
-          <div class="upload-box mb-3"
-            onclick="document.getElementById('imagesInput').click()">
-            <i class="fas fa-upload text-muted me-2"></i> Click to upload
-          </div>
-
-                    <!-- IMAGE PREVIEW AREA -->
-<div id="previewContainer" class="d-flex gap-3 flex-wrap mb-3"></div>
-
-<!-- CROP MODAL -->
-<div class="modal fade" id="cropModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Crop Image</h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body text-center">
-        <img id="cropImage" style="max-width:100%;">
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-dark" id="cropBtn">Crop & Add</button>
-      </div>
-    </div>
+  <div class="col-md-6">
+    <label class="form-label">Brand</label>
+    <select class="form-select" name="brand">
+      <% brands.forEach(brand => { %>
+        <option value="<%= brand._id %>"
+          <%= String(product.brand) === String(brand._id) ? "selected" : "" %>>
+          <%= brand.name %>
+        </option>
+      <% }) %>
+    </select>
+    <small class="text-danger" id="brandError"></small>
   </div>
 </div>
 
 
 
 
-
-          <input type="file" id="imagesInput" multiple hidden>
-
-          <!-- SUBMIT -->
-          <div class="text-center mt-4">
-            <button type="submit" class="btn btn-dark px-5">
-              UPDATE PRODUCT
-            </button>
+        <!-- PRICE -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label>Price</label>
+            <input type="number" class="form-control" name="price" value="<%= product.price %>">
+            <small class="text-danger" id="priceError"></small>
           </div>
+          <div class="col-md-6">
+            <label>Offer Price</label>
+            <input type="number" class="form-control" name="offerPrice" value="<%= product.offerPrice %>">
+            <small class="text-danger" id="offerPriceError"></small>
 
-        </form>
+          </div>
+        </div>
 
+
+
+        <!-- DESCRIPTION -->
+<div class="mb-3">
+  <label>Description</label>
+  <textarea class="form-control"
+            name="description"
+            rows="3"
+            placeholder="Enter product description"><%= product.description %></textarea>
+            <small class="text-danger" id="descriptionError"></small>
+</div>
+
+
+<h5 class="fw-bold mt-4">Product Variants</h5>
+
+<div id="variantsContainer">
+
+<%
+  let variants = [];
+  if (product.variants) {
+    variants = Array.isArray(product.variants)
+      ? product.variants
+      : Object.values(product.variants);
+  }
+%>
+
+<% if (variants.length > 0) { %>
+
+  <% variants.forEach((v, i) => { %>
+    <div class="card p-3 mb-3 variant-row">
+      <div class="row">
+
+        <div class="col-md-4">
+          <label>Size</label>
+          <input type="text"
+                 class="form-control"
+                 name="variants[<%= i %>][size]"
+                 value="<%= v.size %>">
+          <small class="text-danger sizeError"></small>
+        </div>
+
+        <div class="col-md-4">
+          <label>Color</label>
+          <input type="text"
+                 class="form-control"
+                 name="variants[<%= i %>][color]"
+                 value="<%= v.color %>">
+          <small class="text-danger colorError"></small>
+        </div>
+
+        <div class="col-md-3">
+          <label>Stock</label>
+          <input type="number"
+                 class="form-control"
+                 name="variants[<%= i %>][stock]"
+                 value="<%= v.stock %>">
+          <small class="text-danger stockError"></small>
+        </div>
+
+        <div class="col-md-1 d-flex align-items-end">
+          <!-- <button type="button"
+                  class="btn btn-danger btn-sm"
+                  onclick="this.closest('.variant-row').remove()">×</button> -->
+        </div>
+
+      </div>
+    </div>
+  <% }) %>
+
+<% } else { %>
+
+  <!-- DEFAULT EMPTY VARIANT -->
+  <div class="card p-3 mb-3 variant-row">
+    <div class="row">
+
+      <div class="col-md-4">
+        <label>Size</label>
+        <input class="form-control" name="variants[0][size]">
+        <small class="text-danger sizeError"></small>
+      </div>
+
+      <div class="col-md-4">
+        <label>Color</label>
+        <input class="form-control" name="variants[0][color]">
+        <small class="text-danger colorError"></small>
+      </div>
+
+      <div class="col-md-3">
+        <label>Stock</label>
+        <input class="form-control" name="variants[0][stock]">
+        <small class="text-danger stockError"></small>
+      </div>
+
+    </div>
+  </div>
+
+<% } %>
+
+</div>
+
+
+
+        <!-- EXISTING IMAGES -->
+        <label class="fw-bold">Existing Images</label>
+        <div class="d-flex gap-3 mb-3">
+          <% product.images.forEach(img => { %>
+            <div style="position:relative">
+              <img src="/uploads/product-images/<%= img %>"
+     style="
+       width:90px;
+       height:90px;
+       object-fit:contain;
+       image-rendering: auto;
+     ">
+
+
+
+              <button type="button"
+                      class="btn btn-danger btn-sm delete-image-btn"
+                      data-img="<%= img %>"
+                      style="position:absolute;top:-5px;right:-5px">×</button>
+            </div>
+          <% }) %>
+        </div>
+
+        <!-- UPLOAD -->
+        <label class="fw-bold">Upload New Images</label>
+        <div class="upload-box mb-3" onclick="document.getElementById('imagesInput').click()">
+          Click to upload & crop
+
+        
+
+        </div>
+
+          <small class="text-danger" id="imageError"></small>
+
+
+
+        <div id="previewContainer" class="d-flex gap-2 mb-3"></div>
+
+        <input type="file" id="imagesInput" name="images" multiple hidden>
+
+        <button class="btn btn-dark px-5">UPDATE PRODUCT</button>
+      </form>
+    </div>
+  </div>
+
+
+
+  
+
+  <!-- CROP MODAL -->
+  <div id="cropModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center">
+    <div style="background:#fff;width:90%;max-width:800px;border-radius:8px">
+      <div class="p-3 d-flex justify-content-between">
+        <h5>Crop Image</h5>
+        <button id="cancelCrop" class="btn-close"></button>
+      </div>
+      <div class="p-3" style="max-height:70vh; overflow:auto;">
+  <img id="cropImage" style="width:100%; max-height:500px; display:block; margin:auto;">
+</div>
+
+      <div class="p-3 text-end">
+        <button id="applyCrop" class="btn btn-primary">Crop & Save</button>
       </div>
     </div>
   </div>
 
-</body>
-</html>
 
 
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   <script>
+  const existingImageCount = <%= product.images.length %>;
+</script>
 
-<script>
 
-// DELETE IMAGE FUNCTION
-document.querySelectorAll(".delete-image-btn").forEach(btn => {
-    btn.addEventListener("click", async () => {
 
-        const imgName = btn.getAttribute("data-img");
-        const productId = "<%= product._id %>";
 
-        const response = await fetch(`/admin/delete-product-image/${productId}/${imgName}`, {
-            method: "DELETE"
-        });
 
-        const data = await response.json();
+  <script>
+  /* ========= IMAGE CROP LOGIC ========= */
 
-        if (data.success) {
-            location.reload();
 
-        }
+
+
+  let selectedFiles = [];
+  let filesToCrop = [];
+  let cropIndex = 0;
+  let cropper = null;
+
+  const input = document.getElementById("imagesInput");
+  const preview = document.getElementById("previewContainer");
+  const cropModal = document.getElementById("cropModal");
+  const cropImage = document.getElementById("cropImage");
+
+  /* FILE SELECT */
+  input.addEventListener("change", e => {
+    filesToCrop = Array.from(e.target.files);
+     
+    cropIndex = 0;
+    startCropping();
+  });
+
+  /* START CROPPING */
+  function startCropping() {
+    if (cropIndex >= filesToCrop.length) {
+      syncInput();
+      renderPreview();
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = e => {
+      cropImage.src = e.target.result;
+
+      if (cropper) cropper.destroy();
+      cropper = new Cropper(cropImage, {
+  aspectRatio: 1,
+  viewMode: 1,
+  autoCropArea: 1,
+  background: false,
+  movable: true,
+  zoomable: true,
+  scalable: false,
+  cropBoxResizable: true,
+  dragMode: "move"
+
+
+   
+   
+  });
+
+      cropModal.style.display = "flex"; // ✅ OPEN MODAL
+    };
+
+    reader.readAsDataURL(filesToCrop[cropIndex]);
+  }
+
+  /* APPLY CROP */
+  document.getElementById("applyCrop").onclick = () => {
+    if (!cropper) return;
+
+    const canvas = cropper.getCroppedCanvas({
+    width: 500,
+    height: 500,
+    imageSmoothingQuality: "high"
+  });
+    canvas.toBlob(blob => {
+      selectedFiles.push(
+        new File([blob], `product-${Date.now()}.jpg`, {
+          type: "image/jpeg"
+        })
+      );
+
+      cropModal.style.display = "none";
+      cropper.destroy();
+      cropper = null;
+
+      cropIndex++;
+      startCropping();
+    }, "image/jpeg", 0.9);
+  };
+
+  /* CANCEL CROP */
+  document.getElementById("cancelCrop").onclick = () => {
+    cropModal.style.display = "none";
+    if (cropper) {
+      cropper.destroy();
+      cropper = null;
+    }
+  };
+
+  /* PREVIEW */
+  function renderPreview() {
+    preview.innerHTML = "";
+    selectedFiles.forEach(file => {
+      const img = document.createElement("img");
+      img.src = URL.createObjectURL(file);
+      img.width = 80;
+      img.height = 80;
+      img.style.objectFit = "cover";
+      img.style.borderRadius = "6px";
+      img.style.marginRight = "6px";
+      preview.appendChild(img);
     });
-});
+  }
+
+  /* SYNC FILE INPUT */
+  function syncInput() {
+    const dt = new DataTransfer();
+    selectedFiles.forEach(f => dt.items.add(f));
+    input.files = dt.files;
+  }
+
+  /* DELETE EXISTING IMAGE */
+  document.querySelectorAll(".delete-image-btn").forEach(btn => {
+    btn.onclick = async () => {
+      await fetch(
+        `/admin/delete-product-image/<%= product._id %>/${btn.dataset.img}`,
+        { method: "DELETE" }
+      );
+      location.reload();
+    };
+  });
 
 
-    // validation 
 
-    function validateForm() {
+   //  validation 
+
+   function validateForm() {
+
+  // Clear old errors
+  document.querySelectorAll("small.text-danger")
+    .forEach(el => el.innerText = "");
 
   let isValid = true;
 
-  
   const name = document.querySelector("input[name='name']").value.trim();
   const category = document.querySelector("select[name='category']").value;
   const brand = document.querySelector("select[name='brand']").value;
-  const description = document.querySelector("input[name='description']").value.trim();
+  const description = document.querySelector("textarea[name='description']").value.trim();
   const price = document.querySelector("input[name='price']").value;
   const offerPrice = document.querySelector("input[name='offerPrice']").value;
-  const size = document.querySelector("input[name='size']").value.trim();
-  const color = document.querySelector("input[name='color']").value.trim();
-  const stock = document.querySelector("input[name='stock']").value;
 
-  // clear old errors
-  document.querySelectorAll("small.text-danger").forEach(el => el.innerText = "");
-
-  // PRODUCT NAME
-  if (name === "") {
+  // NAME
+  if (!name) {
     document.getElementById("nameError").innerText = "Product name is required";
     isValid = false;
   }
 
   // CATEGORY
   if (!category) {
-    document.getElementById("categoryError").innerText = "Please select a category";
+    document.getElementById("categoryError").innerText = "Category is required";
     isValid = false;
   }
 
   // BRAND
   if (!brand) {
-    document.getElementById("brandError").innerText = "Please select a brand";
+    document.getElementById("brandError").innerText = "Brand is required";
     isValid = false;
   }
 
   // DESCRIPTION
-  if (description.length < 10) {
-    document.getElementById("descriptionError").innerText =
-      "Description must be at least 10 characters";
+  if (!description) {
+    document.getElementById("descriptionError").innerText = "Description is required";
     isValid = false;
   }
 
   // PRICE
-  if (price === "" || price <= 0) {
-    document.getElementById("priceError").innerText =
-      "Enter a valid price";
+  if (!price || price <= 0) {
+    document.getElementById("priceError").innerText = "Enter a valid price";
     isValid = false;
   }
 
   // OFFER PRICE
-  if (offerPrice && Number(offerPrice) >= Number(price)) {
+  if (!offerPrice || offerPrice <= 0) {
+    document.getElementById("offerPriceError").innerText = "Enter a valid offer price";
+    isValid = false;
+  } else if (Number(offerPrice) >= Number(price)) {
     document.getElementById("offerPriceError").innerText =
       "Offer price must be less than price";
     isValid = false;
   }
 
-  // SIZE
-  if (size === "") {
-    document.getElementById("sizeError").innerText =
-      "Size is required";
-    isValid = false;
-  }
+  // VARIANTS VALIDATION
+  const variantRows = document.querySelectorAll(".variant-row");
 
-  // COLOR
-  if (color === "") {
-    document.getElementById("colorError").innerText =
-      "Color is required";
-    isValid = false;
-  }
+  variantRows.forEach((row, index) => {
+    const size = row.querySelector("input[name*='[size]']").value.trim();
+    const color = row.querySelector("input[name*='[color]']").value.trim();
+    const stock = row.querySelector("input[name*='[stock]']").value;
 
-  // STOCK
-  if (stock === "" || stock < 0) {
-    document.getElementById("stockError").innerText =
-      "Enter valid stock";
-    isValid = false;
-  }
+    if (!size) {
+      row.querySelector(".sizeError").innerText = "Size required";
+      isValid = false;
+    }
+
+    if (!color) {
+      row.querySelector(".colorError").innerText = "Color required";
+      isValid = false;
+    }
+
+    if (stock === "" || stock < 0) {
+      row.querySelector(".stockError").innerText = "Stock must be 0 or more";
+      isValid = false;
+    }
+  });
+
+
+
+
+  const totalImages = existingImageCount + selectedFiles.length;
+
+if (totalImages < 3) {
+  document.getElementById("imageError").innerText =
+    "At least 3 product images are required";
+  isValid = false;
+} else {
+  document.getElementById("imageError").innerText = "";
+}
+
 
   return isValid;
 }
 
 
 
-//  croppping \
+
+  </script>
+
+ 
 
 
-let cropper;
-let selectedFiles = [];
-
-const input = document.getElementById("imagesInput");
-const preview = document.getElementById("previewContainer");
-const cropImage = document.getElementById("cropImage");
-
-input.addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = () => {
-    cropImage.src = reader.result;
-    const modal = new bootstrap.Modal(document.getElementById("cropModal"));
-    modal.show();
-
-    setTimeout(() => {
-      cropper = new Cropper(cropImage, {
-        aspectRatio: 1,
-        viewMode: 2
-      });
-    }, 200);
-  };
-  reader.readAsDataURL(file);
-});
-
-document.getElementById("cropBtn").addEventListener("click", () => {
-  cropper.getCroppedCanvas({
-    width: 500,
-    height: 500
-  }).toBlob(blob => {
-    selectedFiles.push(blob);
-
-    const img = document.createElement("img");
-    img.src = URL.createObjectURL(blob);
-    img.style.width = "100px";
-    img.style.height = "100px";
-    img.style.objectFit = "cover";
-    img.style.borderRadius = "8px";
-
-    preview.appendChild(img);
-
-    cropper.destroy();
-    bootstrap.Modal.getInstance(document.getElementById("cropModal")).hide();
-  });
-});
-
-
-
-
-
-
-
-
-
-
-</script>
+  </body>
+  </html>

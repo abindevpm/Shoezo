@@ -504,9 +504,9 @@ document.getElementById("applyCrop").onclick = function () {
   }
 
   // IMAGES (MIN 1, MAX 10)
-  if (selectedFiles.length < 1) {
+  if (selectedFiles.length < 3) {
     document.getElementById("imageError").innerText =
-      "At least 1 product image is required";
+      "At least 3 product image is required";
     isValid = false;
   } else if (selectedFiles.length > 10) {
     document.getElementById("imageError").innerText =
@@ -545,6 +545,15 @@ const params = new URLSearchParams(window.location.search);
       showConfirmButton: false,
       timer: 2000
     });
+  }
+
+  if(status === "exists"){
+    Swal.fire({
+      icon:"success",
+      title:"Product Already Exists",
+      text:"Added Product is Already Exists",
+
+    })
   }
 
   if (status === "error") {

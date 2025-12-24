@@ -97,32 +97,7 @@ const Category = require("../../models/categorySchema");
 
 
 
-// const toggleCategory = async (req, res) => {
-//   try {
-//     const { id } = req.params;
 
-//     const category = await Category.findById(id);
-//     if (!category) {
-//       return res.json({ success: false, message: "Category not found" });
-//     }
-
-//     category.isListed = !category.isListed; // 🔁 toggle
-//     await category.save();
-
-//     res.json({
-//       success: true,
-//       message: category.isListed ? "Category Listed" : "Category Unlisted",
-//       isListed: category.isListed
-//     });
-
-//   } catch (error) {
-//     console.log("Toggle Category Error:", error);
-//     res.json({
-//       success: false,
-//       message: "Internal Server Error"
-//     });
-//   }
-// };
 
 
 const toggleCategory = async (req, res) => {

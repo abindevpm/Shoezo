@@ -47,14 +47,12 @@ router.get("/dashboard", adminController.dashboard)
   //  product managemant
  router.get("/products", adminAuth, productController.loadProducts);
  router.get("/add-products",adminAuth,productController.loadAddProducts)
-router.post("/add-product",upload.array("images", 3), productController.AddProducts);
-router.get("/edit-product/:id",productController.loadEditProduct)
-router.post("/edit-product/:id",upload.array("images",4),productController.updateProduct);
- router.get("/delete-product/:id",productController.deleteProduct)
- router.patch("/delete-product/:id",productController.deleteProduct)
- router.delete("/delete-product-image/:productId/:imgName", productController.deleteProductImage);
-
-
+router.post("/add-product",adminAuth,upload.array("images", 3), productController.AddProducts);
+router.get("/edit-product/:id",adminAuth,productController.loadEditProduct)
+router.post("/edit-product/:id",adminAuth,upload.array("images",3),productController.updateProduct);
+ router.patch("/delete-product/:id",adminAuth,productController.deleteProduct)
+ router.delete("/delete-product-image/:productId/:imgName",adminAuth, productController.deleteProductImage);
+ router.patch("/toggle-product/:id",adminAuth,productController.toggleProduct);
 
 
 
