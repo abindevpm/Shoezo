@@ -12,7 +12,7 @@ router.get("/pageNotFound",userController.pageNotFound)
 
  // user 
  router.get("/",userController.loadHomepage)
- router.get("/landingpage",userAuth,userController.landingpage)
+ router.get("/landingpage",userController.landingpage)
  router.get("/pageNotFound",userAuth,userController.pageNotFound)
  router.get("/signup",userController.loadSignup)
  router.post("/signup",userController.signup)

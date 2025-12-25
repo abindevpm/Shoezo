@@ -15,7 +15,7 @@ const customerinfo = async (req, res) => {
       ]
     };
 
-    const userData = await User.find(searchQuery)
+  const userData = await User.find(searchQuery)
       .sort({ lastLogin: -1, _id: -1 })
       .skip((page - 1) * limit)
       .limit(limit);

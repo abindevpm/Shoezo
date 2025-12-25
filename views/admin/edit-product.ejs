@@ -41,6 +41,20 @@
   object-fit: contain;
 }
 
+/* Sidebar width = 260px */
+.admin-content {
+  margin-left: 260px;
+  padding: 20px;
+  min-height: 100vh;
+  background: #f8f9fa;
+}
+
+/* Card should not overflow */
+.card {
+  overflow: hidden;
+}
+
+
       
     
     </style>
@@ -104,19 +118,19 @@
 
 
         <!-- PRICE -->
-        <div class="row mb-3">
+        <!-- <div class="row mb-3">
           <div class="col-md-6">
             <label>Price</label>
             <input type="number" class="form-control" name="price" value="<%= product.price %>">
             <small class="text-danger" id="priceError"></small>
-          </div>
+          </div> 
           <div class="col-md-6">
             <label>Offer Price</label>
             <input type="number" class="form-control" name="offerPrice" value="<%= product.offerPrice %>">
             <small class="text-danger" id="offerPriceError"></small>
 
           </div>
-        </div>
+        </div> -->
 
 
 
@@ -133,90 +147,51 @@
 
 <h5 class="fw-bold mt-4">Product Variants</h5>
 
-<div id="variantsContainer">
+<div class="card p-3 mb-4">
 
-<%
-  let variants = [];
-  if (product.variants) {
-    variants = Array.isArray(product.variants)
-      ? product.variants
-      : Object.values(product.variants);
-  }
-%>
-
-<% if (variants.length > 0) { %>
+  <% const variants = Array.isArray(product.variants) ? product.variants : []; %>
 
   <% variants.forEach((v, i) => { %>
-    <div class="card p-3 mb-3 variant-row">
-      <div class="row">
+    <div class="row g-2 align-items-end mb-3 variant-row">
 
-        <div class="col-md-4">
-          <label>Size</label>
-          <input type="text"
-                 class="form-control"
-                 name="variants[<%= i %>][size]"
-                 value="<%= v.size %>">
-          <small class="text-danger sizeError"></small>
-        </div>
+      <div class="col-md-3">
+  <label class="form-label">Size</label>
+  <input class="form-control" name="variants[<%= i %>][size]" value="<%= v.size %>">
+  <small class="text-danger sizeError"></small>
+</div>
 
-        <div class="col-md-4">
-          <label>Color</label>
-          <input type="text"
-                 class="form-control"
-                 name="variants[<%= i %>][color]"
-                 value="<%= v.color %>">
-          <small class="text-danger colorError"></small>
-        </div>
+<div class="col-md-3">
+  <label class="form-label">Price</label>
+  <input type="number" class="form-control" name="variants[<%= i %>][price]" value="<%= v.price %>">
+  <small class="text-danger priceError"></small>
+</div>
 
-        <div class="col-md-3">
-          <label>Stock</label>
-          <input type="number"
-                 class="form-control"
-                 name="variants[<%= i %>][stock]"
-                 value="<%= v.stock %>">
-          <small class="text-danger stockError"></small>
-        </div>
+<div class="col-md-3">
+  <label class="form-label">Offer Price</label>
+  <input type="number" class="form-control" name="variants[<%= i %>][offerPrice]" value="<%= v.offerPrice %>">
+  <small class="text-danger offerPriceError"></small>
+</div>
 
-        <div class="col-md-1 d-flex align-items-end">
-          <!-- <button type="button"
-                  class="btn btn-danger btn-sm"
-                  onclick="this.closest('.variant-row').remove()">×</button> -->
-        </div>
+<div class="col-md-2">
+  <label class="form-label">Stock</label>
+  <input type="number" class="form-control" name="variants[<%= i %>][stock]" value="<%= v.stock %>">
+  <small class="text-danger stockError"></small>
+</div>
+<small class="text-danger" id="variantCommonError"></small>
+
+
+      <div class="col-md-1 d-grid">
+      <button type="button"
+        class="btn btn-danger"
+        onclick="removeVariantRow(this)">✕</button>
 
       </div>
+
     </div>
   <% }) %>
 
-<% } else { %>
-
-  <!-- DEFAULT EMPTY VARIANT -->
-  <div class="card p-3 mb-3 variant-row">
-    <div class="row">
-
-      <div class="col-md-4">
-        <label>Size</label>
-        <input class="form-control" name="variants[0][size]">
-        <small class="text-danger sizeError"></small>
-      </div>
-
-      <div class="col-md-4">
-        <label>Color</label>
-        <input class="form-control" name="variants[0][color]">
-        <small class="text-danger colorError"></small>
-      </div>
-
-      <div class="col-md-3">
-        <label>Stock</label>
-        <input class="form-control" name="variants[0][stock]">
-        <small class="text-danger stockError"></small>
-      </div>
-
-    </div>
-  </div>
-
-<% } %>
-
 </div>
+
 
 
 
@@ -294,6 +269,10 @@
 </script>
 
 
+
+<script>
+  let variants = <%- JSON.stringify(product.variants || []) %>;
+</script>
 
 
 
@@ -520,6 +499,176 @@ if (totalImages < 3) {
   document.getElementById("imageError").innerText = "";
 }
 
+
+  return isValid;
+}
+
+
+
+
+
+function renderVariants() {
+  const container = document.getElementById("variantList");
+  container.innerHTML = "";
+
+  variants.forEach((v, i) => {
+    container.innerHTML += `
+      <div class="border rounded p-2 mb-2">
+        <div class="row align-items-center text-center">
+
+          <div class="col-md-2"><b>${v.size}</b></div>
+          <div class="col-md-2">₹${v.price}</div>
+          <div class="col-md-2">₹${v.offerPrice}</div>
+          <div class="col-md-2">${v.stock}</div>
+
+  <button type="button"
+        class="btn btn-danger"
+        onclick="removeVariantRow(this)">✕</button>
+
+          <!-- hidden inputs for submit -->
+          <input type="hidden" name="variants[${i}][size]" value="${v.size}">
+          <input type="hidden" name="variants[${i}][price]" value="${v.price}">
+          <input type="hidden" name="variants[${i}][offerPrice]" value="${v.offerPrice}">
+          <input type="hidden" name="variants[${i}][stock]" value="${v.stock}">
+        </div>
+      </div>
+    `;
+  });
+}
+
+renderVariants();
+
+
+
+
+
+function addVariant() {
+  const size = vSize.value.trim();
+  const price = vPrice.value;
+  const offerPrice = vOfferPrice.value;
+  const stock = vStock.value;
+
+  if (!size || !price || !offerPrice || stock === "") {
+    alert("All fields required");
+    return;
+  }
+
+  if (Number(offerPrice) >= Number(price)) {
+    alert("Offer price must be less than price");
+    return;
+  }
+
+  variants.push({ size, price, offerPrice, stock });
+
+  vSize.value = vPrice.value = vOfferPrice.value = vStock.value = "";
+  renderVariants();
+}
+
+
+
+
+
+function removeVariantRow(btn) {
+  const rows = document.querySelectorAll(".variant-row");
+  const commonErr = document.getElementById("variantCommonError");
+
+  commonErr.innerText = "";
+
+  if (rows.length <= 1) {
+    commonErr.innerText = "At least one variant is required";
+    return false;
+  }
+
+  btn.closest(".variant-row").remove();
+}
+
+
+
+
+function validateForm() {
+
+  let isValid = true;
+
+  // clear all errors
+  document.querySelectorAll("small.text-danger")
+    .forEach(el => el.innerText = "");
+
+  /* ---------- BASIC DETAILS ---------- */
+  const name = document.querySelector("input[name='name']").value.trim();
+  const category = document.querySelector("select[name='category']").value;
+  const brand = document.querySelector("select[name='brand']").value;
+  const description = document.querySelector("textarea[name='description']").value.trim();
+
+  if (!name) {
+    document.getElementById("nameError").innerText = "Product name is required";
+    isValid = false;
+  }
+
+  if (!category) {
+    document.getElementById("categoryError").innerText = "Category is required";
+    isValid = false;
+  }
+
+  if (!brand) {
+    document.getElementById("brandError").innerText = "Brand is required";
+    isValid = false;
+  }
+
+  if (!description || description.length < 10) {
+    document.getElementById("descriptionError").innerText =
+      "Description must be at least 10 characters";
+    isValid = false;
+  }
+
+  /* ---------- VARIANTS ---------- */
+  const variantRows = document.querySelectorAll(".variant-row");
+
+  if (variantRows.length < 1) {
+    document.getElementById("variantCommonError").innerText =
+      "At least one variant is required";
+    return false;
+  }
+
+  variantRows.forEach(row => {
+
+    const size = row.querySelector("input[name*='[size]']");
+    const price = row.querySelector("input[name*='[price]']");
+    const offerPrice = row.querySelector("input[name*='[offerPrice]']");
+    const stock = row.querySelector("input[name*='[stock]']");
+
+    if (!size.value.trim()) {
+      row.querySelector(".sizeError").innerText = "Size is required";
+      isValid = false;
+    }
+
+    if (!price.value || price.value <= 0) {
+      row.querySelector(".priceError").innerText = "Enter a valid price";
+      isValid = false;
+    }
+
+    if (!offerPrice.value || offerPrice.value <= 0) {
+      row.querySelector(".offerPriceError").innerText = "Enter a valid offer price";
+      isValid = false;
+    } else if (Number(offerPrice.value) >= Number(price.value)) {
+      row.querySelector(".offerPriceError").innerText =
+        "Offer price must be less than price";
+      isValid = false;
+    }
+
+    if (stock.value === "" || stock.value < 0) {
+      row.querySelector(".stockError").innerText = "Stock must be 0 or more";
+      isValid = false;
+    }
+  });
+
+  /* ---------- IMAGES ---------- */
+  const totalImages = existingImageCount + selectedFiles.length;
+
+  if (totalImages < 3) {
+    document.getElementById("imageError").innerText =
+      "Minimum 3 product images required";
+    isValid = false;
+  }
 
   return isValid;
 }

@@ -24,15 +24,6 @@ const productSchema = new mongoose.Schema({
     required: true
   },
 
-  price: {
-    type: Number,
-    required: true
-  },
-
-  offerPrice: {
-    type: Number,
-    default: 0
-  },
 
   images: {
     type: [String],
@@ -42,7 +33,9 @@ const productSchema = new mongoose.Schema({
   variants: [
     {
       size: { type: Number, required: true },
-      color: { type: String, required: true },
+      price:{type:Number,required:true},
+      offerPrice:{type:Number,required:true},
+    
       stock: { type: Number, required: true }
     }
   ],

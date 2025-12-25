@@ -180,7 +180,7 @@
         function phoneValidateChecking() {
             const phoneval = phoneid.value.trim();
             if (phoneval === "") {
-                displayError(error3, "");
+                displayError(error3, "please Enter Phone Number");
                 return true;
             } else if (phoneval.length !== 10) {
                 displayError(error3, "Phone number must be exactly 10 digits");

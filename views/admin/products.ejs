@@ -91,7 +91,24 @@
 
                       <td class="text-muted small"><%= product?.description || "---" %></td>
 
-                      <td>₹<%= product?.price || 0 %></td>
+                   <%
+  const v = product.variants?.[0];
+%>
+
+<td>
+  <% if(v){ %>
+    ₹<%= v.offerPrice > 0 ? v.offerPrice : v.price %>
+    <% if(v.offerPrice > 0){ %>
+      <br>
+      <small class="text-muted text-decoration-line-through">
+        ₹<%= v.price %>
+      </small>
+    <% } %>
+  <% } else { %>
+    ₹0
+  <% } %>
+</td>
+
 
                       <td><%= product?.variants?.[0]?.stock || 0 %></td>
 
