@@ -180,6 +180,8 @@ const resendOtp = async (req, res) => {
 
     const sent = await sendVerificationEmail(email, newOtp);
 
+  
+
     if (!sent) {
       return res.status(500).json({ success: false, message: "Email failed" });
     }
@@ -224,7 +226,7 @@ const signup = async (req, res) => {
     }
 
     req.session.userOtp = otp;
-    req.session.otpExpiry = Date.now() + 10 * 1000;
+    req.session.otpExpiry = Date.now() + 102 * 1000;
 
     req.session.userData = { name, phone, email, password };
 
@@ -274,6 +276,12 @@ const otp = async (req, res) => {
         message: "OTP expired. Please request a new OTP."
       });
     }
+
+      console.log("OTP:", req.session.userOtp);
+console.log("OTP Expiry:", req.session.otpExpiry);
+console.log("Now:", Date.now());
+console.log("Remaining (sec):", (req.session.otpExpiry - Date.now()) / 1000);
+
 
     
     if (otp !== req.session.userOtp) {

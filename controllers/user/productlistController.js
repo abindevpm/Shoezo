@@ -57,28 +57,87 @@ const loadShopPage = async (req, res) => {
 }
 
 
+
+
        
 
 
-        let sortOption = {};
-        if (req.query.sort === "low_to_high") sortOption.offerPrice = 1;
-        else if (req.query.sort === "high_to_low") sortOption.offerPrice = -1;
-        else sortOption.createdAt = -1;
 
 
         const page = parseInt(req.query.page) || 1;
         const limit = 6; // products per page
         const skip = (page - 1) * limit;
 
+
+
+        const selectedSort = req.query.sort || "latest";
+
+let pipeline = [
+  { $match: filter },
+
+  {
+    $addFields: {
+      effectivePrice: {
+        $min: {
+          $map: {
+            input: "$variants",
+            as: "v",
+            in: {
+              $cond: [
+                { $ifNull: ["$$v.offerPrice", false] },
+                "$$v.offerPrice",
+                "$$v.price"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+];
+
+// 🔥 SORT BASED ON VARIANTS
+if (selectedSort === "low_to_high") {
+  pipeline.push({ $sort: { effectivePrice: 1 } });
+} else if (selectedSort === "high_to_low") {
+  pipeline.push({ $sort: { effectivePrice: -1 } });
+} else {
+  pipeline.push({ $sort: { createdAt: -1 } });
+}
+
+// pagination
+pipeline.push(
+  { $skip: skip },
+  { $limit: limit }
+);
+
+
+
+
+
+let products = await Product.aggregate(pipeline);
+
+products = await Product.populate(products, [
+  { path: "category" },
+  { path: "brand" }
+]);
+
+
+
+
+
+
+
+
         const totalProducts = await Product.countDocuments(filter);
         const totalPages = Math.ceil(totalProducts / limit);
 
-        const products = await Product.find(filter)
-            .populate("category")
-            .populate("brand")
-            .sort(sortOption)
-            .skip(skip)
-            .limit(limit);
+        // const products = await Product.find(filter)
+        //     .populate("category")
+        //     .populate("brand")
+        //     .sort(sortOption)
+        //     .skip(skip)
+        //     .limit(limit);
 
 
 
