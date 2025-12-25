@@ -1,18 +1,18 @@
 
 const User = require("../models/userSchema");
 
-/* -------------------- USER AUTH -------------------- */
+
 const userAuth = (req, res, next) => {
   if (req.session.user) {
     User.findById(req.session.user)
       .then(user => {
         if (user && !user.isBlocked) {
-          return next();                 // allow user
+          return next();                 
         } 
 
         req.session.destroy(err=>{
           if(err) console.log("Session destroy ",err);
-          return res.redirect("/login?blocked=true")
+          return res.redirect("/login")
 
         })
 

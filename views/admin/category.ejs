@@ -1,422 +1,532 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Category Management - Shoezo</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Category Management - Shoezo</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <style>
-        body {
-            background-color: #f8f9fa;
-            overflow-x: hidden;
-        }
+  <style>
+    body { background-color: #f8f9fa; overflow-x: hidden; }
 
-        .content-area {
-            margin-left: 260px; 
-            margin-top: 80px;
-            padding-right: 20px;
-            padding-bottom: 50px;
-            min-height: 100vh;
-        }
+    .content-area {
+      margin-left: 260px;
+      margin-top: 80px;
+      padding: 20px;
+      min-height: 100vh;
+    }
 
-        @media (max-width: 991px) {
-            .content-area {
-                margin-left: 0;
-                margin-top: 80px;
-            }
-        }
+    @media (max-width: 991px) {
+      .content-area { margin-left: 0; }
+    }
 
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            margin-top: 20px;
-        }
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
 
-        .custom-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            padding: 25px;
-        }
+    .custom-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
 
-        .search-group {
-            width: 300px;
-            position: relative;
-        }
+    .search-group { width: 300px; position: relative; }
+    .search-input { padding-left: 40px; }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #aaa;
+    }
 
-        .search-input {
-            padding-left: 40px;
-        }
+    .action-btn {
+      width: 35px;
+      height: 35px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      border: none;
+      color: #fff;
+    }
 
-        .search-icon {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #aaa;
-        }
+    .btn-edit { background: #3b82f6; }
+    .btn-add { background: #000; color: #fff; }
 
-        .action-btn {
-            width: 35px;
-            height: 35px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 6px;
-            border: none;
-            color: white;
-            margin-right: 5px;
-        }
+    /* TOGGLE SWITCH */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 46px;
+      height: 24px;
+    }
 
-        .btn-edit { background-color: #3b82f6; }
-        .btn-delete { background-color: #6b7280; }
-        .btn-add { background-color: #000; color: #fff; }
-        .btn-add:hover { background-color: #333; }
-    </style>
+    .switch input { opacity: 0; width: 0; height: 0; }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+
+
+
+
+    .pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.custom-pagination {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+}
+
+.custom-pagination .page-link {
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background-color: #f1f3f5;
+  color: #333;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.custom-pagination .page-link:hover {
+  background-color: #e0e7ff;
+  color: #1d4ed8;
+}
+
+.custom-pagination .active .page-link {
+  background-color: #2563eb;
+  color: #fff;
+}
+
+.custom-pagination .disabled .page-link {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #d1d5db; /* grey OFF */
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #22c55e; /* green ON */
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+
+
+    input:checked + .slider { background-color: #22c55e; }
+    input:checked + .slider:before { transform: translateX(22px); }
+  </style>
 </head>
 
 <body>
 
-    <%- include('../partials/admin/navbar.ejs') %>
-    <%- include('../partials/admin/sidebar.ejs') %>
+<%- include('../partials/admin/navbar.ejs') %>
+<%- include('../partials/admin/sidebar.ejs') %>
 
-    <main class="content-area">
+<main class="content-area">
 
-        <div class="page-header">
-            <h3 class="fw-bold m-0">Category Management</h3>
+  <div class="page-header">
+    <h3 class="fw-bold">Category Management</h3>
+      
 
-            <div class="d-flex align-items-center gap-3">
-                <div class="search-group">
-                    <i class="fa fa-search search-icon"></i>
-                   <input type="text" class="form-control search-input" placeholder="Search category" value="<%= search %>">
 
-                </div>
-                <button class="btn btn-add" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
-                    <i class="fa fa-plus me-1"></i> Add Category
-                </button>
-            </div>
-        </div>
 
-        <div class="custom-card">
-            <div class="table-responsive">
+  <form method="GET" action="/admin/category">
+  <div class="d-flex gap-3 align-items-center">
+    <div class="search-group position-relative">
+      <i class="fa fa-search search-icon"></i>
 
-                <table class="table table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th>S.No</th>
-                            <th>Brand</th>
-                            <th>Category Name</th>
-                            <th>Description</th>
-                            <th>Offer</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
+      <input type="text"
+             name="search"
+             class="form-control search-input"
+             placeholder="Search category"
+             value="<%= search %>">
+    </div>
 
-                    <tbody>
-                        <% if (categories && categories.length > 0) { %>
-
-                            <% categories.forEach((cat, index) => { %>
-                                <tr>
-                                    <td><%= index + 1 %></td>
-                                    <td><%= cat.brand %></td>
-                                    <td><%= cat.name %></td>
-                                    <td><%= cat.description %></td>
-                                    <td><%= cat.categoryOffer ? cat.categoryOffer + "%" : "N/A" %></td>
-
-                                  <td>
-               <button type="button" class="action-btn btn-edit"
-        data-id="<%= cat._id %>"
-        data-name="<%= cat.name %>"
-        data-brand="<%= cat.brand %>"
-        data-description="<%= cat.description %>"
-        data-offer="<%= cat.categoryOffer %>"
-        data-bs-toggle="modal"
-        data-bs-target="#editCategoryModal">
-        <i class="fa fa-pencil"></i>
+    <button type="submit" class="btn btn-primary">
+      Search
     </button>
+  </div>
+</form>
 
-    <button type="button" class="action-btn btn-delete" data-id="<%= cat._id %>">
-        <i class="fa fa-trash"></i>
-    </button>
+
+      <button class="btn btn-add" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+        <i class="fa fa-plus me-1"></i> Add Category
+      </button>
+    </div>
+  </div>
+
+  <div class="custom-card">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>S.No</th>
+            <th>Category Name</th>
+            <th>Description</th>
+            <th>Offer</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% if (categories && categories.length > 0) { %>
+            <% categories.forEach((cat, index) => { %>
+              <tr>
+                <td><%= index + 1 %></td>
+                <td><%= cat.name %></td>
+                <td><%= cat.description %></td>
+                <td><%= cat.categoryOffer ? cat.categoryOffer + "%" : "N/A" %></td>
+
+
+
+          <td class="d-flex align-items-center gap-2">
+
+  <!-- EDIT -->
+  <button class="action-btn btn-edit"
+    data-id="<%= cat._id %>"
+    data-name="<%= cat.name %>"
+    data-description="<%= cat.description %>"
+    data-offer="<%= cat.categoryOffer %>"
+    data-bs-toggle="modal"
+    data-bs-target="#editCategoryModal">
+    <i class="fa fa-pencil"></i>
+  </button>
+
+  <!-- LIST / UNLIST TOGGLE -->
+
+
+  <label class="switch">
+  <input 
+    type="checkbox"
+    <%= cat.isListed ? "checked" : "" %>
+    onchange="toggleCategory(this, '<%= cat._id %>')"
+
+  >
+  <span class="slider"></span>
+</label>
+
+
+  
+
+  
+
+
 </td>
- 
-                                </tr>
-                            <% }) %>
 
-                        <% } else { %>
-                            <tr>
-                                <td colspan="6" class="text-center text-muted">No categories found</td>
-                            </tr>
-                        <% } %>
-                    </tbody>
-                </table>
-                            <!-- ⭐ PAGINATION START ⭐ -->
 
-    <div class="pagination-wrapper d-flex justify-content-center">
-                             <nav>
 
-        <ul class="pagination gap-2">
-          <li class="page-item <%= currentPage == 1 ? 'disabled' : '' %>">
-            <a class="page-link" href="?page=<%= currentPage - 1 %>&search=<%= search %>">
-              <i class="fas fa-chevron-left"></i>
-            </a>
-          </li>
 
-          <% for (let i = 1; i <= totalPages; i++) { %>
-            <li class="page-item <%= currentPage == i ? 'active' : '' %>">
-              <a class="page-link" href="?page=<%= i %>&search=<%= search %>"><%= i %></a>
-            </li>
+              
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="5" class="text-center text-muted">No categories found</td>
+            </tr>
           <% } %>
+        </tbody>
+      </table>
 
-          <li class="page-item <%= currentPage == totalPages ? 'disabled' : '' %>">
-            <a class="page-link" href="?page=<%= currentPage + 1 %>&search=<%= search %>">
-              <i class="fas fa-chevron-right"></i>
-            </a>
-          </li>
-        </ul>
-      </nav>
+                  
 
 
+<nav class="pagination-wrapper">
+  <ul class="pagination custom-pagination">
+
+    <!-- Previous -->
+    <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+      <a class="page-link"
+         href="?page=<%= currentPage - 1 %>&search=<%= search || '' %>">
+        ‹
+      </a>
+    </li>
+
+    <!-- Page Numbers -->
+    <% for(let i = 1; i <= totalPages; i++) { %>
+      <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+        <a class="page-link"
+           href="?page=<%= i %>&search=<%= search || '' %>">
+          <%= i %>
+        </a>
+      </li>
+    <% } %>
+
+    <!-- Next -->
+    <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+      <a class="page-link"
+         href="?page=<%= currentPage + 1 %>&search=<%= search || '' %>">
+        ›
+      </a>
+    </li>
+
+  </ul>
+</nav>
 
 
-            </div>
-        </div>
 
-    </main>
 
-    <!-- Add Category Modal -->
-    <div class="modal fade" id="addCategoryModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold">Add New Category</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
 
-                <div class="modal-body">
-                    <form id="addCategoryForm">
-
-                        <div class="mb-3">
-                            <label class="form-label">Category Name</label>
-                            <input type="text" name="name" class="form-control">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Brand</label>
-                            <input type="text" name="brand" class="form-control">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Description</label>
-                            <textarea name="description" class="form-control"></textarea>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Category Offer (%)</label>
-                            <input type="number" name="categoryOffer" class="form-control" min="0" max="100">
-                        </div>
-
-                        <button class="btn btn-dark w-100">Create Category</button>
-
-                    </form>
-                </div>
-
-            </div>
-        </div>
     </div>
+  </div>
 
+</main>
 
-       <!-- Edit Category Modal -->
-<div class="modal fade" id="editCategoryModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+<!-- ADD CATEGORY MODAL -->
+<div class="modal fade" id="addCategoryModal">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="fw-bold">Add Category</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
 
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold">Edit Category</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
+      <div class="modal-body">
+        <form id="addCategoryForm">
+          <div class="mb-3">
+            <label>Category Name</label>
+            <input type="text" name="name" class="form-control" >
+          </div>
 
-            <div class="modal-body">
-                <form id="editCategoryForm">
+          <div class="mb-3">
+            <label>Description</label>
+            <textarea name="description" class="form-control" ></textarea>
+          </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Category Name</label>
-                        <input type="text" name="name" class="form-control">
-                    </div>
+          <div class="mb-3">
+            <label>Category Offer (%)</label>
+            <input type="number" name="categoryOffer" class="form-control" min="0" max="100">
+          </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Brand</label>
-                        <input type="text" name="brand" class="form-control">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Description</label>
-                        <textarea name="description" class="form-control"></textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Category Offer (%)</label>
-                        <input type="number" name="categoryOffer" class="form-control" min="0" max="100">
-                    </div>
-
-                    <button class="btn btn-primary w-100" type="submit">Update Category</button>
-
-                </form>
-            </div>
-
-        </div>
+          <button class="btn btn-dark w-100">Create Category</button>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
 
+<!-- EDIT CATEGORY MODAL -->
+<div class="modal fade" id="editCategoryModal">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="fw-bold">Edit Category</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
 
- 
+      <div class="modal-body">
+        <form id="editCategoryForm">
+          <div class="mb-3">
+            <label>Category Name</label>
+            <input type="text" name="name" class="form-control" >
+          </div>
 
+          <div class="mb-3">
+            <label>Description</label>
+            <textarea name="description" class="form-control" ></textarea>
+          </div>
 
+          <div class="mb-3">
+            <label>Category Offer (%)</label>
+            <input type="number" name="categoryOffer" class="form-control" min="0" max="100">
+          </div>
 
-    <!-- DELETE SCRIPT -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+          <button class="btn btn-primary w-100">Update Category</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-document.getElementById("addCategoryForm").addEventListener("submit", async function(event) {
-    event.preventDefault();
+/* ADD CATEGORY */
+document.getElementById("addCategoryForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
 
-    const formData = new FormData(this);
-    let data = {};
-    formData.forEach((value, key) => data[key] = value);
+  const res = await fetch("/admin/addCategory", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
 
-    const response = await fetch("/admin/addCategory", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-    });
+  const result = await res.json();
+  if (result.success) {
+    Swal.fire({ icon: "success", title: "Category Added", timer: 1000, showConfirmButton: false });
+    setTimeout(() => location.reload(), 1000);
+  } else {
+    Swal.fire({ icon: "error", title: "Error", text: result.message });
+  }
+});
 
-    const result = await response.json();
+/* EDIT CATEGORY */
+const editForm = document.getElementById("editCategoryForm");
 
-    if (result.success) {
-        Swal.fire({ icon: "success", title: "Category Added!", timer: 1000, showConfirmButton: false });
-        setTimeout(() => location.reload(), 1000);
-    } else {
-        Swal.fire({ icon: "error", title: "Error", text: result.message });
-    }
+document.querySelectorAll(".btn-edit").forEach(btn => {
+  btn.onclick = () => {
+    editForm.dataset.id = btn.dataset.id;
+    editForm.name.value = btn.dataset.name;
+    editForm.description.value = btn.dataset.description;
+    editForm.categoryOffer.value = btn.dataset.offer || "";
+  };
 });
 
 
-// DELETE CATEGORY
-document.querySelectorAll(".btn-delete").forEach(button => {
-    button.addEventListener("click", async () => {
-        const id = button.getAttribute("data-id");
 
-        const confirmDelete = await Swal.fire({
-            title: "Are you sure?",
-            text: "This category will be deleted!",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "Yes, delete"
-        });
+editForm.addEventListener("submit", async e => {
+  e.preventDefault();
+  const id = editForm.dataset.id;
 
-        if (!confirmDelete.isConfirmed) return;
+  const res = await fetch(`/admin/edit-category/${id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: editForm.name.value,
+      description: editForm.description.value,
+      categoryOffer: editForm.categoryOffer.value
+    })
+  });
 
-        const response = await fetch(`/admin/delete-category/${id}`, { method: "POST" });
-        const result = await response.json();
+  const result = await res.json();
 
-        if (result.success) {
-            Swal.fire({ icon: "success", title: "Deleted!", timer: 1000, showConfirmButton: false });
-            setTimeout(() => location.reload(), 800);
-        }
+  if (result.success) {
+    Swal.fire({
+      icon: "success",
+      title: "Category Updated",
+      timer: 1000,
+      showConfirmButton: false
     });
+    setTimeout(() => location.reload(), 1000);
+  } else {
+    Swal.fire("Error", result.message, "error");
+  }
 });
 
 
-const editForm = document.getElementById('editCategoryForm');
 
-document.querySelectorAll(".btn-edit").forEach(button => {
-    button.addEventListener("click", () => {
+/* TOGGLE LIST / UNLIST */
 
-        const id = button.getAttribute("data-id");
-        const name = button.getAttribute("data-name");
-        const brand = button.getAttribute("data-brand");
-        const description = button.getAttribute("data-description");
-        const offer = button.getAttribute("data-offer") || "";
+function toggleCategory(toggle, id) {
 
-        editForm.setAttribute("data-id", id);
-
-        editForm.querySelector("input[name='name']").value = name;
-        editForm.querySelector("input[name='brand']").value = brand;
-        editForm.querySelector("textarea[name='description']").value = description;
-        editForm.querySelector("input[name='categoryOffer']").value = offer;
-    });
-});
-
-editForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const name = editForm.querySelector("input[name='name']").value.trim();
-    const brand = editForm.querySelector("input[name='brand']").value.trim();
-    const description = editForm.querySelector("textarea[name='description']").value.trim();
-    const offer = editForm.querySelector("input[name='categoryOffer']").value.trim();
-
-    if (!name || !brand || !description || offer === "") {
-        Swal.fire({
-            icon: "error",
-            title: "All fields are required!",
-            text: "Please fill all fields before updating."
-        });
+  // If turning OFF → confirm
+  if (!toggle.checked) {
+    Swal.fire({
+      title: "Unlist category?",
+      text: "This category will be hidden from users.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, unlist",
+      cancelButtonText: "Cancel"
+    }).then(result => {
+      if (!result.isConfirmed) {
+        toggle.checked = true; // revert
         return;
-    }
-
-    const id = editForm.getAttribute("data-id");
-
-    const response = await fetch(`/admin/edit-category/${id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, brand, description, categoryOffer: offer })
+      }
+      performToggle(toggle, id);
     });
+  } else {
+    // Turning ON → no confirm
+    performToggle(toggle, id);
+  }
+}
 
-    const result = await response.json();
+function performToggle(toggle, id) {
+  fetch(`/admin/toggle-category/${id}`, { method: "PATCH" })
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) {
+        toggle.checked = !toggle.checked;
+        Swal.fire("Error", "Something went wrong", "error");
+        return;
+      }
 
-    if (result.success) {
-        Swal.fire({
-            icon: "success",
-            title: "Updated!",
-            timer: 1000,
-            showConfirmButton: false
-        });
-        setTimeout(() => location.reload(), 1000);
-    } else {
-        Swal.fire({
-            icon: "error",
-            title: "Error!",
-            text: result.message
-        });
-    }
-});
+      // backend is source of truth
+      toggle.checked = data.isListed;
 
-document.addEventListener("DOMContentLoaded", function () {
-    const input = document.querySelector(".search-input");
-    if (!input) return;
-
-    input.addEventListener("keydown", function (e) {
-        if (e.key === "Enter") {
-
-            const value = this.value.trim();
-
-            const url = new URL(window.location.href);
-            url.searchParams.set("search", value);
-            url.searchParams.set("page", 1);
-
-            window.location.href = url.toString();
-        }
+      Swal.fire({
+        icon: "success",
+        title: data.isListed ? "Category Listed" : "Category Unlisted",
+        timer: 900,
+        showConfirmButton: false
+      });
+    })
+    .catch(() => {
+      toggle.checked = !toggle.checked;
+      Swal.fire("Error", "Server error", "error");
     });
-});
-
+}
 
 </script>
 

@@ -25,7 +25,7 @@
         .sidebar-container {
             width: 250px;
             min-height: 100vh;
-            background-color: #343a40 !important;
+            background-color: hsl(210, 100%, 98%) !important;
             position: fixed;
             top: 60px;
             left: 0;
@@ -78,150 +78,155 @@
                     <!-- ⭐ PRODUCT FORM ⭐ -->
                   <form method="post" action="/admin/add-product" enctype="multipart/form-data" onsubmit="return validateForm()">
 
-
-
-                        <!-- PRODUCT NAME -->
-                        <div class="row mb-3">
-                            <div class="col-md-3 text-md-end"><label class="form-label">Product Name :</label></div>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control" name="name">
-                                <small class="text-danger" id="nameError"></small>
-                            </div>
-                        </div>
-
-                        <!-- CATEGORY + BRAND -->
-                        <div class="row mb-3">
-
-                            <!-- CATEGORY -->
-                            <div class="col-md-3 text-md-end"><label class="form-label">Category :</label></div>
-                            <div class="col-md-3">
-                                <select class="form-select" name="category">
-                                    <option value="">Select Category</option>
-                                    <% categories.forEach(cat=> { %>
-                                        <option value="<%= cat._id %>">
-                                            <%= cat.name %>
-                                        </option>
-                                        <% }) %>
-                                     
-                                </select>
-                                   <small class="text-danger" id="categoryError"></small>
-                            </div>
-
-                            <!-- BRAND -->
-                            <div class="col-md-3 text-md-end"><label class="form-label">Brand :</label></div>
-                            <div class="col-md-3">
-                                <input type="text" class="form-control" name="brand">
-                                <small class="text-danger" id="brandError"></small>
-                            </div>
-
-                        </div>
-
-                        <!-- DESCRIPTION -->
-                        <div class="row mb-3">
-                            <div class="col-md-3 text-md-end"><label class="form-label">Description :</label></div>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control" name="description">
-                                <small class="text-danger" id="descriptionError"></small>
-                            </div>
-                        </div>
-
-                        <!-- PRICE -->
-                        <div class="row mb-3">
-                            <div class="col-md-3 text-md-end"><label class="form-label">Price :</label></div>
-                            <div class="col-md-9">
-                                <input type="number" class="form-control" name="price">
-                                <small class="text-danger" id="priceError"></small>
-                            </div>
-                        </div>
-
-                        <!-- OFFER PRICE -->
-                        <div class="row mb-3">
-                            <div class="col-md-3 text-md-end"><label class="form-label">Offer Price :</label></div>
-                            <div class="col-md-9">
-                                <input type="number" class="form-control" name="offerPrice">
-                                <small class="text-danger" id="offerpriceError"></small>
-                            </div>
-                        </div>
-
-                        <!-- VARIANTS -->
-                        <h5 class="fw-bold mb-3">Product Variants</h5>
-
-                        <div class="card-form-variants">
-                            <div class="row mb-4">
-
-                                <div class="col-4">
-                                    <label class="form-label">Size</label>
-                                    <input type="number" class="form-control" name="size">
-                                  <small class="text-danger" id="sizeError"></small>
-                                </div>
-
-                                <div class="col-4">
-                                    <label class="form-label">Color</label>
-                                    <input type="text" class="form-control" name="color">
-                                    <small class="text-danger" id="colorError"></small>
-                                </div>
-
-                                <div class="col-4">
-                                    <label class="form-label">Stock</label>
-                                    <input type="number" class="form-control" name="stock">
-                                    <small class="text-danger"  id="stockError"></small>
-                                </div>
-
-                            </div>
-
-                            <!-- IMAGE UPLOAD -->
-                          <!-- IMAGE UPLOAD -->
-<div class="row mb-3">
-    <label class="form-label">Upload Images (Min 1, Max 10):</label>
-
-    <div class="col-md-12">
-
-        <div class="upload-box w-100"
-            onclick="document.getElementById('imagesInput').click()">
-            <i class="fas fa-upload text-muted"></i> Click to upload images (single or multiple)
-        </div>
-
-        <!-- FIXED INPUT -->
-        <input type="file" id="imagesInput" name="images" multiple accept="image/*" hidden />
-
-        <!-- PREVIEW -->
-        <div id="previewContainer" class="d-flex flex-wrap gap-2 mt-3"></div>
-
-        <small class="text-danger" id="imageError"></small>
-
+  <!-- PRODUCT NAME -->
+  <div class="row mb-3 align-items-center">
+    <div class="col-md-2 text-md-end">
+      <label class="form-label">Product Name :</label>
     </div>
+    <div class="col-md-10">
+      <input type="text"
+             class="form-control form-control-sm"
+             name="name">
+      <small class="text-danger" id="nameError"></small>
+    </div>
+  </div>
+
+  <!-- CATEGORY + BRAND -->
+  <div class="row mb-3 align-items-center">
+
+    <div class="col-md-2 text-md-end">
+      <label class="form-label">Category :</label>
+    </div>
+    <div class="col-md-4">
+      <select class="form-select form-select-sm" name="category" >
+        <option value="">Select Category</option>
+        <% categories.forEach(cat => { %>
+          <option value="<%= cat._id %>"><%= cat.name %></option>
+        <% }) %>
+      </select>
+      <small class="text-danger" id="categoryError"></small>
+    </div>
+
+    <div class="col-md-2 text-md-end">
+      <label class="form-label">Brand :</label>
+    </div>
+    <div class="col-md-4">
+      <select class="form-select form-select-sm" name="brand" >
+        <option value="">Select Brand</option>
+        <% brands.forEach(brand => { %>
+          <option value="<%= brand._id %>"><%= brand.name %></option>
+        <% }) %>
+      </select>
+      <small class="text-danger" id="brandError"></small>
+    </div>
+
+  </div>
+
+  <!-- DESCRIPTION -->
+  <div class="row mb-3 align-items-center">
+    <div class="col-md-2 text-md-end">
+      <label class="form-label">Description :</label>
+    </div>
+    <div class="col-md-10">
+      <input type="text"
+             class="form-control form-control-sm"
+             name="description">
+      <small class="text-danger" id="descriptionError"></small>
+    </div>
+  </div>
+
+  <!-- PRICE -->
+  <!-- <div class="row mb-3 align-items-center">
+    <div class="col-md-2 text-md-end">
+      <label class="form-label">Price :</label>
+    </div>
+    <div class="col-md-10">
+      <input type="number"
+             class="form-control form-control-sm"
+             name="price">
+      <small class="text-danger" id="priceError"></small>
+    </div>
+  </div> -->
+
+  <!-- OFFER PRICE -->
+  <!-- <div class="row mb-3 align-items-center">
+    <div class="col-md-2 text-md-end">
+      <label class="form-label">Offer Price :</label>
+    </div>
+    <div class="col-md-10">
+      <input type="number"
+             class="form-control form-control-sm"
+             name="offerPrice">
+      <small class="text-danger" id="offerpriceError"></small>
+    </div>
+  </div> -->
+
+  <!-- VARIANTS -->
+
+  <h5 class="fw-bold mt-4">Product Variants</h5>
+
+<div class="card p-3 mb-2">
+  <div class="row g-2">
+    <div class="col-md-3">
+      <input type="text" id="vSize" class="form-control" placeholder="Size">
+    </div>
+
+    <div class="col-md-3">
+      <input type="number" id="vPrice" class="form-control" placeholder="Price">
+    </div>
+
+    <div class="col-md-3">
+      <input type="number" id="vOfferPrice" class="form-control" placeholder="Offer Price">
+    </div>
+
+    <div class="col-md-3">
+      <input type="number" id="vStock" class="form-control" placeholder="Stock">
+    </div>
+  </div>
+
+  <button type="button"
+          class="btn btn-outline-dark btn-sm mt-3"
+          onclick="addVariant()">
+    + Add Variant
+  </button>
+
+  <small class="text-danger" id="variantInputError"></small>
 </div>
 
-                        <!-- SUBMIT -->
-                        <div class="text-center mt-5">
-                            <button type="submit" class="btn btn-dark btn-lg px-5">ADD PRODUCT</button>
-                        </div>
-
-                    </form>
-                </div>
-
-            </div>
-        </div>
+<div id="variantList"></div>
+<small class="text-danger" id="variantError"></small>
 
 
-        <!-- CROP MODAL (FINAL WORKING VERSION) -->
 
 
-        <!-- <div class="modal fade" id="cropModal" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Crop Image</h5> <button type="button" class="btn-close"
-                            data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body"> <img id="cropImage" style="width:100%; max-height: 500px;"> </div>
-                    <div class="modal-footer"> <button id="cropSaveBtn" class="btn btn-primary">Crop & Save</button>
-                    </div>
-                </div>
-            </div>
-        </div> -->
 
-        <!-- FINAL CROP MODAL (Bootstrap Style + Custom Working) -->
+  <!-- IMAGE UPLOAD -->
+  <label class="form-label">Upload Images</label>
+  <div class="upload-box mb-3"
+       onclick="document.getElementById('imagesInput').click()">
+    <i class="fas fa-upload text-muted me-2"></i> Click to upload
+  </div>
+
+  <input type="file"
+         id="imagesInput"
+         name="images"
+         multiple
+         hidden>
+
+  <div id="previewContainer" class="d-flex flex-wrap gap-2 mt-3"></div>
+  <small class="text-danger" id="imageError"></small>
+
+  <!-- SUBMIT -->
+  <div class="text-center mt-4">
+    <button type="submit" class="btn btn-dark px-5">
+      ADD PRODUCT
+    </button>
+  </div>
+
+</form>
+
+
+        
 <div id="cropModal" style="
     position: fixed;
     inset: 0;
@@ -428,85 +433,254 @@ document.getElementById("applyCrop").onclick = function () {
   //  validation 
 
 
-   function validateForm(){
-    document.querySelectorAll("small.text-danger").forEach(element=>element.innerHTML = "");
+  function validateForm() {
 
-     let isValid = true;
+  // clear old errors
+  document.querySelectorAll("small.text-danger")
+    .forEach(el => el.innerText = "");
 
+  let isValid = true;
 
-     const name = document.querySelector("input[name ='name']").value.trim();
-  const category = document.querySelector("select[name='category']").value.trim();
-  const brand = document.querySelector("input[name='brand']").value.trim();
+  const name = document.querySelector("input[name='name']").value.trim();
+  const category = document.querySelector("select[name='category']").value;
+  const brand = document.querySelector("select[name='brand']").value;
   const description = document.querySelector("input[name='description']").value.trim();
-  const price = document.querySelector("input[name='price']").value.trim();
-  const offerPrice = document.querySelector("input[name='offerPrice']").value.trim();
-  const size = document.querySelector("input[name='size']").value.trim();
-  const color = document.querySelector("input[name='color']").value.trim();
-  const stock = document.querySelector("input[name='stock']").value.trim();
+  // const price = document.querySelector("input[name='price']").value;
+  // const offerPrice = document.querySelector("input[name='offerPrice']").value;
+  // const size = document.querySelector("input[name='size']").value.trim();
+  // const color = document.querySelector("input[name='color']").value.trim();
+  // const stock = document.querySelector("input[name='stock']").value;
 
-
-    if (!name) {
+  // PRODUCT NAME
+  if (!name) {
     document.getElementById("nameError").innerText = "Product name is required";
     isValid = false;
   }
 
-  if(!category){
+  // CATEGORY
+  if (!category) {
     document.getElementById("categoryError").innerText = "Category is required";
     isValid = false;
   }
-  if(!brand){
-    document.getElementById("brandError").innerText ="Brand is required";
-     isValid = false;
+
+  // BRAND
+  if (!brand) {
+    document.getElementById("brandError").innerText = "Brand is required";
+    isValid = false;
   }
 
-  if(!description){
-    document.getElementById("descriptionError").innerText = "Desciption  is required";
+  // DESCRIPTION
+  if (!description) {
+    document.getElementById("descriptionError").innerText = "Description is required";
+    isValid = false;
+  }
+
+  // PRICE
+  // if (!price || price <= 0) {
+  //   document.getElementById("priceError").innerText = "Enter a valid price";
+  //   isValid = false;
+  // }
+
+  // // OFFER PRICE
+  // if (!offerPrice || offerPrice <= 0) {
+  //   document.getElementById("offerpriceError").innerText = "Enter a valid offer price";
+  //   isValid = false;
+  // } else if (Number(offerPrice) >= Number(price)) {
+  //   document.getElementById("offerpriceError").innerText =
+  //     "Offer price must be less than price";
+  //   isValid = false;
+  // }
+
+  // SIZE
+  // if (!size) {
+  //   document.getElementById("sizeError").innerText = "Size is required";
+  //   isValid = false;
+  // }
+
+  // COLOR
+  // if (!color) {
+  //   document.getElementById("colorError").innerText = "Color is required";
+  //   isValid = false;
+  // }
+
+  // STOCK
+  // if (!stock || stock < 0) {
+  //   document.getElementById("stockError").innerText = "Stock must be 0 or more";
+  //   isValid = false;
+  // }
+
+  // IMAGES (MIN 1, MAX 10)
+  if (selectedFiles.length < 3) {
+    document.getElementById("imageError").innerText =
+      "At least 3 product image is required";
+    isValid = false;
+  } else if (selectedFiles.length > 10) {
+    document.getElementById("imageError").innerText =
+      "Maximum 10 images allowed";
     isValid = false;
   }
 
 
 
-  if(!price){
-    document.getElementById("priceError").innerText = "Price is required";
-    isValid = false;
+  // VARIANTS
+if (variants.length === 0) {
+  document.getElementById("variantError").innerText =
+    "Please add at least one variant";
+  isValid = false;
+}
+
+
+  return isValid;
+}
+
+
+
+function updateInputFiles() {
+  const dataTransfer = new DataTransfer();
+
+  selectedFiles.forEach(file => {
+    dataTransfer.items.add(file);
+  });
+
+  input.files = dataTransfer.files;
+}
+
+
+
+
+//  sweat  alert validation
+
+const params = new URLSearchParams(window.location.search);
+  const status = params.get("status");
+
+  if (status === "success") {
+    Swal.fire({
+      icon: "success",
+      title: "Product Added Successfully",
+      text: "Your product has been added.",
+      showConfirmButton: false,
+      timer: 2000
+    });
   }
 
-  if(!offerPrice){
-    document.getElementById("offerpriceError").innerText = "OfferPrice is required ";
-    isValid = false;
+  if(status === "exists"){
+    Swal.fire({
+      icon:"success",
+      title:"Product Already Exists",
+      text:"Added Product is Already Exists",
+
+    })
   }
 
-  if(!size){
-    document.getElementById("sizeError").innerText = "Size is required";
-    isValid = false;
+  if (status === "error") {
+    Swal.fire({
+      icon: "error",
+      title: "Failed to Add Product",
+      text: "Something went wrong. Please try again."
+    });
   }
 
-  if(!color){
-     document.getElementById("colorError").innerText = "Color is required";
-     isValid = false;
-  }
-
-  if(!stock){
-    document.getElementById("stockError").innerText = "Stock is required";
-    isValid =false;
-  }
-
-
-    if (selectedFiles.length === 0) {
-    document.getElementById("imageError").innerText = "At least 3 image is required";
-    isValid = false;
+  // clean URL
+  if (status) {
+    window.history.replaceState({}, document.title, window.location.pathname);
   }
 
 
-return isValid
-
-
-
-   }
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  let variants = [];
+
+function addVariant() {
+  document.getElementById("variantInputError").innerText = "";
+
+  const size = document.getElementById("vSize").value.trim();
+  const price = document.getElementById("vPrice").value;
+  const offerPrice = document.getElementById("vOfferPrice").value;
+  const stock = document.getElementById("vStock").value;
+
+  if (!size || !price || !offerPrice || stock === "") {
+    document.getElementById("variantInputError").innerText =
+      "All variant fields are required";
+    return;
+  }
+
+  if (Number(price) <= 0) {
+    document.getElementById("variantInputError").innerText =
+      "Price must be greater than 0";
+    return;
+  }
+
+  if (Number(offerPrice) <= 0 || Number(offerPrice) >= Number(price)) {
+    document.getElementById("variantInputError").innerText =
+      "Offer price must be less than price";
+    return;
+  }
+
+  if (Number(stock) < 0) {
+    document.getElementById("variantInputError").innerText =
+      "Stock must be 0 or more";
+    return;
+  }
+
+  variants.push({ size, price, offerPrice, stock });
+
+  document.getElementById("vSize").value = "";
+  document.getElementById("vPrice").value = "";
+  document.getElementById("vOfferPrice").value = "";
+  document.getElementById("vStock").value = "";
+
+  renderVariants();
+}
+
+function renderVariants() {
+  const container = document.getElementById("variantList");
+  container.innerHTML = "";
+
+  variants.forEach((v, i) => {
+    container.innerHTML += `
+      <div class="variant-item d-flex gap-3 align-items-center mb-2">
+        <div><b>${v.size}</b></div>
+        <div>₹${v.price}</div>
+        <div>₹${v.offerPrice}</div>
+        <div>${v.stock}</div>
+
+        <input type="hidden" name="variants[${i}][size]" value="${v.size}">
+        <input type="hidden" name="variants[${i}][price]" value="${v.price}">
+        <input type="hidden" name="variants[${i}][offerPrice]" value="${v.offerPrice}">
+        <input type="hidden" name="variants[${i}][stock]" value="${v.stock}">
+
+        <button type="button"
+                class="btn btn-sm btn-danger"
+                onclick="removeVariant(${i})">X</button>
+      </div>
+    `;
+  });
+}
+
+function removeVariant(index) {
+  variants.splice(index, 1);
+  renderVariants();
+}
 
 
 

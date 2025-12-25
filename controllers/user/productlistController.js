@@ -2,6 +2,7 @@
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const User = require("../../models/userSchema");
+const Brand = require("../../models/brandSchema")
 
 
 
@@ -10,7 +11,7 @@ const loadShopPage = async (req, res) => {
         const userId = req.session.user;
         let userData = await User.findById(userId);
         
-        let filter = {isDeleted:false};
+        let filter = {isDeleted:false,isListed:true};
 
         if (req.query.search && req.query.search.trim() !== "") {
             const searchText = req.query.search.trim();
@@ -26,7 +27,9 @@ const loadShopPage = async (req, res) => {
                 : [req.query.category];
 
             const categoryDocs = await Category.find({
-                name: { $in: selected.map(c => new RegExp("^" + c + "$", "i")) }
+                name: { $in: selected.map(c => new RegExp("^" + c + "$", "i")) },
+                isDeleted:false,
+                isListed:true
             });
 
             const categoryIds = categoryDocs.map(c => c._id);
@@ -35,15 +38,26 @@ const loadShopPage = async (req, res) => {
             }
         }
 
-        if (req.query.brand) {
-    const selectedBrands = Array.isArray(req.query.brand)
-        ? req.query.brand
-        : [req.query.brand];
 
-    filter.brand = { 
-        $in: selectedBrands.map(b => new RegExp("^" + b + "$", "i")) 
-    };
+        if (req.query.brand) {
+  const selectedBrands = Array.isArray(req.query.brand)
+    ? req.query.brand
+    : [req.query.brand];
+
+  const brandDocs = await Brand.find({
+    name: { $in: selectedBrands.map(b => new RegExp("^" + b + "$", "i")) },
+    isDeleted: false,
+    isListed: true
+  });
+
+  const brandIds = brandDocs.map(b => b._id);
+  if (brandIds.length > 0) {
+    filter.brand = { $in: brandIds };
+  }
 }
+
+
+       
 
 
         let sortOption = {};
@@ -66,6 +80,19 @@ const loadShopPage = async (req, res) => {
             .skip(skip)
             .limit(limit);
 
+
+
+            const categories = await Category.find({
+  isDeleted: false,
+  isListed: true
+});
+
+const brands = await Brand.find({
+  isDeleted: false,
+  isListed: true
+});
+
+
         res.render("productlist", {
             products,
             selectedCategory: req.query.category ? [].concat(req.query.category) : [],
@@ -75,6 +102,8 @@ const loadShopPage = async (req, res) => {
             page,
             totalPages,
             user: userData,
+            categories,
+            brands
         });
 
     } catch (err) {

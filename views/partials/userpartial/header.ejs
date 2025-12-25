@@ -1,6 +1,12 @@
+
+
+
 <header class="bg-white sticky top-0 z-50 shadow-sm border-b border-gray-200">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 
               flex flex-col md:flex-row justify-between items-center gap-4">
+
+
+
 
     <!-- LOGO -->
     <a href="/" class="flex items-center space-x-2 text-3xl font-extrabold tracking-widest text-black">
@@ -35,26 +41,81 @@
     </form>
 
     <!-- USER DROPDOWN / LOGIN -->
-    <div class="flex items-center space-x-6">
-      <% if (locals.user) { %>
-        <div class="relative">
-          <button id="userMenuBtn" class="flex items-center gap-1 font-semibold cursor-pointer">
-            <%= locals.user.name %>
-            <span class="text-xs">▼</span>
-          </button>
 
-          <div id="userDropdown"
-            class="hidden absolute right-0 mt-2 w-40 bg-white border border-gray-200 
-                   rounded-lg shadow-lg z-50">
-            <a href="/user/profile" class="block px-4 py-2 hover:bg-gray-100">My Profile</a>
-            <a href="/logout" class="block px-4 py-2 hover:bg-gray-100 text-red-600">Logout</a>
-          </div>
+    <div class="flex items-center space-x-6">
+
+  <% if (locals.user && locals.user.name) { %>
+
+    <% 
+      const userName = locals.user.name;
+      const userInitial = userName.charAt(0).toUpperCase();
+    %>
+
+    <div class="relative">
+
+      <!-- BUTTON -->
+      <button id="userMenuBtn" type="button"
+        class="flex items-center gap-2 font-semibold cursor-pointer bg-transparent border-0">
+
+        <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold"
+             style="background: linear-gradient(135deg,#667eea,#764ba2);">
+          <%= userInitial %>
         </div>
-      <% } else { %>
-        <a href="/login" class="font-medium text-gray-700 hover:text-blue-600">Login</a>
-        <a href="/signup" class="font-medium text-gray-700 hover:text-blue-600">Signup</a>
-      <% } %>
+
+        <span><%= userName %></span>
+        <i class="fa-solid fa-chevron-down text-xs"></i>
+      </button>
+
+      <!-- DROPDOWN -->
+      <div id="userDropdown"
+        class="hidden absolute right-0 mt-2 w-44 bg-white border border-gray-200 
+               rounded-xl shadow-lg z-50 overflow-hidden">
+
+        <a href="/user/profile"
+          class="block px-4 py-3 text-sm hover:bg-gray-100">
+          My Profile
+        </a>
+
+        <a href="/logout"
+          class="block px-4 py-3 text-sm text-red-600 hover:bg-gray-100">
+          Logout
+        </a>
+
+      </div>
     </div>
 
-  </div>
+  <% } else { %>
+
+    <!-- GUEST -->
+    <a href="/login" class="font-medium text-gray-700 hover:text-black">Login</a>
+    <a href="/signup" class="font-medium text-gray-700 hover:text-black">Signup</a>
+
+  <% } %>
+
+</div>
+
+
+
+
+
+
+  
 </header>
+
+
+
+<script>
+  const userBtn = document.getElementById("userMenuBtn");
+  const userDropdown = document.getElementById("userDropdown");
+
+  if (userBtn && userDropdown) {
+    userBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      userDropdown.classList.toggle("hidden");
+    });
+
+    document.addEventListener("click", () => {
+      userDropdown.classList.add("hidden");
+    });
+  }
+</script>
