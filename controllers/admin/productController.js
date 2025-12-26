@@ -96,13 +96,12 @@
         return res.redirect("/admin/add-products?status=exists");
       }
 
-      // ✅ HANDLE IMAGES
+      
       const images = [];
       if (req.files && req.files.length > 0) {
         req.files.forEach(file => images.push(file.filename));
       }
-
-      // ✅ HANDLE VARIANTS (IMPORTANT FIX)
+      
       const variants = data.variants
         ? Object.values(data.variants)
         : [];
@@ -127,8 +126,8 @@
       return res.redirect("/admin/add-products?status=success");
 
 
-      console.log("BODY:", req.body);
-console.log("FILES:", req.files);
+//       console.log("BODY:", req.body);
+// console.log("FILES:", req.files);
 
 
     } catch (error) {
@@ -139,11 +138,6 @@ console.log("FILES:", req.files);
 
 
       
-
-
-
-      
-
 
       const loadAddProducts = async (req, res) => {
     try {
@@ -167,7 +161,6 @@ console.log("FILES:", req.files);
     try {
       const id = req.params.id;
 
-      
       const product = await Product.findOne({
         _id: id,
         isDeleted: false,
@@ -180,7 +173,6 @@ console.log("FILES:", req.files);
         return res.status(404).send("Product not found");
       }
 
-      
       const categories = await Category.find({
         isDeleted: false,
         isListed: true
@@ -252,6 +244,7 @@ console.log("FILES:", req.files);
   };
 
 
+
   const deleteProduct = async (req, res) => {
     try {
       const { id } = req.params;
@@ -276,7 +269,7 @@ console.log("FILES:", req.files);
           try {
               const { productId, imgName } = req.params;
 
-              // Remove image from product document
+              
               const updatedProduct = await Product.findByIdAndUpdate(
                   productId,
                   { $pull: { images: imgName } },
@@ -287,7 +280,7 @@ console.log("FILES:", req.files);
                   return res.json({ success: false, message: "Product not found" });
               }
 
-              // Delete image from folder
+              
               const imagePath = path.join(__dirname, "../../public/uploads/product-images", imgName);
 
               if (fs.existsSync(imagePath)) {

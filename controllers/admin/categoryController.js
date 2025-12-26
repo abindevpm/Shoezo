@@ -125,27 +125,17 @@ const toggleCategory = async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const editCategory = async (req, res) => {
     try {
         const id = req.params.id;
         let { name, description, categoryOffer } = req.body;
 
-        // Trim input values
+      
         name = name?.trim();
     
         description = description?.trim();
 
-        // VALIDATION
+        
         if (!name ||!description || categoryOffer === "") {
             return res.json({
                 success: false,
@@ -153,7 +143,7 @@ const editCategory = async (req, res) => {
             });
         }
 
-        // UPDATE CATEGORY
+        
         await Category.findByIdAndUpdate(id, {
             name,
             description,

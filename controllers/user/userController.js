@@ -23,14 +23,14 @@ const loadHomepage = async (req, res) => {
     }
 
 
-    // FEATURED PRODUCTS (optional)
+    
     const featuredProducts = await Product.find({ isDeleted:true,isListed:true })
       .sort({ createdAt: -1 })
       .limit(3);
 
     return res.render("home", { 
       user: userData,
-      featuredProducts  // <-- FIXED (NOW AVAILABLE IN EJS)
+      featuredProducts  
     });
 
   } catch (error) {
@@ -424,15 +424,15 @@ const sendResetOTP = async (req, res) => {
     if (!user) {
       return res.render("forgot-password", { message: "Email does not exist" });
     }
-    // Generate OTP
+    
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
     console.log("Your OTP is:",otp)
 
-    // Save in session (SAFE)
+    
     req.session.resetEmail = email;
     req.session.resetOtp = otp;
 
-    // Send Email
+    
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -519,7 +519,7 @@ const resetPassword = async (req, res) => {
       { $set: { password: hashedPassword } }
     );
 
-    // Clear session data
+    
     delete req.session.resetEmail;
     delete req.session.resetOtp;
 

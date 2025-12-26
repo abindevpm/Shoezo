@@ -10,6 +10,8 @@ const loadlogin = (req, res) => {
   res.render("adminlogin");
 };
 
+
+
  const login = async(req,res)=>{
 
   try{

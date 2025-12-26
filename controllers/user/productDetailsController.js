@@ -1,28 +1,33 @@
+
 const Product = require("../../models/productSchema");
 
 const loadProductDetails = async (req, res) => {
   try {
-    const id = req.params.id;
+    const { id } = req.params;
 
-    const product = await Product.findById(id).populate("category");
+    const product = await Product.findOne({
+      _id: id,
+      isDeleted: false,
+      isListed: true
+    })
+      .populate("category")
+      .populate("brand");
 
+    
     if (!product) {
       return res.redirect("/productlist");
     }
 
-    
-    res.render("productDetails", { 
-        product, 
-        reviews: [],          
-        similarProducts: []   
+    res.render("productDetails", {
+      product,
+      reviews: [],
+      similarProducts: []
     });
 
-  } catch (err) {
-    console.log("Product Details Error:", err);
-    res.status(500).send("Internal Server Error");
+  } catch (error) {
+    console.log("Product Details Error:", error);
+    return res.redirect("/productlist");
   }
 };
 
-module.exports = { 
-    
-    loadProductDetails };
+module.exports = { loadProductDetails };

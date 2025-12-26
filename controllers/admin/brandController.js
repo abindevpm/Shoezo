@@ -12,7 +12,7 @@ const loadBrands = async (req, res) => {
 
 
 
-      // 🔑 SEARCH QUERY
+    
     const query = {
       isDeleted: false,
       name: { $regex: search, $options: "i" }

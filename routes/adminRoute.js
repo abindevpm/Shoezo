@@ -45,7 +45,7 @@ router.get("/dashboard", adminController.dashboard)
 
 
   //  product managemant
- router.get("/products", adminAuth, productController.loadProducts);
+ router.get("/products", productController.loadProducts);
  router.get("/add-products",adminAuth,productController.loadAddProducts)
 router.post("/add-product",adminAuth,upload.array("images", 3), productController.AddProducts);
 router.get("/edit-product/:id",adminAuth,productController.loadEditProduct)
