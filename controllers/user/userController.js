@@ -304,6 +304,7 @@ console.log("Remaining (sec):", (req.session.otpExpiry - Date.now()) / 1000);
 
     await saveUserData.save();
 
+    req.session.user = user;
     
     req.session.userOtp = null;
     req.session.otpExpiry = null;

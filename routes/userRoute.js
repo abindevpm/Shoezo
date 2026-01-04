@@ -3,6 +3,10 @@ const router = express.Router();
 const userController = require("../controllers/user/userController");
 const productlistController = require("../controllers/user/productlistController")
 const productDetailsController = require("../controllers/user/productDetailsController")
+const profileController = require("../controllers/user/profileController")
+const {uploadProfile} = require("../middlewares/multer")
+
+
 
 const passport = require("passport");
 const { userAuth } = require("../middlewares/auth");
@@ -16,6 +20,7 @@ router.get("/pageNotFound",userController.pageNotFound)
  router.get("/pageNotFound",userAuth,userController.pageNotFound)
  router.get("/signup",userController.loadSignup)
  router.post("/signup",userController.signup)
+
  router.post("/otp",userController.otp)
  router.post("/resend-otp",userController.resendOtp)
  
@@ -41,12 +46,12 @@ router.get("/auth/google/callback", passport.authenticate("google", { failureRed
 
    //   product list  
 
-   router.get("/productlist",userAuth,productlistController.loadShopPage)
+   router.get("/productlist",productlistController.loadShopPage)
 
 
    // productdetails
 
-router.get("/productdetails/:id",userAuth,productDetailsController.loadProductDetails)
+router.get("/productdetails/:id",productDetailsController.loadProductDetails)
 
 
 //  forgot pass
@@ -56,12 +61,23 @@ router.post("/forgot-password", userController.sendResetOTP);
 router.get("/verify-otp", userController.loadOtpPage);
 router.post("/verify-otp", userController.verifyOtp);
 
+
 router.get("/reset-password", userController.loadResetPage);
 router.post("/reset-password", userController.resetPassword);
 
 
 
 
+//  user profile
+ router.get("/profile", profileController.loadProfile)
+router.get("/edit-profile", profileController.loadEditProfile)
+router.post("/edit-profile", profileController.editProfile)
+router.post("/upload-profile-image",userAuth,uploadProfile.single("profileImage"),profileController.uploadProfileImage)
+router.post("/change-password",userAuth,profileController.changePassword)
+
+router.post("/send-email-otp", userAuth,profileController.sendEmailOtp);
+router.get("/verify-email-otp",profileController.loadVerifyEmailOtp);
+router.post("/verify-email-otp", userAuth,profileController.verifyEmailOtp);
 
 
 

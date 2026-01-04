@@ -1,121 +1,184 @@
 
-
-
-<header class="bg-white sticky top-0 z-50 shadow-sm border-b border-gray-200">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 
-              flex flex-col md:flex-row justify-between items-center gap-4">
-
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 
 
-    <!-- LOGO -->
-    <a href="/" class="flex items-center space-x-2 text-3xl font-extrabold tracking-widest text-black">
-      <span>SHOEZO</span>
-    </a>
 
-    <!-- NAVIGATION -->
-    <nav class="flex space-x-6 text-gray-600 font-medium">
-      <a href="/" class="hover:text-black">Home</a>
-      <a href="/productlist" class="hover:text-black">Shop</a>
-      <a href="/orders" class="hover:text-black">Orders</a>
-    </nav>
 
-    <!-- SEARCH BAR -->
-    <form action="/productlist" method="GET" class="relative hidden lg:block">
-      <input 
-        type="text" 
-        name="search" 
-        placeholder="Search"
-        value="<%= typeof search !== 'undefined' ? search : '' %>"
-        class="border border-gray-300 rounded-full py-2 pl-4 pr-10 text-sm 
-               focus:outline-none focus:ring-2 focus:ring-gray-700 
-               transition duration-150 w-64"
-      >
-      <button type="submit" class="absolute right-0 top-0 mt-2 mr-3 text-gray-500 hover:text-black">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z">
-          </path>
-        </svg>
-      </button>
-    </form>
 
-    <!-- USER DROPDOWN / LOGIN -->
 
-    <div class="flex items-center space-x-6">
+<header class="navbar-custom">
+  <div class="container-xl">
+    <div class="navbar-inner">
 
-  <% if (locals.user && locals.user.name) { %>
+      <!-- LOGO -->
+      <a href="/" class="logo">SHOEZO</a>
 
-    <% 
-      const userName = locals.user.name;
-      const userInitial = userName.charAt(0).toUpperCase();
-    %>
+      <!-- NAV -->
+      <nav class="nav-links">
+        <a href="/">Home</a>
+        <a href="/productlist">Shop</a>
+        <a href="/orders">Orders</a>
+      </nav>
 
-    <div class="relative">
+      <!-- SEARCH -->
+      <form action="/productlist" method="GET" class="search-box d-none d-lg-block">
+        <input
+          type="text"
+          name="search"
+          placeholder="Search"
+          value="<%= typeof search !== 'undefined' ? search : '' %>"
+        >
+        <button type="submit">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+      </form>
 
-      <!-- BUTTON -->
-      <button id="userMenuBtn" type="button"
-        class="flex items-center gap-2 font-semibold cursor-pointer bg-transparent border-0">
+      <!-- USER -->
+      <div class="user-area">
 
-        <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold"
-             style="background: linear-gradient(135deg,#667eea,#764ba2);">
-          <%= userInitial %>
-        </div>
+        <% if (locals.user && locals.user.name) { %>
+          <% const initial = locals.user.name.charAt(0).toUpperCase(); %>
 
-        <span><%= userName %></span>
-        <i class="fa-solid fa-chevron-down text-xs"></i>
-      </button>
+          <div class="dropdown">
+            <button class="user-btn" data-bs-toggle="dropdown">
+              <div class="avatar"><%= initial %></div>
+              <span><%= locals.user.name %></span>
+              <i class="fa-solid fa-chevron-down"></i>
+            </button>
 
-      <!-- DROPDOWN -->
-      <div id="userDropdown"
-        class="hidden absolute right-0 mt-2 w-44 bg-white border border-gray-200 
-               rounded-xl shadow-lg z-50 overflow-hidden">
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="/profile">My Profile</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="/logout">Logout</a></li>
+            </ul>
+          </div>
 
-        <a href="/user/profile"
-          class="block px-4 py-3 text-sm hover:bg-gray-100">
-          My Profile
-        </a>
-
-        <a href="/logout"
-          class="block px-4 py-3 text-sm text-red-600 hover:bg-gray-100">
-          Logout
-        </a>
+        <% } else { %>
+          <a href="/login">Login</a>
+          <a href="/signup">Signup</a>
+        <% } %>
 
       </div>
     </div>
-
-  <% } else { %>
-
-    <!-- GUEST -->
-    <a href="/login" class="font-medium text-gray-700 hover:text-black">Login</a>
-    <a href="/signup" class="font-medium text-gray-700 hover:text-black">Signup</a>
-
-  <% } %>
-
-</div>
-
-
-
-
-
-
-  
+  </div>
 </header>
 
 
 
-<script>
-  const userBtn = document.getElementById("userMenuBtn");
-  const userDropdown = document.getElementById("userDropdown");
+<style>
 
-  if (userBtn && userDropdown) {
-    userBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      userDropdown.classList.toggle("hidden");
-    });
 
-    document.addEventListener("click", () => {
-      userDropdown.classList.add("hidden");
-    });
-  }
-</script>
+  /* ===== EXACT TAILWIND NAVBAR LOOK ===== */
+
+.navbar-custom {
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.navbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+}
+
+/* LOGO */
+.logo {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #000;
+  text-decoration: none;
+}
+
+/* NAV LINKS */
+.nav-links {
+  display: flex;
+  gap: 24px;
+  font-weight: 500;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #4b5563;
+}
+
+.nav-links a:hover {
+  color: #000;
+}
+
+/* SEARCH */
+.search-box {
+  position: relative;
+}
+
+.search-box input {
+  width: 256px;
+  padding: 8px 40px 8px 16px;
+  border-radius: 9999px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  outline: none;
+}
+
+.search-box input:focus {
+  border-color: #374151;
+}
+
+.search-box button {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #6b7280;
+}
+
+/* USER AREA */
+.user-area {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.user-area a {
+  text-decoration: none;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.user-area a:hover {
+  color: #000;
+}
+
+/* USER BUTTON */
+.user-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  font-weight: 600;
+}
+
+/* AVATAR */
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,#667eea,#764ba2);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+</style>
