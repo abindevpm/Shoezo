@@ -189,8 +189,58 @@
 }
 
 
+.address-card {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 18px;
+  position: relative;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+
+.address-card p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #444;
+}
+
+.badge {
+  background: #555;
+  color: #fff;
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 10px;
+  text-transform: uppercase;
+}
+
+.badge.blue {
+  background: #3b82f6;
+}
+
+.card-actions {
+  position: absolute;
+  bottom: 18px;
+  right: 20px;
+}
+
+.card-actions a {
+  font-size: 12px;
+  color: #333;
+  margin-left: 15px;
+  text-decoration: none;
+}
 
 
+ .error {
+    color: red;
+    font-size: 11px;
+    margin-top: 4px;
+    display: block;
+  }
+
+  .input-error {
+    border: 1px solid red !important;
+  }
 
 
 
@@ -201,166 +251,95 @@
     <%- include("../partials/userpartial/header.ejs") %>
 
     <div class="container">
-        <%- include("../partials/userpartial/userprofile-sidebar.ejs", {
-    user: user,
-    activePage: "profile"
-  }) %>
+        <aside>
+            <div class="user-header">
+           
+
+                <img
+    src="<%= user.profileImage && user.profileImage !== '' 
+          ? user.profileImage 
+          : '/images/default avatar ong.jpg' %>"
+    alt="User"
+  >
+            
+                <%= user.name %>
+
+            </div>
+            <a href="#" class="menu-item active"><i class="fas fa-th-large"></i> Account Overview</a>
+            <a href="#" class="menu-item"><i class="fas fa-box"></i> My Orders</a>
+            <a href="#" class="menu-item"><i class="fas fa-address-book"></i> Manage Addresses</a>
+            <a href="#" class="menu-item"><i class="fas fa-wallet"></i> Wallet</a>
+            <a href="#" class="menu-item"><i class="fas fa-ticket-alt"></i> coupons</a>
+            <a href="#" class="menu-item"><i class="fas fa-users"></i> Refer & Earn</a>
+            <a href="#" class="menu-item" style="margin-top: 60px; border-bottom: none;"><i class="fas fa-sign-out-alt"></i> logout</a>
+        </aside>
+
         <main>
 
+  <h2 style="text-align:center; margin-bottom:6px;">Add New Addresses</h2>
+  <p style="text-align:center; font-size:13px; color:#777; margin-bottom:30px;">
+    Fill in the below details to add new address
+  </p>
 
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-  <h3 class="section-title">Account Settings</h3>
+  <form action="/addAdress" method="POST" style="max-width:520px; margin:0 auto;" onsubmit="return validateAddAddressForm()">
 
-  <a href="/user/edit-profile" class="edit-btn">
-    <i class="fas fa-pen"></i> Edit Profile
-  </a>
+
+    <!-- NAME -->
+<div class="input-group">
+  <label>Name</label>
+  <input type="text" name="fullName">
+  <small class="error"></small>
 </div>
 
-     
-
-<div class="form-row">
-
-  <!-- LEFT SIDE : FORM CONTENT -->
-  <div class="form-inputs">
-
-    <!-- PROFILE UPDATE FORM -->
-    <form action="/userdashboard/update-profile" method="POST">
-
-      <div class="input-group">
-        <label>Full name</label>
-        <input type="text" name="name" value="<%= user.name %>" readonly>
-      </div>
-
-      <div class="input-group">
-  <label>Phone Number</label>
-  <input
-    type="text"
-    value="<%= user.phone ? user.phone : 'Not added' %>"
-    readonly>
+<!-- STATE -->
+<div class="input-group">
+  <label>State</label>
+  <input type="text" name="state">
+  <small class="error"></small>
 </div>
- 
 
-      <!-- <button class="black-btn" type="submit">
-        Save Changes
-      </button> -->
-    </form>
+<!-- ADDRESS -->
+<div class="input-group">
+  <label>Address</label>
+  <textarea name="addressLine" rows="3"></textarea>
+  <small class="error"></small>
+</div>
 
-    
-    <div class="email-section">
+<!-- PINCODE -->
+<div class="input-group">
+  <label>Pin Code</label>
+  <input type="text" name="pincode">
+  <small class="error"></small>
+</div>
 
-      <label>Email</label>
+<!-- MOBILE -->
+<div class="input-group">
+  <label>Mobile Number</label>
+  <input type="text" name="phone">
+  <small class="error"></small>
+</div>
 
-      <div class="email-row">
-        <input type="text" value="<%= user.email %>" readonly>
-
-        <!-- <button
-          type="button"
-          class="black-btn-sm"
-          onclick="toggleEmailInput()">
-          Change
-        </button> -->
-      </div>
-
-<!--     
-      <form
-        action="/user/request-email-change"
-        method="POST"
-        id="newEmailBox"
-        style="display:none; margin-top:10px;">
-
-        <input
-          type="email"
-          name="email"
-          placeholder="Enter new email"
-          required>
-
-        <button class="black-btn-sm" type="submit" style="margin-top:8px;">
-          Send OTP
-        </button>
-      </form> -->
-
-    </div>
-  </div>
-
-  
-  <div class="profile-pic-side">
-
-    <img
-  src="<%= user.profileImage && user.profileImage !== '' 
-        ? user.profileImage 
-        : '/images/default avatar ong.jpg' %>"
-  alt="Profile"
-  class="profile-img"
-/>
-
-
-    
-    <br>
-    <button class="choose-img-btn">User  Image</button>
-  </div>
-
+<!-- ALTERNATE -->
+<div class="input-group">
+  <label>Alternate Number</label>
+  <input type="text" name="alternatePhone">
+  <small class="error"></small>
 </div>
 
 
-<div class="password-section">
-  <!-- <h3 class="section-title">Change Password</h3> -->
 
-  <form action="/userdashboard/change-password" method="POST">
-    <div class="pw-grid">
 
-      <!-- <div class="input-group pw-full-width">
-        <label>Current Password</label>
-        <input
-          type="password"
-          name="currentPassword"
-          placeholder="Current password"
-          readonly
-        >
-      </div> -->
-<!-- 
-      <div class="input-group">
-        <label>New Password</label>
-        <input
-          type="password"
-          name="newPassword"
-          placeholder="New password"
-          required
-        >
-      </div>
-
-      <div class="input-group">
-        <label>Confirm Password</label>
-        <input
-          type="password"
-          name="confirmPassword"
-          placeholder="Confirm password"
-          required
-        >
-      </div>
-
+    <!-- SUBMIT -->
+    <div style="text-align:center; margin-top:25px;">
+      <button type="submit" class="black-btn" style="padding:10px 50px;">
+        ADD
+      </button>
     </div>
 
-    <button class="black-btn" type="submit">
-      Change Password
-    </button>
   </form>
-</div>
 
+</main>
 
-
- -->
-
-
-
-
-            <div class="refer-container">
-                <button class="refer-btn">Refer & Earn</button>
-                <div class="refer-box">
-                    <span style="font-size: 18px; color: #555;">ox3291756</span>
-                    <i class="far fa-copy" style="cursor: pointer; font-size: 20px;"></i>
-                </div>
-            </div>
-        </main>
     </div>
 
     <%- include("../partials/userpartial/footer.ejs") %>
@@ -368,7 +347,55 @@
 </body>
 </html>
 
+
 <script>
+function validateAddAddressForm() {
 
+  let isValid = true;
+
+  
+  document.querySelectorAll(".error").forEach(e => e.innerText = "");
+  document.querySelectorAll("input, textarea").forEach(el => el.classList.remove("input-error"));
+
+  function setError(input, message) {
+    input.classList.add("input-error");
+    input.parentElement.querySelector(".error").innerText = message;
+    isValid = false;
+  }
+
+  const fullName = document.querySelector("input[name='fullName']");
+  const state = document.querySelector("input[name='state']");
+  const addressLine = document.querySelector("textarea[name='addressLine']");
+  const pincode = document.querySelector("input[name='pincode']");
+  const phone = document.querySelector("input[name='phone']");
+  const alternatePhone = document.querySelector("input[name='alternatePhone']");
+
+  
+  if (!fullName.value.trim()) setError(fullName, "Name is required");
+  if (!state.value.trim()) setError(state, "State is required");
+  if (!addressLine.value.trim()) setError(addressLine, "Address is required");
+  if (!pincode.value.trim()) setError(pincode, "Pincode is required");
+  if (!phone.value.trim()) setError(phone, "Mobile number is required");
+
+  
+  if (state.value && !/^[A-Za-z ]+$/.test(state.value))
+    setError(state, "State must contain only letters");
+
+      if (fullName.value && !/^[A-Za-z ]+$/.test(fullName.value))
+    setError(fullName, "Name  must contain only letters");
+
+
+
+
+  if (pincode.value && !/^\d{6}$/.test(pincode.value))
+    setError(pincode, "Enter valid 6 digit pincode");
+
+  if (phone.value && !/^\d{10}$/.test(phone.value))
+    setError(phone, "Enter valid 10 digit mobile number");
+
+  if (alternatePhone.value && !/^\d{10}$/.test(alternatePhone.value))
+    setError(alternatePhone, "Alternate number must be 10 digits");
+
+  return isValid;
+}
 </script>
-

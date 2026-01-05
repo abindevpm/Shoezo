@@ -191,25 +191,10 @@
     <%- include("../partials/userpartial/header.ejs") %>
 
     <div class="container">
-        <aside>
-            <div class="user-header">
-                     <img
-  src="<%= user.profileImage && user.profileImage !== '' 
-        ? user.profileImage 
-        : '/images/default avatar ong.jpg' %>"
-  alt="User"
->
-
-                <%= user.name %>
-            </div>
-            <a href="#" class="menu-item active"><i class="fas fa-th-large"></i> Account Overview</a>
-            <a href="#" class="menu-item"><i class="fas fa-box"></i> My Orders</a>
-            <a href="#" class="menu-item"><i class="fas fa-address-book"></i> Manage Addresses</a>
-            <a href="#" class="menu-item"><i class="fas fa-wallet"></i> Wallet</a>
-            <a href="#" class="menu-item"><i class="fas fa-ticket-alt"></i> coupons</a>
-            <a href="#" class="menu-item"><i class="fas fa-users"></i> Refer & Earn</a>
-            <a href="#" class="menu-item" style="margin-top: 60px; border-bottom: none;"><i class="fas fa-sign-out-alt"></i> logout</a>
-        </aside>
+        <%- include("../partials/userpartial/userprofile-sidebar.ejs", {
+    user: user,
+    activePage: "profile"
+  }) %>
 
         <main>
           <h3 class="section-title">Account Settings</h3>
@@ -312,10 +297,6 @@
 
 </div>
 
-
-
-
-  
 
 
 </div>

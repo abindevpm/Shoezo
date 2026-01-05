@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SHOEZOO - Account Settings</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
         /* KEEP ALL THIS CSS - Your partials do not have these styles */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
@@ -189,8 +191,46 @@
 }
 
 
+.address-card {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 18px;
+  position: relative;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
 
+.address-card p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #444;
+}
 
+.badge {
+  background: #555;
+  color: #fff;
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 10px;
+  text-transform: uppercase;
+}
+
+.badge.blue {
+  background: #3b82f6;
+}
+
+.card-actions {
+  position: absolute;
+  bottom: 18px;
+  right: 20px;
+}
+
+.card-actions a {
+  font-size: 12px;
+  color: #333;
+  margin-left: 15px;
+  text-decoration: none;
+}
 
 
 
@@ -201,165 +241,91 @@
     <%- include("../partials/userpartial/header.ejs") %>
 
     <div class="container">
-        <%- include("../partials/userpartial/userprofile-sidebar.ejs", {
-    user: user,
-    activePage: "profile"
-  }) %>
+        <aside>
+            <div class="user-header">
+           
+
+                <img
+    src="<%= user.profileImage && user.profileImage !== '' 
+          ? user.profileImage 
+          : '/images/default avatar ong.jpg' %>"
+    alt="User"
+  >
+            
+                <%= user.name %>
+
+            </div>
+            <a href="#" class="menu-item active"><i class="fas fa-th-large"></i> Account Overview</a>
+            <a href="#" class="menu-item"><i class="fas fa-box"></i> My Orders</a>
+            <a href="#" class="menu-item"><i class="fas fa-address-book"></i> Manage Addresses</a>
+            <a href="#" class="menu-item"><i class="fas fa-wallet"></i> Wallet</a>
+            <a href="#" class="menu-item"><i class="fas fa-ticket-alt"></i> coupons</a>
+            <a href="#" class="menu-item"><i class="fas fa-users"></i> Refer & Earn</a>
+            <a href="#" class="menu-item" style="margin-top: 60px; border-bottom: none;"><i class="fas fa-sign-out-alt"></i> logout</a>
+        </aside>
+
         <main>
 
 
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-  <h3 class="section-title">Account Settings</h3>
+             <h2 style="font-size:22px; margin-bottom:6px;">Manage Addresses</h2>
+  <p style="font-size:13px; color:#777; margin-bottom:25px;">
+    Here you can manage the addresses. You can Add, edit or delete the addresses
+  </p>
 
-  <a href="/user/edit-profile" class="edit-btn">
-    <i class="fas fa-pen"></i> Edit Profile
-  </a>
-</div>
+  <!-- Add Address Button -->
+<a href="/addAdress" style="
+  display:block;
+  width:100%;
+  background:#000;
+  color:#fff;
+  padding:14px;
+  border-radius:30px;
+  font-size:14px;
+  text-align:left;
+  margin-bottom:25px;
+  text-decoration:none;
+">
+  <i class="fas fa-plus-circle" style="margin-right:10px;"></i>
+  Add New Address
+</a>
+  <% if (addresses.length === 0) { %>
+  <p style="font-size:13px; color:#777;">
+    No addresses added yet.
+  </p>
+<% } %>
 
-     
+<% addresses.forEach(address => { %>
 
-<div class="form-row">
+  <div class="address-card">
 
-  <!-- LEFT SIDE : FORM CONTENT -->
-  <div class="form-inputs">
+    <% if (address.isDefault) { %>
+      <span class="badge">Default</span>
+    <% } %>
 
-    <!-- PROFILE UPDATE FORM -->
-    <form action="/userdashboard/update-profile" method="POST">
+    <p>
+      <%= address.fullName %>,<br>
+      <%= address.addressLine %>,<br>
+      <%= address.city %>, <%= address.state %><br>
+      <%= address.pincode %><br>
+      Mobile: <%= address.phone %>
+    </p>
 
-      <div class="input-group">
-        <label>Full name</label>
-        <input type="text" name="name" value="<%= user.name %>" readonly>
-      </div>
+    <div class="card-actions">
+      <a href="/editAddress/<%= address._id %>">Edit</a>
+<a href="javascript:void(0)"
+   onclick="confirmDelete('<%= address._id %>')">
+   Delete
+</a>
 
-      <div class="input-group">
-  <label>Phone Number</label>
-  <input
-    type="text"
-    value="<%= user.phone ? user.phone : 'Not added' %>"
-    readonly>
-</div>
- 
-
-      <!-- <button class="black-btn" type="submit">
-        Save Changes
-      </button> -->
-    </form>
-
-    
-    <div class="email-section">
-
-      <label>Email</label>
-
-      <div class="email-row">
-        <input type="text" value="<%= user.email %>" readonly>
-
-        <!-- <button
-          type="button"
-          class="black-btn-sm"
-          onclick="toggleEmailInput()">
-          Change
-        </button> -->
-      </div>
-
-<!--     
-      <form
-        action="/user/request-email-change"
-        method="POST"
-        id="newEmailBox"
-        style="display:none; margin-top:10px;">
-
-        <input
-          type="email"
-          name="email"
-          placeholder="Enter new email"
-          required>
-
-        <button class="black-btn-sm" type="submit" style="margin-top:8px;">
-          Send OTP
-        </button>
-      </form> -->
-
-    </div>
-  </div>
-
-  
-  <div class="profile-pic-side">
-
-    <img
-  src="<%= user.profileImage && user.profileImage !== '' 
-        ? user.profileImage 
-        : '/images/default avatar ong.jpg' %>"
-  alt="Profile"
-  class="profile-img"
-/>
-
-
-    
-    <br>
-    <button class="choose-img-btn">User  Image</button>
-  </div>
-
-</div>
-
-
-<div class="password-section">
-  <!-- <h3 class="section-title">Change Password</h3> -->
-
-  <form action="/userdashboard/change-password" method="POST">
-    <div class="pw-grid">
-
-      <!-- <div class="input-group pw-full-width">
-        <label>Current Password</label>
-        <input
-          type="password"
-          name="currentPassword"
-          placeholder="Current password"
-          readonly
-        >
-      </div> -->
-<!-- 
-      <div class="input-group">
-        <label>New Password</label>
-        <input
-          type="password"
-          name="newPassword"
-          placeholder="New password"
-          required
-        >
-      </div>
-
-      <div class="input-group">
-        <label>Confirm Password</label>
-        <input
-          type="password"
-          name="confirmPassword"
-          placeholder="Confirm password"
-          required
-        >
-      </div>
 
     </div>
 
-    <button class="black-btn" type="submit">
-      Change Password
-    </button>
-  </form>
-</div>
+  </div>
+
+<% }) %>
 
 
-
- -->
-
-
-
-
-            <div class="refer-container">
-                <button class="refer-btn">Refer & Earn</button>
-                <div class="refer-box">
-                    <span style="font-size: 18px; color: #555;">ox3291756</span>
-                    <i class="far fa-copy" style="cursor: pointer; font-size: 20px;"></i>
-                </div>
-            </div>
+   
         </main>
     </div>
 
@@ -369,6 +335,21 @@
 </html>
 
 <script>
-
+function confirmDelete(addressId) {
+  Swal.fire({
+    title: "Delete Address?",
+    text: "This address will be permanently removed",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#555",
+    confirmButtonText: "Yes, delete",
+    cancelButtonText: "Cancel"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      window.location.href = `/address/delete/${addressId}`;
+    }
+  });
+}
 </script>
 

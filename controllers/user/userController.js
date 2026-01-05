@@ -553,6 +553,6 @@ sendResetOTP,
 loadOtpPage,
 verifyOtp,
 loadResetPage,
-resetPassword
+resetPassword,
 
 }

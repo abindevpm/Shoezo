@@ -4,6 +4,7 @@ const userController = require("../controllers/user/userController");
 const productlistController = require("../controllers/user/productlistController")
 const productDetailsController = require("../controllers/user/productDetailsController")
 const profileController = require("../controllers/user/profileController")
+const addressController = require("../controllers/user/addressController");
 const {uploadProfile} = require("../middlewares/multer")
 
 
@@ -80,6 +81,17 @@ router.get("/verify-email-otp",profileController.loadVerifyEmailOtp);
 router.post("/verify-email-otp", userAuth,profileController.verifyEmailOtp);
 router.post("/resend-email-otp",userAuth,profileController.resendEmailOtp)
 router.get("/remove-profile-image",userAuth,profileController.removeProfileImage);
+
+
+
+//  address management
+router.get("/address",addressController.loadAddresses)
+router.get("/addAdress",addressController.loadaddAdresses)
+router.post("/addAdress",addressController.addAdress)
+router.get("/address/delete/:addressId", addressController.deleteAddress)
+router.get("/editAddress/:id",userAuth,addressController.loadEditAddress)
+router.post("/updateAddress/:id",addressController.updateAddress)
+
 
 
 
