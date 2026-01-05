@@ -115,14 +115,16 @@
   <!doctype html>
   <html lang="en">
   <head>
+
+
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>SHOEZO — <%= currentProduct.name %></title>
+    <title> — <%= currentProduct.name %></title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <style>
+    <!-- <style>
       body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
       .thumb { width:64px; height:64px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid #e5e7eb; }
       .thumb.active-border { border-color: #111827 !important; }
@@ -131,21 +133,23 @@
       .fit-dot { position:absolute; top:50%; transform:translate(-50%, -50%); width:12px; height:12px; border:2px solid #fff; box-shadow:0 0 0 1px #1f2937; border-radius:9999px; background:#1f2937; }
       .review-bar-fill { height:100%; background:#10b981; border-radius:9999px; }
       .scrollbar-hide::-webkit-scrollbar { display:none; } .scrollbar-hide { -ms-overflow-style:none; scrollbar-width:none; }
-    </style>
+    </style> -->
   </head>
   <body class="antialiased text-gray-900">
 
-    <%- include("../partials/userpartial/header") %>
+         <%- include("../partials/userpartial/header.ejs") %>
+
+   
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-  <nav class="text-sm text-gray-500 mb-6 flex items-center gap-2">
+  <!-- <nav class="text-sm text-gray-500 mb-6 flex items-center gap-2">
     
     <a href="/" class="hover:text-black">Home</a>
     <span>›</span>
 
     <a href="/shop" class="hover:text-black">Shop</a>
-    <span>›</span>
+    <span>›</span> -->
 
     <!-- FIXED CATEGORY LINK -->
     <a href="/shop/<%= product?.category?.name ? product.category.name.toLowerCase() : '' %>" 
@@ -213,21 +217,41 @@
             <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight"><%= currentProduct.name %></h1>
             <!-- <p class="text-sm text-gray-500 mt-1"><%= currentProduct.model || 'Product' %></p> -->
           </div>
-
-          <button class="p-2 text-gray-400 hover:text-red-500">❤️</button>
+<!-- 
+          <button class="p-2 text-gray-400 hover:text-red-500">❤️</button> -->
         </div>
 
         <div class="border-t pt-4 space-y-3">
           <div class="flex items-center gap-4">
-            <% const displayPrice = currentProduct.offerPrice || currentProduct.price; 
-              const originalPrice = currentProduct.oldPrice || currentProduct.price; 
-            %>
 
-            <p class="text-2xl font-bold">₹<%= displayPrice.toLocaleString() %></p>
+            <%
+  const firstVariant =
+    currentProduct.variants && currentProduct.variants.length > 0
+      ? currentProduct.variants[0]
+      : null;
 
-            <% if (displayPrice < originalPrice) { %>
-              <p class="text-sm text-gray-400 line-through">MRP ₹<%= originalPrice.toLocaleString() %></p>
-            <% } %>
+  const displayPrice = firstVariant ? firstVariant.offerPrice : 0;
+  const originalPrice = firstVariant ? firstVariant.price : 0;
+%>
+
+
+
+          
+<!-- 
+            ₹<%= (displayPrice || 0).toLocaleString() %> -->
+
+
+  <p id="productPrice" class="text-2xl font-bold">
+  ₹<%= (displayPrice || 0).toLocaleString() %>
+</p>
+
+
+<% if ((displayPrice || 0) < (originalPrice || 0)) { %>
+  <p id="originalPrice" class="text-sm text-gray-400 line-through">
+    MRP ₹<%= (originalPrice || 0).toLocaleString() %>
+  </p>
+<% } %>
+
 
             <% if (currentProduct.discount) { %>
               <span class="text-red-600 text-sm font-semibold"><%= currentProduct.discount %>% OFF</span>
@@ -245,7 +269,7 @@
         <p class="text-gray-600"><%= currentProduct.description %></p>
 
         <!-- COLOR -->
-        <div>
+        <!-- <div>
           <p class="text-sm font-semibold text-gray-700 mb-2">Select Color</p>
           <div class="flex gap-2">
             <% (currentProduct.variants || []).forEach((v, idx) => { %>
@@ -256,21 +280,26 @@
               ></button>
             <% }) %>
           </div>
-        </div>
+        </div> -->
 
         <!-- SIZE -->
-        <div>
-          <p class="text-sm font-semibold text-gray-700 mb-2">Select Size (UK)</p>
-          <div class="flex gap-2 flex-wrap">
-            <% (currentProduct.variants || []).forEach((v, idx) => { %>
-              <button 
-                class="px-4 py-2 border rounded-md text-sm font-medium 
-                  <%= idx===0 ? 'bg-black text-white border-black' : '' %>"
-                data-size="<%= v.size %>"
-              ><%= v.size %></button>
-            <% }) %>
-          </div>
-        </div>
+      <div>
+  <p class="text-sm font-semibold text-gray-700 mb-2">Select Size (UK)</p>
+  <div class="flex gap-2 flex-wrap">
+    <% (currentProduct.variants || []).forEach((v, idx) => { %>
+      <button 
+        type="button"
+        class="variant-btn px-4 py-2 border rounded-md text-sm font-medium 
+          <%= idx===0 ? 'bg-black text-white border-black' : '' %>"
+        data-size="<%= v.size %>"
+        data-price="<%= v.offerPrice || v.price %>"
+         data-original="<%= v.price %>"
+      >
+        <%= v.size %>
+      </button>
+    <% }) %>
+  </div>
+</div>
 
         <!-- ACTION BUTTONS -->
         <div class="flex gap-3 pt-2">
@@ -395,6 +424,7 @@
     </main>
 
     <%- include("../partials/userpartial/footer") %>
+    
 
     <script>
       // swap main image when thumb clicked
@@ -474,6 +504,30 @@
 
 
 
+   const offerPriceEl = document.getElementById("productPrice");
+  const originalPriceEl = document.getElementById("originalPrice");
+
+  document.querySelectorAll(".variant-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+
+      // active style
+      document.querySelectorAll(".variant-btn").forEach(b => {
+        b.classList.remove("bg-black", "text-white", "border-black");
+        b.classList.add("bg-white", "text-gray-800", "border-gray-300");
+      });
+
+      btn.classList.add("bg-black", "text-white", "border-black");
+
+      // prices
+      const offerPrice = btn.dataset.price;
+      const originalPrice = btn.dataset.original;
+
+      // update UI
+      offerPriceEl.innerText = "₹" + Number(offerPrice).toLocaleString();
+      originalPriceEl.innerText = "MRP ₹" + Number(originalPrice).toLocaleString();
+    });
+  });
+
     </script>
   </body>
-  </html>
+

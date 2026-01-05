@@ -5,6 +5,7 @@ const path = require("path");
 require("dotenv").config();
 const userRoute = require("./routes/userRoute")
 const adminRoute = require("./routes/adminRoute");
+
 const session = require("express-session")
 const passport = require("./config/passport")
 const { userAuth, adminAuth } = require("./middlewares/auth");
@@ -43,7 +44,7 @@ app.use(session({
   cookie:{
     secure:false,
     httpOnly:true,
-    maxAge: 72 * 60 * 60 * 1000   // 72 hours
+    maxAge: 72 * 60 * 60 * 1000   
 
   }
 
@@ -51,11 +52,12 @@ app.use(session({
 }))
 
 
+
 app.use(passport.initialize())
 app.use(passport.session())
 
 app.use((req, res, next) => {
-    res.locals.user = req.session.user;
+    res.locals.user = req.session.user || null;
     next();
 });
 
@@ -67,6 +69,8 @@ app.use((req, res, next) => {
 app.use("/",userRoute)
 app.use("/user",userAuth,userRoute)
 app.use("/admin",adminRoute)
+
+
 
 // Server
 app.listen(process.env.PORT, () => {

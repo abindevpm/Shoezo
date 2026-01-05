@@ -23,14 +23,14 @@ const loadHomepage = async (req, res) => {
     }
 
 
-    // FEATURED PRODUCTS (optional)
-    const featuredProducts = await Product.find({ isDeleted: false })
+    
+    const featuredProducts = await Product.find({ isDeleted:true,isListed:true })
       .sort({ createdAt: -1 })
       .limit(3);
 
     return res.render("home", { 
       user: userData,
-      featuredProducts  // <-- FIXED (NOW AVAILABLE IN EJS)
+      featuredProducts  
     });
 
   } catch (error) {
@@ -62,7 +62,9 @@ const pageNotFound = async (req, res) => {
 
 const loadSignup = async (req, res) => {
   try {
-    return res.render("signup")
+    return res.render("signup",{
+      formData:{}
+    })
 
   } catch (error) {
     console.log("signup not found")
@@ -93,14 +95,66 @@ async function sendVerificationEmail(email, otp) {
     })
 
     const info = await transporter.sendMail({
-      from: process.env.NODEMAILER_EMAIL,
-      to: email,
-      subject: "Verify your account",
-      text: `Your OTP is ${otp}`,
-      html: `<b>Your OTP :${otp}</b>`,
+  from: `"Shoezo 👟" <${process.env.NODEMAILER_EMAIL}>`,
+  to: email,
+  subject: "Verify your Shoezo account",
+  html: `
+  <div style="font-family: Arial, sans-serif; background-color:#f4f4f4; padding:20px;">
+    <div style="max-width:500px; margin:auto; background:#ffffff; border-radius:8px; overflow:hidden;">
+      
+      <!-- Header -->
+      <div style="background:#000; padding:20px; text-align:center;">
+        <h1 style="color:#ffffff; margin:0; letter-spacing:2px;">SHOEZO</h1>
+        <p style="color:#cccccc; margin:5px 0 0;">Step into Style</p>
+      </div>
 
+      <!-- Body -->
+      <div style="padding:30px; color:#333;">
+        <h2 style="margin-top:0;">Verify Your Account</h2>
+        <p>
+          Thank you for signing up with <strong>Shoezo</strong> 👟  
+          Please use the OTP below to verify your account.
+        </p>
 
-    })
+        <div style="margin:30px 0; text-align:center;">
+          <span style="
+            display:inline-block;
+            background:#f0f0f0;
+            padding:15px 30px;
+            font-size:28px;
+            letter-spacing:6px;
+            font-weight:bold;
+            border-radius:6px;
+          ">
+            ${otp}
+          </span>
+        </div>
+
+        <p style="font-size:14px; color:#666;">
+          ⏰ This OTP is valid for a limited time only.  
+          Please do not share this code with anyone.
+        </p>
+
+        <p style="margin-top:20px;">
+          If you didn’t request this, you can safely ignore this email.
+        </p>
+
+        <p style="margin-top:30px;">
+          Happy shopping! 🛒 <br/>
+          <strong>— Team Shoezo</strong>
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div style="background:#f9f9f9; text-align:center; padding:15px; font-size:12px; color:#999;">
+        © ${new Date().getFullYear()} Shoezo. All rights reserved.
+      </div>
+
+    </div>
+  </div>
+  `
+});
+
     return info.accepted.length > 0
 
   } catch (error) {
@@ -120,11 +174,13 @@ const resendOtp = async (req, res) => {
     const newOtp = generateOtp();
     req.session.userOtp = newOtp;
 
-     req.session.otpExpiry = Date.now() + (2 * 60 * 1000); 
+     req.session.otpExpiry = Date.now() + (101* 1000); 
 
     const email = req.session.userData.email;
 
     const sent = await sendVerificationEmail(email, newOtp);
+
+  
 
     if (!sent) {
       return res.status(500).json({ success: false, message: "Email failed" });
@@ -148,28 +204,29 @@ const signup = async (req, res) => {
     const { name, phone, email, password, confirmPassword } = req.body;
 
     if (!email || !password || !confirmPassword) {
-      return res.render("signup", { message: "All required fields must be filled" });
+      return res.render("signup", { message: "All required fields must be filled",formData:req.body });
     }
 
     if (password !== confirmPassword) {
-      return res.render("signup", { message: "Password does not match" });
+      return res.render("signup", { message: "Password does not match",formData:req.body });
     }
 
     const findUser = await User.findOne({ email });
 
     if (findUser) {
-      return res.render("signup", { message: "User already exists" });
+      return res.render("signup", { message: "User already exists",formData:req.body });
+
     }
 
     const otp = generateOtp();
     const emailSent = await sendVerificationEmail(email, otp);
 
     if (!emailSent) {
-      return res.render("signup", { message: "Email sending failed" });
+      return res.render("signup", { message: "Email sending failed",formData:req.body });
     }
 
     req.session.userOtp = otp;
-    req.session.otpExpiry = Date.now() + 10 * 1000;
+    req.session.otpExpiry = Date.now() + 102 * 1000;
 
     req.session.userData = { name, phone, email, password };
 
@@ -220,6 +277,12 @@ const otp = async (req, res) => {
       });
     }
 
+      console.log("OTP:", req.session.userOtp);
+console.log("OTP Expiry:", req.session.otpExpiry);
+console.log("Now:", Date.now());
+console.log("Remaining (sec):", (req.session.otpExpiry - Date.now()) / 1000);
+
+
     
     if (otp !== req.session.userOtp) {
       return res.status(400).json({
@@ -241,6 +304,7 @@ const otp = async (req, res) => {
 
     await saveUserData.save();
 
+    req.session.user = user;
     
     req.session.userOtp = null;
     req.session.otpExpiry = null;
@@ -304,7 +368,11 @@ const login = async (req, res) => {
     if (!passwordMatch) {
       return res.render("login", { message: "Incorrect Password" })
     }
-    req.session.user = findUser._id
+    req.session.user = {
+      _id:findUser._id,
+      name:findUser.name,
+      email:findUser.email
+    }
 
      await User.findByIdAndUpdate(findUser._id, {
       lastLogin: new Date()
@@ -357,15 +425,15 @@ const sendResetOTP = async (req, res) => {
     if (!user) {
       return res.render("forgot-password", { message: "Email does not exist" });
     }
-    // Generate OTP
+    
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
     console.log("Your OTP is:",otp)
 
-    // Save in session (SAFE)
+    
     req.session.resetEmail = email;
     req.session.resetOtp = otp;
 
-    // Send Email
+    
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -406,7 +474,7 @@ const verifyOtp = (req, res) => {
   const email = req.session.resetEmail;
 
   if (!email) {
-    return res.redirect("/forgot-password"); // session expired
+    return res.redirect("/forgot-password"); 
   }
 
   const maskedEmail = email.replace(/(.{2}).+(@.+)/, "$1****$2");
@@ -452,7 +520,7 @@ const resetPassword = async (req, res) => {
       { $set: { password: hashedPassword } }
     );
 
-    // Clear session data
+    
     delete req.session.resetEmail;
     delete req.session.resetOtp;
 
@@ -486,6 +554,5 @@ loadOtpPage,
 verifyOtp,
 loadResetPage,
 resetPassword
-
 
 }

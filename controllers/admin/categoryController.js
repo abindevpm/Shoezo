@@ -4,7 +4,7 @@ const Category = require("../../models/categorySchema");
     try{
         let search = req.query.search || "";
         let page = parseInt(req.query.page) || 1;
-         let limit = 5;
+         let limit = 3;
 
          const query = {
             isDeleted:false,
@@ -33,105 +33,119 @@ const Category = require("../../models/categorySchema");
  }
 
 
- const addCategory = async(req,res)=>{
-
-    try {
-
-        const {name,brand,description,categoryOffer} = req.body
+ const addCategory = async (req, res) => {
+  try {
 
 
-        if (!name || !brand || !description) {
-            return res.json({
-                success: false,
-                message: "All fields are required"
-            });
-        }
+    let { name, description, categoryOffer } = req.body;
+
+       name = name ? name.trim() : "";
+    description = description ? description.trim() : "";
+    categoryOffer = categoryOffer ? categoryOffer.trim() : "";
 
 
+    if (!name || !description) {
+      return res.json({
+        success: false,
+        message: "All fields are required"
+      });
+    }
 
+    name = name.trim();
 
-        const exists = await Category.findOne({name})
+    const exists = await Category.findOne({
+      name: { $regex: `^${name}$`, $options: "i" }
+    });
 
-        if(exists)return res.json({success:false,message:"Category already exists"})
-        
+    if (exists) {
+      return res.json({
+        success: false,
+        message: "Category already exists"
+      });
+    }
+
     await Category.create({
-    name,
-    brand,
-    description,
-    categoryOffer,
-    isListed: true,   // or false
-    isDeleted: false
-});
+      name,
+      description,
+      categoryOffer,
+      isListed: true,
+      isDeleted: false
+    });
 
-     res.json({success:true,message:"Category added Successfully"})
+    return res.json({
+      success: true,
+      message: "Category added successfully"
+    });
 
+  } catch (error) {
+    console.error("Add category error:", error);
 
-    } catch (error) {
-        console.log(error);
-        res.json({success:false,message:"Internal Server error"})
-        
+    
+    if (error.code === 11000) {
+      return res.json({
+        success: false,
+        message: "Category already exists"
+      });
     }
 
- }
-
-  const deleteCategory = async(req,res)=>{
-
-
-    try {
-
-          const id = req.params.id;
-
-          const category = await Category.findById(id)
-
-          if(!category){
-            return res.json({success:false,message:"Category not found"})
-
-
-          }
-           await Category.findByIdAndUpdate(id,{isDeleted:true});
-           
-           res.json({
-            success:true,
-            message:"Category Deleted Successfully"
-           })
-
-        
-    } catch (error) {
-
-      console.log("Delete Category Error"+error)
-
-      res.json({
-        success:false,
-        message:"Internal Server Error"
-      })
-        
-    }
-
-
-
+    return res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
   }
+};
+
+
+
+
+
+
+const toggleCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const category = await Category.findById(id);
+    if (!category) {
+      return res.json({ success: false });
+    }
+
+    category.isListed = !category.isListed;
+    await category.save();
+
+    return res.json({
+      success: true,
+      isListed: category.isListed
+    });
+
+  } catch (err) {
+    console.log("Toggle Category Error:", err);
+    res.status(500).json({ success: false });
+  }
+};
+
+
+
 const editCategory = async (req, res) => {
     try {
         const id = req.params.id;
-        let { name, brand, description, categoryOffer } = req.body;
+        let { name, description, categoryOffer } = req.body;
 
-        // Trim input values
+      
         name = name?.trim();
-        brand = brand?.trim();
+    
         description = description?.trim();
 
-        // VALIDATION
-        if (!name || !brand || !description || categoryOffer === "") {
+        
+        if (!name ||!description || categoryOffer === "") {
             return res.json({
                 success: false,
                 message: "All fields are required"
             });
         }
 
-        // UPDATE CATEGORY
+        
         await Category.findByIdAndUpdate(id, {
             name,
-            brand,
             description,
             categoryOffer
         });
@@ -156,7 +170,7 @@ const editCategory = async (req, res) => {
 module.exports = { 
     categoryInfo,
     addCategory,
-    deleteCategory,
+    toggleCategory,
     editCategory
 
  };

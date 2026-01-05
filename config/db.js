@@ -7,7 +7,7 @@ const connectDB = async () => {
       useUnifiedTopology: true,
     });
 
-    console.log("✅ Local MongoDB Connected Successfully");
+    console.log(" Local MongoDB Connected Successfully");
   } catch (error) {
     console.log("❌ Local MongoDB Connection Failed:", error.message);
   }

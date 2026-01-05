@@ -1,252 +1,320 @@
-    const Product = require("../../models/productSchema");
-    const Category = require("../../models/categorySchema");
-    const fs = require("fs")
+      const Product = require("../../models/productSchema");
+      const Category = require("../../models/categorySchema");
+      const Brand = require("../../models/brandSchema");
 
-    const sharp = require("sharp");
-    const path = require("path");
+      const fs = require("fs")
 
-    const loadProducts = async (req, res) => {
-        try {
-            const search = req.query.search || "";
-            const categoryFilter = req.query.category || "";
-            const minPrice = req.query.minPrice ? Number(req.query.minPrice) : null;
-            const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : null;
+      const sharp = require("sharp");
+      const path = require("path");
 
-            
-            let page = parseInt(req.query.page) || 1; 
-            let limit = 5; // number of products per page
-            let skip = (page - 1) * limit;
-
-            
-            let query = {};
-
-            if (search) {
-                query.name = { $regex: search, $options: "i" };
-            }
-
-            if (categoryFilter) {
-                query.category = categoryFilter;
-            }
-
-        
-            if (minPrice !== null || maxPrice !== null) {
-                query.price = {};
-                if (minPrice !== null) query.price.$gte = minPrice;
-                if (maxPrice !== null) query.price.$lte = maxPrice;
-            }
-
-            
-            const totalProducts = await Product.countDocuments(query);
-            const totalPages = Math.ceil(totalProducts / limit);
-
-            
-            const products = await Product.find(query)
-                .populate("category")
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit);
-
-            const categories = await Category.find({ isDeleted: false });
-
-            res.render("products", {
-                products,
-                categories,
-                currentPage: page,
-                totalPages,
-                search,
-                categoryFilter,
-                minPrice: req.query.minPrice || "",
-                maxPrice: req.query.maxPrice || ""
-            });
-
-        } catch (error) {
-            console.log("Load Products Error:", error);
-            res.status(500).send("Internal Server Error");
-        }
-    };
-
-    const AddProducts = async (req, res) => {
-        try {
-            const data = req.body;
-
-            if (!data.category || data.category.trim() === "") {
-                return res.status(400).send("Please select a category before submitting.");
-            }
-
-            const categoryExists = await Category.findById(data.category);
-            if (!categoryExists) {
-                return res.status(400).send("Invalid category");
-            }
-
-        
-            const productExists = await Product.findOne({ name: data.name });
-            if (productExists) {
-                return res.status(400).send("Product already exists");
-            }
-
-            
-            const images = [];
-
-            if (req.files && req.files.length > 0) {
-                req.files.forEach(file => {
-                    images.push(file.filename); // <-- just push
-                });
-            }
-
-            
-            const newProduct = new Product({
-                name: data.name,
-                brand: data.brand,
-                category: data.category,
-                description: data.description,
-                price: data.price,
-                offerPrice: data.offerPrice,
-                images: images,
-                variants: [
-                    {
-                        size: data.size,
-                        color: data.color,
-                        stock: data.stock
-                    }
-                ],
-                isDeleted: false
-            });
-
-
-            await newProduct.save();
-
-            return res.redirect("/admin/products");
-
-        } catch (error) {
-            console.log("Product upload error:", error);
-            return res.status(500).send("Internal Server Error");
-        }
-    };
-
-
-
-
-
-    const loadAddProducts = async (req, res) => {
-        try {
-            const categories = await Category.find({ isDeleted: false });
-            res.render("add-products", { categories });
-
-        } catch (error) {
-            console.log("Load Add product Error:", error);
-            res.status(500).send("Internal Server Error");
-        }
-    };
-
-
-
-
-    const loadEditProduct = async (req, res) => {
+      const loadProducts = async (req, res) => {
     try {
-        const id = req.params.id;
+      const search = req.query.search || "";
+      const categoryFilter = req.query.category || "";
+      const minPrice = req.query.minPrice ? Number(req.query.minPrice) : null;
+      const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : null;
 
-        const product = await Product.findById(id).populate("category");
-        const categories = await Category.find({ isDeleted: false }); // FIXED
+      
+      let page = search ? 1 : parseInt(req.query.page) || 1;
+      let limit = 5;
+      let skip = (page - 1) * limit;
 
-        
-        res.render("edit-product", { product, categories });
+      
+      let query = { isDeleted: false };
+
+      
+      if (search) {
+        query.name = { $regex: search, $options: "i" };
+      }
+
+      if (categoryFilter) {
+  const listedCategoryIds = await Category.find({
+    isDeleted: false,
+    isListed: true
+  }).distinct("_id");
+
+  if (listedCategoryIds.includes(categoryFilter)) {
+    query.category = categoryFilter;
+  }
+}
+      
+      if (minPrice !== null || maxPrice !== null) {
+        query.price = {};
+        if (minPrice !== null) query.price.$gte = minPrice;
+        if (maxPrice !== null) query.price.$lte = maxPrice;
+      }
+
+      const totalProducts = await Product.countDocuments(query);
+      const totalPages = Math.ceil(totalProducts / limit);
+
+      const products = await Product.find(query)
+    .populate({
+  path: "category",
+  match: { isListed: true, isDeleted: false }
+})
+        .populate("brand")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+      const categories = await Category.find({ isDeleted: false ,isListed:true});
+
+      res.render("products", {
+        products,
+        categories,
+        currentPage: page,
+        totalPages,
+        search,
+        categoryFilter,
+        minPrice: req.query.minPrice || "",
+        maxPrice: req.query.maxPrice || ""
+      });
+
+    } catch (error) {
+      console.log("Load Products Error:", error);
+      res.status(500).send("Internal Server Error");
+    }
+  };
+
+
+
+  const AddProducts = async (req, res) => {
+    try {
+      const data = req.body;
+
+      if (!data.category) {
+        return res.redirect("/admin/add-products?status=error");
+      }
+
+      const categoryExists = await Category.findById(data.category);
+      if (!categoryExists) {
+        return res.redirect("/admin/add-products?status=error");
+      }
+
+      const productExists = await Product.findOne({ name: data.name });
+      if (productExists) {
+        return res.redirect("/admin/add-products?status=exists");
+      }
+
+      
+      const images = [];
+      if (req.files && req.files.length > 0) {
+        req.files.forEach(file => images.push(file.filename));
+      }
+      
+      const variants = data.variants
+        ? Object.values(data.variants)
+        : [];
+
+      if (variants.length === 0) {
+        return res.redirect("/admin/add-products?status=error");
+      }
+
+      const newProduct = new Product({
+        name: data.name,
+        brand: data.brand,
+        category: data.category,
+        description: data.description,
+        images: images,
+        variants: variants,   
+        isDeleted: false,
+        isListed: true
+      });
+
+      await newProduct.save();
+
+      return res.redirect("/admin/add-products?status=success");
+
+
+//       console.log("BODY:", req.body);
+// console.log("FILES:", req.files);
 
 
     } catch (error) {
-        console.log("Edit product error:", error);
-        res.status(500).send("Internal Server Error");
+      console.log("Add product error:", error);
+      return res.redirect("/admin/add-products?status=error");
     }
-    };
+  };
 
 
+      
 
+      const loadAddProducts = async (req, res) => {
+    try {
+      const categories = await Category.find({ isDeleted: false, isListed: true });
+      const brands = await Brand.find({ isDeleted: false, isListed: true });
 
-    
-
-    const updateProduct = async (req, res) => {
-        try {
-            const id = req.params.id;
-
-            const updatedData = {
-                name: req.body.name,
-                brand: req.body.brand,
-                description: req.body.description,
-                price: req.body.price,
-                offerPrice: req.body.offerPrice,
-                category: req.body.category,
-                variants: [
-                    {
-                        size: req.body.size,
-                        color: req.body.color,
-                        stock: req.body.stock
-                    }
-                ]
-            };
-
-            if (req.files && req.files.length > 0) {
-                updatedData.images = req.files.map(file => file.filename);
-            }
-
-            await Product.findByIdAndUpdate(id, updatedData);
-            res.redirect("/admin/products");
-
-        } catch (error) {
-            console.log("Product Update Error:", error);
-            res.status(500).send("Internal Server Error");
-        }
-    };
-
-
-    const deleteProduct = async(req,res)=>{
-
-
-        try {
-        const { id } = req.params;
-        const { isDeleted } = req.body;
-
-        await Product.findByIdAndUpdate(id, { isDeleted });
-
-        res.json({ success: true });
+      res.render("add-products", {
+        categories,
+        brands
+      });
 
     } catch (error) {
-        console.log("Toggle product error:", error);
-        res.status(500).json({ success: false });
+      console.log("Load Add product Error:", error);
+      res.status(500).send("Internal Server Error");
     }
-    
+  };
+
+
+
+  const loadEditProduct = async (req, res) => {
+    try {
+      const id = req.params.id;
+
+      const product = await Product.findOne({
+        _id: id,
+        isDeleted: false,
+      
+      })
+        .populate("category")
+        .populate("brand");
+
+      if (!product) {
+        return res.status(404).send("Product not found");
+      }
+
+      const categories = await Category.find({
+        isDeleted: false,
+        isListed: true
+      });
+
+      const brands = await Brand.find({
+        isDeleted: false,
+        isListed: true
+      });
+
+      res.render("edit-product", {
+        product,
+        categories,
+        brands
+      });
+
+    } catch (error) {
+      console.log("Edit product error:", error);
+      res.status(500).send("Internal Server Error");
     }
+  };
 
 
 
 
-    const deleteProductImage = async (req, res) => {
-        try {
-            const { productId, imgName } = req.params;
+  const updateProduct = async (req, res) => {
+    try {
+      const id = req.params.id;
+      const data = req.body;
 
-            // Remove image from product document
-            const updatedProduct = await Product.findByIdAndUpdate(
-                productId,
-                { $pull: { images: imgName } },
-                { new: true }
-            );
+      const product = await Product.findById(id);
+      if (!product) {
+        return res.status(404).send("Product not found");
+      }
 
-            if (!updatedProduct) {
-                return res.json({ success: false, message: "Product not found" });
-            }
+      
+      let variants = [];
 
-            // Delete image from folder
-            const imagePath = path.join(__dirname, "../../public/uploads/product-images", imgName);
+      if (data.variants) {
+        variants = Array.isArray(data.variants)
+          ? data.variants
+          : Object.values(data.variants);
+      }
 
-            if (fs.existsSync(imagePath)) {
-                fs.unlinkSync(imagePath);
-            }
+      const updateData = {
+        name: data.name,
+        brand: data.brand,
+        description: data.description,
+        price: data.price,
+        offerPrice: data.offerPrice,
+        category: data.category,
+        variants: variants   
+      };
 
-            return res.json({ success: true });
+      
+      if (req.files && req.files.length > 0) {
+        const newImages = req.files.map(file => file.filename);
+        updateData.images = [...product.images, ...newImages];
+      }
 
-        } catch (error) {
-            console.log("Delete product image error:", error);
-            return res.json({ success: false });
-        }
-    };
+      await Product.findByIdAndUpdate(id, updateData);
+
+      res.redirect("/admin/products");
+
+    } catch (error) {
+      console.log("Product Update Error:", error);
+      res.status(500).send("Internal Server Error");
+    }
+  };
+
+
+
+  const deleteProduct = async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      await Product.findByIdAndUpdate(id, {
+        isDeleted: true,
+        isListed: false
+      });
+
+      res.json({ success: true });
+
+    } catch (error) {
+      res.status(500).json({ success: false });
+    }
+  };
+
+
+
+
+
+      const deleteProductImage = async (req, res) => {
+          try {
+              const { productId, imgName } = req.params;
+
+              
+              const updatedProduct = await Product.findByIdAndUpdate(
+                  productId,
+                  { $pull: { images: imgName } },
+                  { new: true }
+              );
+
+              if (!updatedProduct) {
+                  return res.json({ success: false, message: "Product not found" });
+              }
+
+              
+              const imagePath = path.join(__dirname, "../../public/uploads/product-images", imgName);
+
+              if (fs.existsSync(imagePath)) {
+                  fs.unlinkSync(imagePath);
+              }
+
+              return res.json({ success: true });
+
+          } catch (error) {
+              console.log("Delete product image error:", error);
+              return res.json({ success: false });
+          }
+      };
+
+
+      const toggleProduct = async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const product = await Product.findById(id);
+      if (!product) {
+        return res.json({ success: false });
+      }
+
+      product.isListed = !product.isListed;
+      await product.save();
+
+      res.json({ success: true, isListed: product.isListed });
+
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ success: false });
+    }
+  };
 
 
 
@@ -255,12 +323,14 @@
 
 
 
-    module.exports = {
-        loadProducts,
-        loadAddProducts,
-        AddProducts,
-        loadEditProduct,
-        updateProduct,
-        deleteProduct,
-        deleteProductImage
-    };
+
+      module.exports = {
+          loadProducts,
+          loadAddProducts,
+          AddProducts,
+          loadEditProduct,
+          updateProduct,
+          deleteProduct,
+          deleteProductImage,
+          toggleProduct
+      };

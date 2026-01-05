@@ -105,14 +105,23 @@
 
     <!-- Search + Add User -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-4">
-      <input type="text" id="searchInput" class="form-control search-input"
-        placeholder="Search by name, email or phone..." />
+     <form method="GET" action="/admin/customers" class="d-flex gap-3">
+  <input
+    type="text"
+    name="search"
+    value="<%= search %>"
+    class="form-control search-input"
+    placeholder="Search by name or email..."
+  >
+  <input type="hidden" name="page" value="1">
+</form>
 
-      <a href="/admin/add-user" class="btn btn-add-user d-flex align-items-center gap-2">
-        <i class="fas fa-plus"></i>
-        <span>Add User</span>
-      </a>
-    </div>
+
+      <!-- <a href="/admin/add-user" class="btn btn-add-user d-flex align-items-center gap-2">
+         <i class="fas fa-plus"></i> -->
+        <!-- <span>Add User</span> -->
+      <!-- </a> -->
+    </div> 
 
     <!-- TABLE -->
     <div class="table-card">
@@ -255,7 +264,7 @@
 
 
 
-    document.getElementById("searchInput").addEventListener("keyup", function () {
+    
       let filter = this.value.toLowerCase();
       let rows = document.querySelectorAll("#userTableBody tr");
 
@@ -268,7 +277,7 @@
           ? ""
           : "none";
       });
-    });
+    
   </script>
 
 </body>

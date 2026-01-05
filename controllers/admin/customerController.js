@@ -1,52 +1,32 @@
 const User = require("../../models/userSchema");
 
+
 const customerinfo = async (req, res) => {
   try {
-    let search = "";
-    if (req.query.search) {
-      search = req.query.search;
-    }
+    const search = req.query.search || "";
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
 
-    let page = 1;
-    if (req.query.page) {
-      page = req.query.page;
-    }
-
-    const limit = 3;
-
-  
-    const userData = await User.find({
+    const searchQuery = {
       isAdmin: false,
       $or: [
-        { name: { $regex: ".*" + search + ".*", $options: "i" } },
-        { email: { $regex: ".*" + search + ".*", $options: "i" } }
+        { name: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } }
       ]
-    })
-        
-     .sort({ 
-  lastLogin: -1,  
-  _id: -1          
-})     
+    };
 
-      .limit(limit)
+  const userData = await User.find(searchQuery)
+      .sort({ lastLogin: -1, _id: -1 })
       .skip((page - 1) * limit)
-      .exec();
+      .limit(limit);
 
-    
-    const count = await User.countDocuments({
-      isAdmin: false,
-      $or: [
-        { name: { $regex: ".*" + search + ".*", $options: "i" } },
-        { email: { $regex: ".*" + search + ".*", $options: "i" } }
-      ]
-    });
+    const count = await User.countDocuments(searchQuery);
 
-  
-    return res.render("customers", {
+    res.render("customers", {
       customers: userData,
       totalPages: Math.ceil(count / limit),
       currentPage: page,
-      search: search
+      search
     });
 
   } catch (error) {
@@ -54,6 +34,8 @@ const customerinfo = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
+
 
  const blockUser = async(req,res)=>{
   

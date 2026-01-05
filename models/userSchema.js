@@ -13,7 +13,7 @@ const userSchema = new Schema({
     },
     phone: {
         type: String,
-        required: true,
+        required: false,
 
         sparse: true,
         default: null
@@ -26,7 +26,7 @@ const userSchema = new Schema({
 
     password: {
         type: String,
-        required: false,
+        required: true,
     },
     isBlocked: {
         type: Boolean,
@@ -78,7 +78,25 @@ const userSchema = new Schema({
     lastLogin: {
         type: Date,
         default: null
-    }
+    },
+    emailChange: {
+  newEmail: {
+    type: String
+  },
+  otp: {
+    type: String
+  },
+  expiresAt: {
+    type: Date
+  }
+},
+profileImage: {
+  type: String,
+  default: ""
+}
+
+
+
 
 
 
