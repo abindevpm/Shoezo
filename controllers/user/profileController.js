@@ -196,46 +196,97 @@ const sendEmailOtp = async(req,res)=>{
   }
 };
 
-
-
-
-  const verifyEmailOtp = async (req, res) => {
+const verifyEmailOtp = async (req, res) => {
   try {
     const { otp } = req.body;
+
+    if (!req.session.newEmail) {
+      return res.json({ success: false, message: "Session expired" });
+    }
 
     if (
       !req.session.emailOtp ||
       Date.now() > req.session.emailOtpExpiry
     ) {
-      return res.render("verify-email-otp", {
-        error: "OTP expired",
-          email: req.session.newEmail
-      });
+      return res.json({ success: false, message: "OTP expired" });
     }
 
     if (parseInt(otp) !== req.session.emailOtp) {
-      return res.render("verify-email-otp", {
-        error: "Invalid OTP",
-          email: req.session.newEmail
-      });
+      return res.json({ success: false, message: "Invalid OTP" });
     }
 
     await User.findByIdAndUpdate(req.user._id, {
       email: req.session.newEmail
     });
 
+    // clear session
     req.session.emailOtp = null;
+    req.session.emailOtpExpiry = null;
     req.session.newEmail = null;
 
-    res.redirect("/user/profile?success=emailChanged");
+    return res.json({ success: true });
 
   } catch (err) {
     console.log(err);
-    res.render("verify-email-otp", {
-      error: "Something went wrong",
-        email: req.session.newEmail
+    return res.json({ success: false, message: "Something went wrong" });
+  }
+};
+
+
+
+const resendEmailOtp = async(req,res)=>{
+  try {
+       if (!req.session.newEmail) {
+      return res.json({
+        success: false,
+        message: "Session expired. Please try again."
+      });
+    }
+
+        const otp = Math.floor(1000 + Math.random() * 9000);
+
+          req.session.emailOtp = otp;
+        req.session.emailOtpExpiry = Date.now() + 2 * 60 * 1000; 
+
+            await transporter.sendMail({
+      to: req.session.newEmail,
+      subject: "Your Email Verification OTP",
+      html: `<h2>Your OTP is ${otp}</h2>`
+    });
+    console.log(otp)
+
+     return res.json({
+      success: true,
+      message: "OTP resent successfully"
+    });
+
+    
+  } catch (error) {
+    console.log(error);
+    return res.json({
+      success: false,
+      message: "Failed to resend OTP"
     });
   }
+    
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+const removeProfileImage = async (req, res) => {
+  await User.findByIdAndUpdate(req.user._id, {
+    profileImage: ""
+  });
+  res.redirect("profile");
 };
 
 
@@ -252,5 +303,7 @@ module.exports = {
     changePassword,
     sendEmailOtp,
     verifyEmailOtp,
-    loadVerifyEmailOtp
+    loadVerifyEmailOtp,
+    removeProfileImage,
+    resendEmailOtp
 }

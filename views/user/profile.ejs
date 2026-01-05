@@ -201,7 +201,14 @@
         <aside>
             <div class="user-header">
            
-              <img src="<%= user.profileImage %>" alt="User">
+
+                <img
+    src="<%= user.profileImage && user.profileImage !== '' 
+          ? user.profileImage 
+          : '/images/default avatar ong.jpg' %>"
+    alt="User"
+  >
+            
                 <%= user.name %>
 
             </div>
@@ -297,7 +304,7 @@
     <img
   src="<%= user.profileImage && user.profileImage !== '' 
         ? user.profileImage 
-        : '/images/default-avatar.png' %>"
+        : '/images/default avatar ong.jpg' %>"
   alt="Profile"
   class="profile-img"
 />

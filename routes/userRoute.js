@@ -78,6 +78,8 @@ router.post("/change-password",userAuth,profileController.changePassword)
 router.post("/send-email-otp", userAuth,profileController.sendEmailOtp);
 router.get("/verify-email-otp",profileController.loadVerifyEmailOtp);
 router.post("/verify-email-otp", userAuth,profileController.verifyEmailOtp);
+router.post("/resend-email-otp",userAuth,profileController.resendEmailOtp)
+router.get("/remove-profile-image",userAuth,profileController.removeProfileImage);
 
 
 

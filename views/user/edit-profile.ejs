@@ -193,7 +193,13 @@
     <div class="container">
         <aside>
             <div class="user-header">
-                     <img src="<%= user.profileImage %>" alt="User">
+                     <img
+  src="<%= user.profileImage && user.profileImage !== '' 
+        ? user.profileImage 
+        : '/images/default avatar ong.jpg' %>"
+  alt="User"
+>
+
                 <%= user.name %>
             </div>
             <a href="#" class="menu-item active"><i class="fas fa-th-large"></i> Account Overview</a>
@@ -257,27 +263,55 @@
   </div>
 
 
-<form
-  action="/upload-profile-image"
-  method="POST"
-  enctype="multipart/form-data"
-  id="profileForm"
->
+  
 
-  <input
-    type="file"
-    name="profileImage"
-    id="profileImageInput"
-    hidden
-    onchange="document.getElementById('profileForm').submit()"
+<div class="profile-pic-side">
+
+  <img
+    src="<%= user.profileImage && user.profileImage !== '' 
+          ? user.profileImage 
+          : '/images/default avatar ong.jpg' %>"
+    alt="Profile"
+  />
+
+  <form
+    action="/upload-profile-image"
+    method="POST"
+    enctype="multipart/form-data"
+    id="profileForm"
   >
+    <input
+      type="file"
+      name="profileImage"
+      id="profileImageInput"
+      hidden
+      accept="image/*"
+      onchange="document.getElementById('profileForm').submit()"
+    >
 
-  <button type="button" class="choose-img-btn"
-    onclick="document.getElementById('profileImageInput').click()">
-    Choose Image
-  </button>
+    <button
+      type="button"
+      class="choose-img-btn"
+      onclick="document.getElementById('profileImageInput').click()"
+    >
+      Choose Image
+    </button>
 
-</form>
+
+    <button
+  type="button"
+  class="choose-img-btn"
+  onclick="location.href='/remove-profile-image'">
+  Remove Image
+</button>
+
+
+
+
+  </form>
+
+</div>
+
 
 
 
@@ -340,12 +374,33 @@ const phoneInput = document.getElementById("phone");
 const nameError = document.getElementById("nameError");
 const phoneError = document.getElementById("phoneError");
 
+const emailInput = document.getElementById("newEmail");
+const emailError = document.getElementById("emailError");
+
 nameInput.addEventListener("input", () => {
   if (nameInput.value.trim().length < 3) {
     nameError.innerText = "Name must be at least 3 characters";
   } else {
     nameError.innerText = "";
   }
+
+  if(!name){
+    nameError.innerHTML = "Name is required"
+  }
+
+
+  
+nameInput.addEventListener("keypress", (e) => {
+  if (!/[A-Za-z\s]/.test(e.key)) {
+    e.preventDefault();
+  }
+});
+
+nameInput.addEventListener("input", () => {
+  nameInput.value = nameInput.value.replace(/[^A-Za-z\s]/g, "");
+});
+
+
 });
 
 
@@ -470,6 +525,38 @@ async function sendEmailOtp() {
     error.innerText = data.message;
   }
 }
+
+
+
+emailInput.addEventListener("input", () => {
+  const email = emailInput.value.trim();
+
+  if (!email) {
+    emailError.innerText = "Email is required";
+    return;
+  }
+
+  
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailRegex.test(email)) {
+    emailError.innerText = "Invalid email address";
+    return;
+  }
+
+
+  emailError.innerText = "";
+});
+
+
+
+
+
+
+
+
+
+
 
 
 </script>

@@ -100,24 +100,29 @@
       <h1 class="italic-brand">SHOEZO</h1>
       <h2 class="fw-bold">Email OTP Verification</h2>
 
+<%
+  let maskedEmail = "your email";
 
-      <%
-  const parts = email.split("@");
-  const name = parts[0];
-  const domain = parts[1];
+  if (email && typeof email === "string" && email.includes("@")) {
+    const parts = email.split("@");
+    const name = parts[0];
+    const domain = parts[1];
 
-  const maskedName =
-    name.length > 2
-      ? name.slice(0, 2) + "*".repeat(name.length - 2)
-      : name[0] + "*";
+    const maskedName =
+      name.length > 2
+        ? name.slice(0, 2) + "*".repeat(name.length - 2)
+        : name[0] + "*";
+
+    maskedEmail = maskedName + "@" + domain;
+  }
 %>
 
 <p class="text-muted mb-3" style="font-size:14px;">
-  Enter OTP sent to <%= maskedName %>@<%= domain %>
+  Enter OTP sent to <%= maskedEmail %>
 </p>
-    
 
-      <form method="POST" action="/verify-email-otp">
+    
+<form id="otpForm">
   <input type="hidden" name="otp" id="finalOtp">
 
   <div class="d-flex justify-content-between mb-4" style="gap:16px; max-width:340px; margin:0 auto;">
@@ -131,6 +136,7 @@
     Confirm
   </button>
 </form>
+
 
 
       <div class="text-center mt-3">
@@ -150,9 +156,90 @@
       inputs[index + 1].focus();
     }
 
-    // combine OTP
+    
     let otp = "";
     inputs.forEach(i => otp += i.value);
     document.getElementById("finalOtp").value = otp;
   }
+
+
+
+
+
+    const otpForm = document.getElementById("otpForm");
+
+  otpForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const otp = document.getElementById("finalOtp").value.trim();
+
+    if (!otp) {
+      Swal.fire("Error", "OTP is required", "error");
+      return;
+    }
+
+    if (!/^\d{4}$/.test(otp)) {
+      Swal.fire("Error", "OTP must be 4 digits", "error");
+      return;
+    }
+
+    const res = await fetch("/verify-email-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ otp })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      Swal.fire({
+        icon: "success",
+        title: "Email Verified",
+        text: "Your email has been updated successfully",
+        confirmButtonText: "OK"
+      }).then(() => {
+        window.location.href = "/user/profile";
+      });
+    } else {
+      Swal.fire("Error", data.message || "Invalid OTP", "error");
+    }
+  });
+
+
+
+
+   async function handleResendOTP() {
+    const res = await fetch("/user/resend-email-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      Swal.fire({
+        icon: "success",
+        title: "OTP Sent",
+        text: "A new OTP has been sent to your email"
+      });
+
+      // clear old inputs
+      document.querySelectorAll(".otp-input").forEach(i => i.value = "");
+      document.getElementById("finalOtp").value = "";
+      document.querySelector(".otp-input").focus();
+
+    } else {
+      Swal.fire("Error", data.message, "error");
+    }
+  }
+
+
+
+
+
+
+
+
+
+
 </script>
