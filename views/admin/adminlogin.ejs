@@ -65,6 +65,13 @@
 
             <form action="/admin/login" method="POST" class="w-100" style="max-width: 350px;">
 
+
+
+
+
+
+
+
                 <!-- Email -->
                 <div class="mb-4">
                     <input 
@@ -121,10 +128,10 @@ document.querySelector("form").addEventListener("submit", function (e) {
     let password = document.querySelector("input[name='password']");
     let valid = true;
 
-    // Remove previous errors
+    
     document.querySelectorAll(".error-text").forEach(el => el.remove());
 
-    // Email Validation
+    
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (email.value.trim() === "") {
@@ -135,7 +142,7 @@ document.querySelector("form").addEventListener("submit", function (e) {
         valid = false;
     }
 
-    // Password Validation
+    
     if (password.value.trim() === "") {
         showError(password, "Password is required");
         valid = false;
@@ -155,6 +162,24 @@ function showError(input, message) {
     input.parentNode.appendChild(error);
 }
 </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

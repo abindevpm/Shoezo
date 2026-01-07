@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-/* 🔹 Address Sub Schema (OUTSIDE userSchema) */
+
 const addressSchema = new Schema({
   fullName: {
     type: String,
@@ -33,7 +33,7 @@ const addressSchema = new Schema({
   }
 }, { _id: true });
 
-/* 🔹 User Schema */
+
 const userSchema = new Schema({
 
   name: { type: String, required: true },
@@ -91,7 +91,7 @@ const userSchema = new Schema({
     default: ""
   },
 
-  /* ✅ ADDRESSES FIELD */
+  
   addresses: [addressSchema]
 
 }, { timestamps: true });

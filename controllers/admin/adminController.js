@@ -12,33 +12,37 @@ const loadlogin = (req, res) => {
 
 
 
- const login = async(req,res)=>{
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-  try{
-    const {email,password} =  req.body
-    console.log('password',password)
-    const admin =  await User.findOne({email,isAdmin:true})
-    console.log(admin)
-      if(admin){
-        console.log('admindfdfs')
-        const passwordMatch =  await bcrypt.compare(password,admin.password)
-        console.log(passwordMatch)
-          if(passwordMatch){
-             req.session.admin = true
-           return res.redirect("/admin/dashboard")
+    const admin = await User.findOne({ email, isAdmin: true });
 
-          }else{
-            return res.redirect("/admin/login")
-          }
-      }
+    if (!admin) {
+      return res.render("adminlogin", {
+        backendError: "Invalid email or password"
+      });
+    }
 
+    const passwordMatch = await bcrypt.compare(password, admin.password);
 
+    if (!passwordMatch) {
+      return res.render("adminlogin", {
+        backendError: "Password is incorrect"
+      });
+    }
 
-   }catch(error){
-      console.log(error)
-   }
+    req.session.admin = admin._id;
+    return res.redirect("/admin/dashboard");
 
- }
+  } catch (err) {
+    console.log(err);
+    return res.render("adminlogin", {
+      backendError: "Something went wrong"
+    });
+  }
+};
+
 
 
 

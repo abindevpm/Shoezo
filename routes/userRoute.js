@@ -5,6 +5,7 @@ const productlistController = require("../controllers/user/productlistController
 const productDetailsController = require("../controllers/user/productDetailsController")
 const profileController = require("../controllers/user/profileController")
 const addressController = require("../controllers/user/addressController");
+const cartController = require("../controllers/user/cartController")
 const {uploadProfile} = require("../middlewares/multer")
 
 
@@ -50,6 +51,7 @@ router.get("/auth/google/callback", passport.authenticate("google", { failureRed
    router.get("/productlist",productlistController.loadShopPage)
 
 
+
    // productdetails
 
 router.get("/productdetails/:id",productDetailsController.loadProductDetails)
@@ -91,6 +93,14 @@ router.post("/addAdress",addressController.addAdress)
 router.get("/address/delete/:addressId", addressController.deleteAddress)
 router.get("/editAddress/:id",userAuth,addressController.loadEditAddress)
 router.post("/updateAddress/:id",addressController.updateAddress)
+
+
+//  cart management
+router.get("/cart",cartController.loadCart)
+router.post("/cart/:id", cartController.addToCart);
+router.patch("/cart/update-qty",cartController.updateCartQty)
+
+router.delete("/cart/remove-item", cartController.removeCartItem);
 
 
 

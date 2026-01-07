@@ -52,6 +52,27 @@
                 margin-right: 0.5rem;
                 accent-color: #1f2937; /* Checkbox color */
             }
+
+
+            .no-box {
+  border: none;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* 🔥 THIS IS THE KEY FIX */
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+
+  width: 100%;          /* force new line */
+}
+
+
+            
         </style>
     </head>
 
@@ -85,72 +106,100 @@
                     </div>
                 </div>
             </section>
+            
+  <form id="filterForm" method="GET" action="/productlist">
 
-   <form id="filterForm" method="GET" action="/productlist">
 
 <section class="filter-container">
-    <div class="filter-bar">
+  <div class="filter-bar">
 
-     
+    <!-- CATEGORY -->
+    <div class="filter-col">
+      <p class="filter-title">Category</p>
 
-
-        <!-- CATEGORY FILTER -->
-<div class="md:w-1/4">
-  <p class="filter-title">Category</p>
-  <div class="filter-checklist">
-
-    <% categories.forEach(cat => { %>
-      <label>
-        <input type="checkbox"
-               name="category"
-               value="<%= cat.name %>"
-               <%= selectedCategory.includes(cat.name) ? "checked" : "" %>>
-        <%= cat.name %>
-      </label>
-    <% }) %>
-
-  </div>
-</div>
-
-
-<!-- BRAND FILTER -->
-<!-- <div class="md:w-1/4">
-  <p class="filter-title">Brand</p>
-  <div class="filter-checklist">
-
-    <% brands.forEach(br => { %>
-      <label>
-        <input type="checkbox"
-               name="brand"
-               value="<%= br.name %>"
-               <%= selectedBrand.includes(br.name) ? "checked" : "" %>>
-        <%= br.name %>
-      </label>
-    <% }) %>
-
-  </div>
-</div> -->
-
-
-
-
-        <!-- SORT FILTER -->
-        <div class="md:w-1/4">
-            <p class="filter-title">Sort By</p>
-            <select name="sort" class="border border-gray-300 rounded-lg px-4 py-2 text-sm shadow-sm"
-                    onchange="document.getElementById('filterForm').submit()">
-
-                <option value="latest" <%= selectedSort === "latest" ? "selected" : "" %>>Latest</option>
-                <option value="low_to_high" <%= selectedSort === "low_to_high" ? "selected" : "" %>>Price: Low → High</option>
-                <option value="high_to_low" <%= selectedSort === "high_to_low" ? "selected" : "" %>>Price: High → Low</option>
-
-            </select>
-        </div>  
-
+      <% categories.forEach(cat => { %>
+        <label class="checkbox-row">
+          <input type="checkbox"
+                 name="category"
+                 value="<%= cat.name %>"
+                  <%= selectedCategory.includes(cat.name) ? "checked" : "" %>
+                 onchange="applyFilters()">
+          <span><%= cat.name %></span>
+        </label>
+      <% }) %>
     </div>
-</section>
 
-</form>
+    <!-- NAME -->
+    <div class="filter-col name-col">
+      <p class="filter-title">NAME</p>
+
+
+
+      <label class="checkbox-row">
+  <input type="radio"
+         name="nameSort"
+         value=""
+         <%= !selectedNameSort ? "checked" : "" %>
+         onchange="this.form.submit()">
+  <span>Default</span>
+</label>
+
+      <label class="checkbox-row">
+  <input type="radio"
+         name="nameSort"
+         value="name_asc"
+          <%= selectedNameSort === "name_asc" ? "checked" : "" %>
+         onchange="this.form.submit()">
+  <span>A – Z</span>
+</label>
+
+<label class="checkbox-row">
+  <input type="radio"
+         name="nameSort"
+         value="name_desc"
+             <%= selectedNameSort === "name_desc" ? "checked" : "" %>
+         onchange="this.form.submit()">
+  <span>Z – A</span>
+</label>
+
+      
+    </div>
+
+    <!-- BRAND -->
+    <div class="filter-col">
+      <p class="filter-title">BRAND</p>
+
+      <% brands.forEach(brand => { %>
+        <label class="checkbox-row">
+          <input type="checkbox"
+       name="brand"
+        <%= selectedBrand.includes(brand.name) ? "checked" : "" %>
+       value="<%= brand.name %>"
+       onchange="this.form.submit()">
+
+          <span><%= brand.name %></span>
+        </label>
+      <% }) %>
+    </div>
+
+    <!-- SORT -->
+    <div class="filter-col sort-col">
+      <p class="filter-title">Sort By</p>
+
+      <select name="sort"
+              class="border border-gray-300 rounded-lg px-4 py-2 text-sm shadow-sm"
+              onchange="this.form.submit()">
+        <option value="latest">Latest</option>
+        <option value="low_to_high">Price: Low → High</option>
+        <option value="high_to_low">Price: High → Low</option>
+      </select>
+    </div>
+
+  </div>
+</section>
+  </form>
+
+</div>
 
 
         <h2 class="text-3xl font-extrabold mb-8 px-4 text-gray-900 tracking-tight">Featured Products</h2>
@@ -279,10 +328,3 @@
     </html>
 
 
-    <script>
-    document.querySelectorAll('#filterForm input[type="checkbox"]').forEach(item => {
-        item.addEventListener("change", () => {
-            document.getElementById("filterForm").submit();
-        });
-    });
-    </script>

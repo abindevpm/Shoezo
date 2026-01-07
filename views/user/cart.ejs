@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Shoezo - Your Cart</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</head>
+<body>
+
+<!-- 🔹 NAVBAR -->
+<%- include('../partials/userpartial/header.ejs') %>
+
+<div class="cart-wrapper">
+
+  <header class="cart-title">
+    <h1>YOUR CART</h1>
+    <p>Total <%= cartItems.length %> Items In Your Cart</p>
+  </header>
+
+  <div class="main-layout">
+
+    <!-- LEFT SIDE -->
+    <div class="items-section">
+
+      <% if (cartItems.length === 0) { %>
+        <p>Your cart is empty</p>
+      <% } else { %>
+
+        <% cartItems.forEach(item => { %>
+          <div class="cart-item">
+<img
+  src="/uploads/product-images/<%= item.product.images?.[0] || 'default-shoe.png' %>"
+  class="product-img"
+/>
+
+
+
+
+            <div class="item-info">
+              <p class="description"><%= item.product.description %></p>
+               <p class="cart-size">
+    Size: <strong><%= item.size %></strong>
+  </p>
+           <span
+  class="price"
+  id="item-total-<%= item._id %>"
+>
+  ₹<%= item.price * item.quantity %>
+</span>
+
+            </div>
+
+            <div class="item-controls">
+              <div class="qty-selector">
+
+                <div class="qty-box">
+
+ <button
+  id="dec-<%= item._id %>"
+  class="qty-btn"
+  onclick="updateQty('<%= item._id %>', 'dec')"
+>−</button>
+
+
+<span class="qty-number" id="qty-<%= item._id %>">
+  <%= item.quantity %>
+</span>
+
+<button
+  id="inc-<%= item._id %>"
+  class="qty-btn"
+  onclick="updateQty('<%= item._id %>', 'inc')"
+>+</button>
+
+  
+
+</div>
+
+ 
+
+              </div>
+               <i
+  class="fa-regular fa-trash-can delete-icon"
+  onclick="removeItem('<%= item._id %>')"
+></i>
+
+            </div>
+            
+          </div>
+        <% }) %>
+
+        <!-- CHECKOUT BUTTON (LEFT BOTTOM) -->
+        <button class="btn-black checkout-main">
+          Checkout
+        </button>
+
+      <% } %>
+
+    </div>
+
+    <!-- RIGHT SIDE -->
+   <% if (summary) { %>
+<div class="summary-section">
+
+  <div class="summary-card">
+    <h2>Order Summary</h2>
+
+    <div class="summary-line">
+      <span><%= summary.itemsCount %> Items</span>
+       <span id="subtotal">₹<%= summary.subtotal %></span>
+
+    </div>
+
+    <div class="summary-line">
+      <span>Delivery Charges</span>
+      <span class="free">Free</span>
+    </div>
+
+    <div class="summary-line">
+      <span>GST Amount</span>
+      <span id="gst">₹<%= summary.gst %></span>
+    </div>
+
+    <div class="summary-line discount">
+      <span>Discount 30%</span>
+     
+      <span id="discount">-₹<%= summary.discount %></span>
+
+    </div>
+
+    <hr>
+
+    <div class="summary-line total">
+      <strong>Total Price</strong>
+    <strong id="grandTotal">₹<%= summary.grandTotal %></strong>
+
+    </div>
+
+  </div>
+</div>
+<% } %>
+
+
+
+
+   
+
+  </div>
+</div>
+
+
+<!-- 🔹 FOOTER -->
+<%- include('../partials/userpartial/footer.ejs') %>  
+
+</body>
+</html>
+
+<style>
+
+  html, body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+.cart-wrapper {
+  flex: 1;   /* THIS IS THE KEY */
+}
+
+
+
+.cart-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.main-layout {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+.items-section {
+  flex: 2;
+}
+
+.summary-section {
+  flex: 1;
+  position: sticky;
+  top: 100px;
+}
+
+
+.cart-item {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.product-img {
+  width: 120px;
+  height: auto;
+  object-fit: contain;
+}
+
+
+.item-info {
+  flex: 1;
+}
+
+.description {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.price {
+  font-weight: bold;
+}
+
+
+.item-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.qty-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.qty-selector button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #ccc;
+
+  .summary-card {
+  border: 1px solid #eee;
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0;
+}
+
+.summary-line.total {
+  font-size: 18px;
+}
+
+.free {
+  color: green;
+}
+
+  background: none;
+  cursor: pointer;
+}
+
+.delete-icon {
+  cursor: pointer;
+  color: #555;
+}
+
+.btn-black {
+  background: black;
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.checkout-main {
+  margin-top: 30px;
+}
+
+.summary-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
+
+.summary-card h2 {
+  margin-bottom: 20px;
+}
+
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0;
+  font-size: 14px;
+}
+
+.summary-line.total {
+  font-size: 18px;
+  margin-top: 15px;
+}
+
+.discount {
+  color: #d32f2f;
+}
+
+.free {
+  color: green;
+}
+
+
+.qty-selector button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+
+.qty-box {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.qty-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #fff;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.qty-number {
+  width: 40px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.qty-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+
+
+
+
+</style>
+
+
+
+<script>
+async function removeItem(itemId) {
+  Swal.fire({
+    title: "Remove item?",
+    text: "This product will be removed from your cart.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#000",
+    cancelButtonColor: "#aaa",
+    confirmButtonText: "Yes, remove",
+    cancelButtonText: "Cancel"
+  }).then(async (result) => {
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const res = await fetch("/cart/remove-item", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ itemId })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        Swal.fire({
+          icon: "success",
+          title: "Removed!",
+          text: "Item removed from cart",
+          timer: 1200,
+          showConfirmButton: false
+        }).then(() => {
+          location.reload();
+        });
+      } else {
+        Swal.fire("Error", "Something went wrong", "error");
+      }
+
+    } catch (err) {
+      console.log(err);
+      Swal.fire("Error", "Server error", "error");
+    }
+
+  });
+}
+
+
+
+async function updateQty(itemId, action) {
+  try {
+
+
+
+      
+    const currentQty = Number(
+      document.getElementById(`qty-${itemId}`).innerText
+    );
+
+    
+    if (action === "inc" && currentQty >= 10) {
+      Swal.fire({
+        icon: "warning",
+        title: "Maximum limit reached",
+        text: "You can only add up to 10 quantities of this product",
+        confirmButtonColor: "#000"
+      });
+      return;
+    }
+
+  
+    if (action === "dec" && currentQty <= 1) {
+      Swal.fire({
+        icon: "info",
+        title: "Minimum quantity",
+        text: "Quantity cannot be less than 1",
+        confirmButtonColor: "#000"
+      });
+      return;
+    }
+
+
+
+
+    const res = await fetch("/cart/update-qty", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ itemId, action })
+    });
+
+    const data = await res.json();
+
+    if (!data.success) return;
+
+    // update quantity
+    document.getElementById(`qty-${itemId}`).innerText = data.quantity;
+
+    // update item total
+    document.getElementById(`item-total-${itemId}`).innerText =
+      "₹" + data.itemTotal;
+
+    // update summary
+    document.getElementById("subtotal").innerText = "₹" + data.subtotal;
+    document.getElementById("gst").innerText = "₹" + data.gst;
+    document.getElementById("discount").innerText = "-₹" + data.discount;
+    document.getElementById("grandTotal").innerText = "₹" + data.grandTotal;
+
+    // enable / disable buttons
+    const decBtn = document.getElementById(`dec-${itemId}`);
+    const incBtn = document.getElementById(`inc-${itemId}`);
+
+    decBtn = data.quantity <= 1;
+    incBtn = data.quantity >= 10;
+
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+
+
+
+
+
+</script>

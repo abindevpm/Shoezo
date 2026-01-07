@@ -219,7 +219,7 @@ const verifyEmailOtp = async (req, res) => {
       email: req.session.newEmail
     });
 
-    // clear session
+    
     req.session.emailOtp = null;
     req.session.emailOtpExpiry = null;
     req.session.newEmail = null;

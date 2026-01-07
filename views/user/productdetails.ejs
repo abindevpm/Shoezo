@@ -303,9 +303,27 @@
 
         <!-- ACTION BUTTONS -->
         <div class="flex gap-3 pt-2">
-          <button class="flex-1 py-3 border border-gray-300 rounded-lg hover:bg-gray-100">
-            Add to Cart
-          </button>
+
+      <form action="/cart/<%= product._id %>" method="POST" class="flex-1">
+
+  <select name="variant" required>
+    <% product.variants.forEach(v => { %>
+      <option value='<%= JSON.stringify({ size: v.size, price: v.price }) %>'>
+        <%= v.size %> - ₹<%= v.price %>
+      </option>
+    <% }) %>
+  </select>
+
+  <button
+    type="submit"
+    class="w-full py-3 border border-gray-300 rounded-lg hover:bg-gray-100 transition"
+  >
+    Add to Cart
+  </button>
+</form>
+
+
+         
           <button class="flex-1 py-3 bg-black text-white rounded-lg hover:bg-gray-800">
             Buy Now
           </button>

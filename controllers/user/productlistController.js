@@ -45,18 +45,29 @@ const loadShopPage = async (req, res) => {
 
 
         
+if (req.query.brand) {
+  const selectedBrands = Array.isArray(req.query.brand)
+    ? req.query.brand
+    : [req.query.brand];
 
-  if (req.query.brand) {
-  const brandDoc = await Brand.findOne({
-    name: new RegExp("^" + req.query.brand.trim() + "$", "i"),
+  const brandDocs = await Brand.find({
+    name: {
+      $in: selectedBrands.map(b =>
+        new RegExp("^" + b.trim() + "$", "i")
+      )
+    },
     isDeleted: false,
     isListed: true
   });
 
-  if (brandDoc) {
-    filter.brand = new mongoose.Types.ObjectId(brandDoc._id);
+  if (brandDocs.length > 0) {
+    filter.brand = { $in: brandDocs.map(b => b._id) };
   }
 }
+
+ 
+
+console.log("FINAL FILTER OBJECT =>", JSON.stringify(filter, null, 2));
 
 
 
@@ -68,7 +79,7 @@ const loadShopPage = async (req, res) => {
         const skip = (page - 1) * limit;
 
 
-
+         const nameSort = req.query.nameSort;
         const selectedSort = req.query.sort || "latest";
 
 let pipeline = [
@@ -97,13 +108,22 @@ let pipeline = [
 ];
 
 
-if (selectedSort === "low_to_high") {
+if (nameSort === "name_asc") {
+  pipeline.push({ $sort: { name: 1 } });         
+}
+else if (nameSort === "name_desc") {
+  pipeline.push({ $sort: { name: -1 } });         
+}
+else if (selectedSort === "low_to_high") {
   pipeline.push({ $sort: { effectivePrice: 1 } });
-} else if (selectedSort === "high_to_low") {
+}
+else if (selectedSort === "high_to_low") {
   pipeline.push({ $sort: { effectivePrice: -1 } });
-} else {
+}
+else {
   pipeline.push({ $sort: { createdAt: -1 } });
 }
+
 
 
 pipeline.push(
@@ -145,6 +165,7 @@ const brands = await Brand.find({
             selectedCategory: req.query.category ? [].concat(req.query.category) : [],
             selectedBrand: req.query.brand ? [].concat(req.query.brand) : [],
             selectedSort: req.query.sort || "latest",
+              selectedNameSort: nameSort, 
             search: req.query.search || "",
             page,
             totalPages,
@@ -159,4 +180,14 @@ const brands = await Brand.find({
     }
 };
 
-module.exports = { loadShopPage };
+
+
+
+
+
+
+module.exports = { 
+  loadShopPage ,
+
+
+};
