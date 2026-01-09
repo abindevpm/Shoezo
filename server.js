@@ -67,7 +67,7 @@ app.use((req, res, next) => {
 // Routes
 
 app.use("/",userRoute)
-// app.use("/user",userAuth,userRoute)
+app.use("/user",userAuth,userRoute)
 app.use("/admin",adminRoute)
 
 

@@ -6,6 +6,7 @@ const productDetailsController = require("../controllers/user/productDetailsCont
 const profileController = require("../controllers/user/profileController")
 const addressController = require("../controllers/user/addressController");
 const cartController = require("../controllers/user/cartController")
+const checkoutController = require("../controllers/user/checkoutController")
 const {uploadProfile} = require("../middlewares/multer")
 
 
@@ -99,8 +100,20 @@ router.post("/updateAddress/:id",addressController.updateAddress)
 router.get("/cart",cartController.loadCart)
 router.post("/cart/:id", cartController.addToCart);
 router.patch("/cart/update-qty",cartController.updateCartQty)
-
 router.delete("/cart/remove-item", cartController.removeCartItem);
+
+
+
+
+
+
+//   checkout management
+
+
+router.get("/checkout", checkoutController.loadCheckout);
+router.post("/place-order", checkoutController.placeOrder);
+router.get("/order-success", checkoutController.loadOrderSuccess);
+
 
 
 

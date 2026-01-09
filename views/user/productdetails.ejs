@@ -304,15 +304,9 @@
         <!-- ACTION BUTTONS -->
         <div class="flex gap-3 pt-2">
 
-      <form action="/cart/<%= product._id %>" method="POST" class="flex-1">
+   <form action="/cart/<%= product._id %>" method="POST" class="flex-1">
 
-  <select name="variant" required>
-    <% product.variants.forEach(v => { %>
-      <option value='<%= JSON.stringify({ size: v.size, price: v.price }) %>'>
-        <%= v.size %> - ₹<%= v.price %>
-      </option>
-    <% }) %>
-  </select>
+  <input type="hidden" name="variant" id="selectedVariant">
 
   <button
     type="submit"
@@ -321,6 +315,7 @@
     Add to Cart
   </button>
 </form>
+
 
 
          
@@ -445,107 +440,108 @@
     
 
     <script>
-      // swap main image when thumb clicked
-      (function () {
-        const thumbs = document.querySelectorAll('#thumbs img');
-        const main = document.getElementById('mainImage');
+document.addEventListener("DOMContentLoaded", () => {
 
-        thumbs.forEach(t => {
-          t.addEventListener('click', function (e) {
-            const full = t.dataset.full;
-            if (!full) return;
-            main.src = full;
-            thumbs.forEach(x => x.classList.remove('active-border'));
-            t.classList.add('active-border');
-          });
-        });
+  /* ===============================
+     IMAGE THUMBNAIL SWAP
+  ================================ */
+  const thumbs = document.querySelectorAll('#thumbs img');
+  const mainImage = document.getElementById('mainImage');
 
-        // sizes
-        document.querySelectorAll('[data-size]').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            document.querySelectorAll('[data-size]').forEach(b => {
-              b.classList.remove('bg-black', 'text-white', 'border-black');
-              b.classList.add('bg-white', 'text-gray-800', 'border-gray-300');
-            });
-            btn.classList.add('bg-black', 'text-white', 'border-black');
-          });
-        });
-
-        // colors
-        document.querySelectorAll('[data-color]').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            document.querySelectorAll('[data-color]').forEach(b => b.style.borderColor = '#e5e7eb');
-            btn.style.borderColor = '#111827';
-          });
-        });
-
-        // button handlers
-        document.getElementById('addToCartBtn')?.addEventListener('click', () => {
-          alert('Add to Cart clicked — integrate backend/cart next.');
-        });
-        document.getElementById('buyNowBtn')?.addEventListener('click', () => {
-          alert('Buy Now clicked — integrate checkout flow next.');
-        });
-
-        document.getElementById('submitReviewBtn')?.addEventListener('click', () => {
-          const txt = document.getElementById('reviewText')?.value.trim();
-          if (!txt) return alert('Please write a review before submitting.');
-          alert('Review submitted: "' + txt + '" (Implement backend POST to save it.)');
-        });
-      })();
-
-    
-
-      //  zooming logic
+  thumbs.forEach(t => {
+    t.addEventListener('click', () => {
+      const full = t.dataset.full;
+      if (!full) return;
+      mainImage.src = full;
+      thumbs.forEach(x => x.classList.remove('active-border'));
+      t.classList.add('active-border');
+    });
+  });
 
 
-      const zoomContainer = document.querySelector('.zoom-container');
+  /* ===============================
+     ZOOM LOGIC
+  ================================ */
+  const zoomContainer = document.querySelector('.zoom-container');
   const zoomImage = document.querySelector('.zoom-image');
 
-  zoomContainer.addEventListener('mousemove', (e) => {
+  if (zoomContainer && zoomImage) {
+    zoomContainer.addEventListener('mousemove', (e) => {
       const rect = zoomContainer.getBoundingClientRect();
-      const x = e.clientX - rect.left; 
+      const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-
       zoomImage.style.transformOrigin = `${x}px ${y}px`;
-  });
+    });
 
-  zoomContainer.addEventListener('mouseenter', () => {
+    zoomContainer.addEventListener('mouseenter', () => {
       zoomContainer.classList.add('zoomed');
-  });
+    });
 
-  zoomContainer.addEventListener('mouseleave', () => {
+    zoomContainer.addEventListener('mouseleave', () => {
       zoomContainer.classList.remove('zoomed');
-  });
+    });
+  }
 
 
-
-
-
-   const offerPriceEl = document.getElementById("productPrice");
+  /* ===============================
+     VARIANT (SIZE) LOGIC  ✅
+  ================================ */
+  const variantButtons = document.querySelectorAll(".variant-btn");
+  const variantInput = document.getElementById("selectedVariant");
+  const offerPriceEl = document.getElementById("productPrice");
   const originalPriceEl = document.getElementById("originalPrice");
 
-  document.querySelectorAll(".variant-btn").forEach(btn => {
+  if (!variantInput || variantButtons.length === 0) {
+    console.error("Variant input or buttons missing");
+    return;
+  }
+
+  // ✅ SET DEFAULT SIZE (FIRST BUTTON)
+  const firstBtn = variantButtons[0];
+  variantInput.value = JSON.stringify({
+    size: String(firstBtn.dataset.size)
+  });
+
+  if (offerPriceEl) {
+    offerPriceEl.innerText = "₹" + Number(firstBtn.dataset.price).toLocaleString();
+  }
+  if (originalPriceEl) {
+    originalPriceEl.innerText = "MRP ₹" + Number(firstBtn.dataset.original).toLocaleString();
+  }
+
+  console.log("DEFAULT SIZE:", firstBtn.dataset.size);
+
+  // ✅ HANDLE SIZE CLICK
+  variantButtons.forEach(btn => {
     btn.addEventListener("click", () => {
 
-      // active style
-      document.querySelectorAll(".variant-btn").forEach(b => {
+      // active UI
+      variantButtons.forEach(b => {
         b.classList.remove("bg-black", "text-white", "border-black");
         b.classList.add("bg-white", "text-gray-800", "border-gray-300");
       });
 
       btn.classList.add("bg-black", "text-white", "border-black");
 
-      // prices
-      const offerPrice = btn.dataset.price;
-      const originalPrice = btn.dataset.original;
+      // 🔥 SET HIDDEN INPUT (THIS GOES TO BACKEND)
+      variantInput.value = JSON.stringify({
+        size: String(btn.dataset.size)
+      });
 
-      // update UI
-      offerPriceEl.innerText = "₹" + Number(offerPrice).toLocaleString();
-      originalPriceEl.innerText = "MRP ₹" + Number(originalPrice).toLocaleString();
+      // update price UI
+      if (offerPriceEl) {
+        offerPriceEl.innerText = "₹" + Number(btn.dataset.price).toLocaleString();
+      }
+      if (originalPriceEl) {
+        originalPriceEl.innerText = "MRP ₹" + Number(btn.dataset.original).toLocaleString();
+      }
+
+      console.log("SELECTED SIZE:", btn.dataset.size);
     });
   });
 
-    </script>
+});
+</script>
+
   </body>
 

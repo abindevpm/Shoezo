@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Shoezo - Your Cart</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</head>
+<body>
+
+<!-- 🔹 NAVBAR -->
+<%- include('../partials/userpartial/header.ejs') %>
+
+
+
+
+
+
+<div class="order-success-wrapper">
+
+  <!-- Top status bar -->
+  <div class="order-status-bar">
+    <div class="status-left">
+      <p class="status-title">Order Completed</p>
+      <p class="status-sub">Arriving By Wed, Apr 2024</p>
+    </div>
+    <a href="/orders" class="view-order-btn">View order</a>
+  </div>
+
+  <!-- Success content -->
+  <div class="success-content">
+
+    <div class="success-icon">
+      ✓
+    </div>
+
+    <h2>Your order is Completed</h2>
+
+    <p class="success-text">
+      Thank you for your order. Sit tight we are processing your order<br>
+      we will update you with your order in email
+    </p>
+
+    <a href="/productlist" class="continue-btn">
+      Continue Shopping
+    </a>
+
+  </div>
+
+</div>
+
+
+
+<!-- 🔹 FOOTER -->
+<%- include('../partials/userpartial/footer.ejs') %>  
+
+</body>
+</html>
+
+
+<style>
+
+    * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  background: #fff;
+}
+
+.order-success-wrapper {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 0 16px;
+}
+
+/* Top bar */
+.order-status-bar {
+  background: #000;
+  color: #fff;
+  border-radius: 40px;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.status-title {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.status-sub {
+  font-size: 13px;
+  color: #ccc;
+  margin-top: 2px;
+}
+
+.view-order-btn {
+  background: #fff;
+  color: #000;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Success center */
+.success-content {
+  margin-top: 80px;
+  text-align: center;
+}
+
+.success-icon {
+  width: 80px;
+  height: 80px;
+  border: 6px solid #22c55e;
+  border-radius: 50%;
+  color: #22c55e;
+  font-size: 42px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+}
+
+.success-content h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.success-text {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+/* Button */
+.continue-btn {
+  display: inline-block;
+  background: #000;
+  color: #fff;
+  padding: 14px 32px;
+  border-radius: 30px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .order-status-bar {
+    flex-direction: column;
+    gap: 10px;
+    border-radius: 20px;
+  }
+}
+
+</style>

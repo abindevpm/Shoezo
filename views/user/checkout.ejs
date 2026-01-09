@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>checkout page</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</head>
+<body>
+
+    <%- include('../partials/userpartial/header.ejs') %>
+
+<main class="checkout-wrapper">
+    <div class="checkout-container">
+        <div class="checkout-content">
+            <h1 class="main-title">CHECKOUT</h1>
+
+            <div class="product-header">
+                <div>
+  <% cartItems.forEach(item => { %>
+    <div style="border-bottom:1px solid #ccc; padding:10px 0; display:flex; gap:15px;">
+
+      <!-- PRODUCT IMAGE -->
+      <img 
+        src="/uploads/product-images/<%= item.productId.images[0] %>" 
+        alt="<%= item.productId.name %>"
+        style="width:80px;height:80px;object-fit:cover;"
+      >
+
+      <!-- PRODUCT INFO -->
+      <div>
+        <p><strong><%= item.productId.name %></strong></p>
+        <p>Size: <%= item.size %></p>
+        <p>Quantity: <%= item.quantity %></p>
+        <p>Price: ₹<%= item.price %></p>
+        <p>Subtotal: ₹<%= item.price * item.quantity %></p>
+      </div>
+
+    </div>
+  <% }) %>
+</div>
+
+     
+               
+            </div>
+
+            <div class="section-block">
+            
+
+  <%
+function formatAddress(addr) {
+  let parts = [];
+
+  if (addr.house) parts.push(addr.house);
+  if (addr.street) parts.push(addr.street);
+  if (addr.landmark) parts.push(addr.landmark);
+  if (addr.city) parts.push(addr.city);
+  if (addr.state) parts.push(addr.state);
+
+  return parts.join(", ");
+}
+%>
+
+
+
+<h2 class="section-title">Delivery Address</h2>
+
+<%
+  const defaultAddress =
+    user.addresses.find(a => a.isDefault) || user.addresses[0];
+%>
+
+<div class="address-row" id="selectedAddressBox">
+  <div class="address-info">
+    <span class="addr-label">Default</span>
+
+    <p class="addr-name">
+      <strong><%= defaultAddress.fullName %>,<br>
+        <%= defaultAddress.addressLine %>,<br>
+        <%= defaultAddress.pincode %></strong>
+    </p>
+
+    <p class="addr-desc">
+      <%= formatAddress(defaultAddress) %>
+    </p>
+
+    <p class="addr-phone">
+      Mobile: +91 <%= defaultAddress.phone %>
+    </p>
+  </div>
+
+  <button class="btn-black-sm" id="changeAddressBtn">
+    Select Address
+  </button>
+</div>
+
+
+
+
+
+<div id="addressList" class="address-modal" style="display:none;">
+
+  <h3>Select Delivery Address</h3>
+
+  <% user.addresses.forEach(addr => { %>
+    <label class="address-option">
+
+      <input type="radio"
+             name="addressRadio"
+             value="<%= addr._id %>"
+             <%= addr._id.toString() === defaultAddress._id.toString() ? "checked" : "" %>>
+
+      <div class="address-text">
+        <strong><%= addr.fullName %> <br>
+              <%= addr.addressLine %><br>
+          <%= addr.pincode %></strong>
+
+        <% if (addr.isDefault) { %>
+          <span class="badge">HOME</span>
+        <% } %>
+
+        <p><%= formatAddress(addr) %></p>
+        <p>Mobile: +91 <%= addr.phone %></p>
+      </div>
+
+    </label>
+  <% }) %>
+
+  <button class="btn-black" id="confirmAddressBtn">
+    Deliver Here
+  </button>
+</div>
+
+
+            </div>
+
+
+            <div class="section-block">
+                <h2 class="section-title">Payment Method</h2>
+                <p class="payment-hint">Select any payment method</p>
+                <form action="/place-order" method="POST">
+                  <input type="hidden" name="addressId" id="addressIdInput">
+
+                  <div class="payment-section">
+
+  <h3 class="section-title">Choose Payment Method</h3>
+
+  <!-- Razorpay -->
+  <label class="payment-card">
+    <input type="radio" name="paymentMethod" value="ONLINE">
+    <div class="payment-content">
+      <div class="payment-left">
+        <img src="/images/razorpay.png" class="payment-icon" />
+        <div>
+          <p class="payment-title">Razorpay</p>
+          <p class="payment-desc">Pay securely with netbanking</p>
+        </div>
+      </div>
+    </div>
+  </label>
+
+  <!-- Wallet -->
+  <label class="payment-card">
+    <input type="radio" name="paymentMethod" value="WALLET">
+    <div class="payment-content">
+      <div class="payment-left">
+        <img src="/images/wallet.png" class="payment-icon" />
+        <div>
+          <p class="payment-title">Wallet</p>
+          <p class="payment-desc">
+            Available Balance:
+            <span class="wallet-balance">₹<%= user.wallet || 0 %></span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </label>
+
+  <!-- Cash on Delivery -->
+  <label class="payment-card active">
+    <input type="radio" name="paymentMethod" value="COD" checked>
+    <div class="payment-content">
+      <div class="payment-left">
+      <img src="/images/cashondelivery.jpeg" class="payment-icon cod-icon" />
+
+        <div>
+          <p class="payment-title">Cash on Delivery</p>
+          <p class="payment-desc">Pay when your order arrives</p>
+        </div>
+      </div>
+    </div>
+  </label>
+
+</div>
+  
+            </div>
+
+            <hr class="form-divider">
+       <button type="submit" class="btn-place-order">Place order</button>
+
+        </div>
+        
+</form>
+
+        <div class="checkout-sidebar">
+            <button class="btn-details-black">Checkout Details</button>
+            <div class="summary-card">
+
+              <h3 class="summary-header">Order Summary</h3>
+
+<div class="summary-line">
+  <span><%= totalItems %> Items</span>
+  <span>₹<%= subtotal %></span>
+</div>
+
+<div class="summary-line">
+  <span>Delivery Charges</span>
+  <span class="free-text">
+    <%= deliveryCharge === 0 ? "Free" : "₹" + deliveryCharge %>
+  </span>
+</div>
+
+<div class="summary-line">
+  <span>GST Amount</span>
+  <span>₹<%= gstAmount %></span>
+</div>
+
+<div class="summary-line discount">
+  <span>Discount 30%</span>
+  <span>-₹<%= discountAmount %></span>
+</div>
+
+<div class="total-line">
+  <span>Total Price</span>
+  <span>₹<%= totalPrice %></span>
+</div>
+
+
+
+
+         
+            </div>
+
+            <div class="coupon-row">
+                <input type="text" placeholder="coupon code">
+                <button class="btn-view-all">View all</button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<%- include('../partials/userpartial/footer.ejs') %>
+
+
+
+
+
+
+
+
+
+
+</body> 
+</html>
+
+
+<style>
+
+
+  .payment-icon {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.cod-icon {
+  width: 56px;   /* slightly bigger than others */
+  height: auto;
+}
+
+
+
+
+    /* Layout Wra
+    pper */
+.checkout-wrapper {
+    background-color: #fff;
+    padding: 50px 0;
+    font-family: Arial, sans-serif;
+}
+
+.checkout-container {
+    max-width: 1140px;
+    margin: 0 auto;
+    display: flex;
+    gap: 50px;
+    padding: 0 15px;
+}
+
+.checkout-content { flex: 2; }
+.checkout-sidebar { flex: 1; }
+
+.main-title { font-size: 28px; font-weight: bold; margin-bottom: 30px; }
+
+/* Product Row */
+.product-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+}
+.shoe-img { width: 150px; }
+.qty-selector { font-size: 13px; display: flex; align-items: center; gap: 8px; }
+.qty-dropdown { background-color: #94a3b850; border: none; padding: 3px 10px; border-radius: 4px; }
+
+/* Sections */
+.section-title { font-size: 18px; font-weight: 700; margin-bottom: 15px; margin-top: 30px; }
+.address-row { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #eee; padding-bottom: 25px; }
+.addr-label { color: #999; font-size: 11px; font-weight: bold; display: block; margin-bottom: 5px; }
+.address-info p { font-size: 13px; color: #444; margin: 2px 0; }
+.btn-black-sm { background: #000; color: #fff; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+
+/* Form Elements */
+.form-row-three { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+.form-row-two { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; font-size: 11px; color: #888; margin-bottom: 5px; }
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 14px;
+}
+.checkbox-line { font-size: 12px; color: #888; display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+
+/* Payment & Footer Button */
+.payment-hint { font-size: 13px; color: #666; margin-bottom: 15px; }
+.radio-label { display: block; margin-bottom: 10px; font-size: 14px; cursor: pointer; }
+.form-divider { border: 0; border-top: 1px solid #eee; margin: 30px 0; }
+.btn-place-order { background: #000; color: #fff; width: 300px; padding: 18px; border-radius: 40px; font-weight: bold; font-size: 18px; border: none; cursor: pointer; }
+
+/* Sidebar Summary */
+.btn-details-black { width: 100%; background: #000; color: #fff; padding: 12px; border-radius: 30px; font-weight: bold; border: none; margin-bottom: 25px; }
+.summary-card { border: 1px solid #f2f2f2; padding: 25px; box-shadow: 0 5px 20px rgba(0,0,0,0.04); border-radius: 5px; margin-bottom: 20px; }
+.summary-header { text-align: center; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; font-size: 18px; }
+.summary-line { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 14px; }
+.free-text { color: #888; }
+.discount { color: #555; }
+.total-line { display: flex; justify-content: space-between; border-top: 1px solid #eee; padding-top: 20px; font-weight: bold; font-size: 18px; }
+
+.coupon-row { display: flex; gap: 10px; }
+.coupon-row input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+.btn-view-all { background: #000; color: #fff; border: none; padding: 0 15px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+
+/* Mobile View */
+@media (max-width: 900px) {
+    .checkout-container { flex-direction: column; }
+    .form-row-three { grid-template-columns: 1fr; }
+}
+
+
+.payment-section {
+  background: #fff;
+  padding: 18px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.payment-card {
+  display: block;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.payment-card:hover {
+  border-color: #000;
+}
+
+.payment-card input {
+  display: none;
+}
+
+.payment-card.active,
+.payment-card input:checked + .payment-content {
+  border-color: #000;
+}
+
+.payment-content {
+  display: flex;
+  align-items: center;
+}
+
+.payment-left {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.payment-icon {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+
+.payment-title {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.payment-desc {
+  font-size: 13px;
+  color: #666;
+}
+
+.wallet-balance {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+
+
+
+
+
+</style>
+
+<script>
+  const changeBtn = document.getElementById("changeAddressBtn");
+  const addressList = document.getElementById("addressList");
+  const selectedBox = document.getElementById("selectedAddressBox");
+  const selectedInput = document.getElementById("addressIdInput");
+
+
+  changeBtn.onclick = () => {
+    addressList.style.display = "block";
+  };
+
+  document.getElementById("confirmAddressBtn").onclick = () => {
+    const selected = document.querySelector("input[name='addressRadio']:checked");
+    if (!selected) return;
+
+    const label = selected.closest(".address-option");
+    const nameLine = label.querySelector("strong").innerText;
+    const desc = label.querySelector("p").innerText;
+    const phone = label.querySelectorAll("p")[1].innerText;
+
+    selectedBox.querySelector(".addr-name strong").innerText = nameLine;
+    selectedBox.querySelector(".addr-desc").innerText = desc;
+    selectedBox.querySelector(".addr-phone").innerText = phone;
+
+    selectedInput.value = selected.value;
+    addressList.style.display = "none";
+  };
+</script>
+

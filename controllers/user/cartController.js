@@ -1,61 +1,72 @@
 const Cart = require("../../models/cartSchema")
 const Product = require("../../models/productSchema")
+
 const loadCart = async (req, res) => {
-
-  try{
-
+  try {
     const userId = req.session.user?._id || req.session.user;
 
-    if(!userId){
-      return res.redirect("/login")
-
+    if (!userId) {
+      return res.redirect("/login");
     }
 
-    const cart = await Cart.findOne({userId})
-    .populate("items.productId");
+    const cart = await Cart.findOne({ userId })
+      .populate("items.productId");
 
-    if(!cart || cart.items.length === 0){
-      return  res.render("cart",{
-        cartItems:[],
-        summary:null
+    if (!cart || cart.items.length === 0) {
+      return res.render("cart", {
+        cartItems: [],
+        summary: null
       });
-
     }
 
-     const cartItems = cart.items.map(items=>({
-      _id:items._id,
-      product:items.productId,
-      size:items.size,
-      quantity:items.quantity,
-      price:items.price,
-      total:items.quantity*items.price
-     }))
+  
+    const validItems = cart.items.filter(item =>
+      item.productId && item.productId.isListed === true
+    );
 
-     const subtotal = cartItems.reduce((sum,items)=>sum+items.total,0)
+    
+    if (validItems.length !== cart.items.length) {
+      cart.items = validItems;
+      await cart.save();
+    }
 
-     const gst = Math.round(subtotal*0.10)
-     const discount = Math.round(subtotal*0.30)
-     const grandTotal = subtotal+gst-discount;
+  
+    const cartItems = cart.items.map(item => ({
+      _id: item._id,
+      product: item.productId,
+      size: item.size,
+      quantity: item.quantity,
+      price: item.price,
+      total: item.quantity * item.price
+    }));
 
-     res.render("cart",{
+    const subtotal = cartItems.reduce(
+      (sum, item) => sum + item.total,
+      0
+    );
+
+    const gst = Math.round(subtotal * 0.10);
+    const discount = Math.round(subtotal * 0.30);
+    const grandTotal = subtotal + gst - discount;
+
+    res.render("cart", {
       cartItems,
-      summary:{
-        itemsCount:cartItems.length,
+      summary: {
+        itemsCount: cartItems.length,
         subtotal,
         gst,
         discount,
         grandTotal
-
       }
-     })
+    });
 
-  }catch(error){
-    console.log("Load cart have error",error)
-
+  } catch (error) {
+    console.log("Load cart have error", error);
   }
-
-
 };
+
+
+
 
 
 
@@ -70,7 +81,10 @@ const addToCart = async (req, res) => {
     if (!variant) return res.redirect(req.get("referer"));
 
     const parsedVariant = JSON.parse(variant);
-    const size = parsedVariant.size;
+    const size = String(parsedVariant.size);
+    console.log("ADDING SIZE:", typeof size, size);
+
+
 
     
     const product = await Product.findById(productId);
