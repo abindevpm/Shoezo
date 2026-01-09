@@ -124,6 +124,7 @@ const placeOrder = async (req, res) => {
     );
 
     const order = new Order({
+      orderId: "ORD-" + Date.now(), 
       userId,
       items: orderItems,
       address: selectedAddress,

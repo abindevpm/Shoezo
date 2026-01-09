@@ -1,56 +1,13 @@
-// const mongoose = require("mongoose");
-
-// const orderSchema = new mongoose.Schema({
-//   userId: {
-//     type: mongoose.Schema.Types.ObjectId,
-//     ref: "User",
-//     required: true
-//   },
-
-//   items: [
-//     {
-//       productId: {
-//         type: mongoose.Schema.Types.ObjectId,
-//         ref: "Product",
-//         required: true
-//       },
-//       size: String,
-//       quantity: Number,
-//       price: Number
-//     }
-//   ],
-
-//   totalAmount: {
-//     type: Number,
-//     required: true
-//   },
-
-//   address: {
-//     type: String,
-//     required: true
-//   },
-
-//   paymentMethod: {
-//     type: "String",
-//     default: "COD"
-//   },
-
-//   status: {
-//     type: String,
-//     default: "Placed"
-//   },
-
-//   createdAt: {
-//     type: Date,
-//     default: Date.now
-//   }
-// });
-
-// module.exports = mongoose.model("Order", orderSchema);
-
 const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
+
+  orderId: {
+    type: String,
+    unique: true,
+    required: true
+  },
+
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -66,11 +23,16 @@ const orderSchema = new mongoose.Schema({
       },
       size: Number,
       quantity: Number,
-      price: Number
+      price: Number,
+
+      
+      itemStatus: {
+        type: String,
+        default: "Placed" 
+      }
     }
   ],
 
-  // 🔹 Address should be OBJECT
   address: {
     name: String,
     phone: String,
@@ -80,17 +42,25 @@ const orderSchema = new mongoose.Schema({
   },
 
   paymentMethod: {
-    type: String,   // ✅ FIXED
+    type: String,
     default: "COD"
   },
 
   status: {
     type: String,
-    enum: ["Placed", "Shipped", "Delivered", "Cancelled"],
+    enum: ["Placed", "Shipped", "Delivered", "Cancelled", "Returned"],
     default: "Placed"
   },
 
-  // 🔹 Price breakdown (recommended)
+  
+  cancelReason: {
+    type: String
+  },
+
+  returnReason: {
+    type: String
+  },
+
   subtotal: Number,
   gstAmount: Number,
   discountAmount: Number,
