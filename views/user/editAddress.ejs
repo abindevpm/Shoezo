@@ -1,122 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHOEZOO - Account Settings</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SHOEZOO - Account Settings</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <style>
-        /* KEEP ALL THIS CSS - Your partials do not have these styles */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-        body { background-color: #fff; color: #333; }
+  <style>
+    /* KEEP ALL THIS CSS - Your partials do not have these styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
 
-        /* DASHBOARD LAYOUT */
-        .container {
-            display: flex;
-            width: 100%;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding-left: 40px; 
-        }
+    body {
+      background-color: #fff;
+      color: #333;
+    }
 
-        aside {
-            width: 280px;
-            border-right: 1px solid #eee;
-            padding-top: 30px;
-            flex-shrink: 0;
-        }
+    /* DASHBOARD LAYOUT */
+    .container {
+      display: flex;
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding-left: 40px;
+    }
 
-        .user-header {
-            background: #000;
-            color: #fff;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 5px;
-        }
+    aside {
+      width: 280px;
+      border-right: 1px solid #eee;
+      padding-top: 30px;
+      flex-shrink: 0;
+    }
 
-        .user-header img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border: 2px solid #fff;
-            object-fit: cover;
-        }
+    .user-header {
+      background: #000;
+      color: #fff;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 5px;
+    }
 
-        .menu-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px;
-            text-decoration: none;
-            color: #555;
-            font-size: 14px;
-            border-bottom: 1px solid #eee;
-        }
+    .user-header img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      object-fit: cover;
+    }
 
-        .menu-item.active {
-            background-color: #d6e0e5; /* Highlight from your image */
-            color: #000;
-        }
-        
-        .menu-item i { width: 20px; text-align: center; }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      text-decoration: none;
+      color: #555;
+      font-size: 14px;
+      border-bottom: 1px solid #eee;
+    }
 
-        main { flex: 1; padding: 30px 60px; }
+    .menu-item.active {
+      background-color: #d6e0e5;
+      /* Highlight from your image */
+      color: #000;
+    }
 
-        /* FORMS & BUTTONS */
-        .section-title { font-size: 16px; font-weight: 600; margin-bottom: 25px; color: #444; }
-        .form-row { display: flex; gap: 40px; margin-bottom: 40px; }
-        .form-inputs { flex: 1; max-width: 500px; }
-        .input-group { margin-bottom: 15px; position: relative; }
-        .input-group label { display: block; font-size: 11px; color: #666; margin-bottom: 5px; }
-        .input-group input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #eee;
-            border-radius: 4px;
-            font-size: 13px;
-        }
+    .menu-item i {
+      width: 20px;
+      text-align: center;
+    }
 
-        .profile-pic-side { width: 200px; text-align: center; }
-        .profile-pic-side img { width: 160px; height: 160px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; }
+    main {
+      flex: 1;
+      padding: 30px 60px;
+    }
 
-        .black-btn { background: #000; color: #fff; border: none; padding: 12px 30px; border-radius: 25px; font-size: 13px; cursor: pointer; }
-        .choose-img-btn { border: 1px solid #000; background: #fff; padding: 8px 20px; border-radius: 20px; font-size: 12px; cursor: pointer; }
+    /* FORMS & BUTTONS */
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 25px;
+      color: #444;
+    }
 
-        /* CHANGE PASSWORD SECTION */
-        .password-section { border-top: 1px solid #eee; margin-top: 40px; padding-top: 30px; }
-        .pw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 800px; }
-        .pw-full-width { grid-column: span 2; }
+    .form-row {
+      display: flex;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
 
-        /* REFERRAL SECTION */
-        .refer-container { margin-top: 50px; }
-        .refer-btn { background: #888; color: #fff; border: none; padding: 12px 60px; border-radius: 25px; font-size: 18px; cursor: pointer; margin-bottom: 15px; }
-        .refer-box {
-            background: #f8f9fa;
-            display: flex;
-            align-items: center;
-            width: fit-content;
-            padding: 12px 25px;
-            gap: 25px;
-            border: 1px solid #eee;
-        }
+    .form-inputs {
+      flex: 1;
+      max-width: 500px;
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+      position: relative;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #eee;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    .profile-pic-side {
+      width: 200px;
+      text-align: center;
+    }
+
+    .profile-pic-side img {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 15px;
+    }
+
+    .black-btn {
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 25px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .choose-img-btn {
+      border: 1px solid #000;
+      background: #fff;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* CHANGE PASSWORD SECTION */
+    .password-section {
+      border-top: 1px solid #eee;
+      margin-top: 40px;
+      padding-top: 30px;
+    }
+
+    .pw-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      max-width: 800px;
+    }
+
+    .pw-full-width {
+      grid-column: span 2;
+    }
+
+    /* REFERRAL SECTION */
+    .refer-container {
+      margin-top: 50px;
+    }
+
+    .refer-btn {
+      background: #888;
+      color: #fff;
+      border: none;
+      padding: 12px 60px;
+      border-radius: 25px;
+      font-size: 18px;
+      cursor: pointer;
+      margin-bottom: 15px;
+    }
+
+    .refer-box {
+      background: #f8f9fa;
+      display: flex;
+      align-items: center;
+      width: fit-content;
+      padding: 12px 25px;
+      gap: 25px;
+      border: 1px solid #eee;
+    }
 
 
 
-        .black-btn-sm {
-  background: #000;
-  color: #fff;
-  border: none;
-  padding: 6px 14px;     /* 👈 smaller */
-  border-radius: 1px;
-  font-size: 11px;       /* 👈 smaller text */
-  cursor: pointer;
-}
+    .black-btn-sm {
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 6px 14px;
+      /* 👈 smaller */
+      border-radius: 1px;
+      font-size: 11px;
+      /* 👈 smaller text */
+      cursor: pointer;
+    }
 
-/* .grid-2 {
+    /* .grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
@@ -147,282 +243,244 @@
   object-fit: cover;
 } */
 
-.account-card {
-  background: #fff;
-  padding: 30px;
-  border-radius: 14px;
-  max-width: 520px;
-}
+    .account-card {
+      background: #fff;
+      padding: 30px;
+      border-radius: 14px;
+      max-width: 520px;
+    }
 
-.input-group {
-  margin-bottom: 18px;
-}
+    .input-group {
+      margin-bottom: 18px;
+    }
 
-.email-section {
-  margin-top: 30px;
-  border-top: 1px solid #eee;
-  padding-top: 20px;
-}
+    .email-section {
+      margin-top: 30px;
+      border-top: 1px solid #eee;
+      padding-top: 20px;
+    }
 
-.email-row {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-
-.edit-btn {
-  background: #000;
-  color: #fff;
-  border: none;
-  padding: 10px 26px;
-  border-radius: 25px;      /* same pill shape */
-  font-size: 13px;          /* same as black-btn */
-  font-weight: 500;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.edit-btn:hover {
-  opacity: 0.85;
-}
+    .email-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
 
 
-.address-card {
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 18px;
-  position: relative;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-}
+    .edit-btn {
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 10px 26px;
+      border-radius: 25px;
+      /* same pill shape */
+      font-size: 13px;
+      /* same as black-btn */
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-.address-card p {
-  font-size: 13px;
-  line-height: 1.6;
-  color: #444;
-}
-
-.badge {
-  background: #555;
-  color: #fff;
-  font-size: 10px;
-  padding: 3px 10px;
-  border-radius: 10px;
-  text-transform: uppercase;
-}
-
-.badge.blue {
-  background: #3b82f6;
-}
-
-.card-actions {
-  position: absolute;
-  bottom: 18px;
-  right: 20px;
-}
-
-.card-actions a {
-  font-size: 12px;
-  color: #333;
-  margin-left: 15px;
-  text-decoration: none;
-}
+    .edit-btn:hover {
+      opacity: 0.85;
+    }
 
 
- .error {
-    color: red;
-    font-size: 11px;
-    margin-top: 4px;
-    display: block;
-  }
+    .address-card {
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 18px;
+      position: relative;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    }
 
-  .input-error {
-    border: 1px solid red !important;
-  }
+    .address-card p {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #444;
+    }
+
+    .badge {
+      background: #555;
+      color: #fff;
+      font-size: 10px;
+      padding: 3px 10px;
+      border-radius: 10px;
+      text-transform: uppercase;
+    }
+
+    .badge.blue {
+      background: #3b82f6;
+    }
+
+    .card-actions {
+      position: absolute;
+      bottom: 18px;
+      right: 20px;
+    }
+
+    .card-actions a {
+      font-size: 12px;
+      color: #333;
+      margin-left: 15px;
+      text-decoration: none;
+    }
 
 
+    .error {
+      color: red;
+      font-size: 11px;
+      margin-top: 4px;
+      display: block;
+    }
 
-    </style>
+    .input-error {
+      border: 1px solid red !important;
+    }
+  </style>
 </head>
+
 <body>
 
-    <%- include("../partials/userpartial/header.ejs") %>
+  <%- include("../partials/userpartial/header.ejs") %>
 
     <div class="container">
-        <aside>
-            <div class="user-header">
-           
-
-                <img
-    src="<%= user.profileImage && user.profileImage !== '' 
-          ? user.profileImage 
-          : '/images/default avatar ong.jpg' %>"
-    alt="User"
-  >
-            
-                <%= user.name %>
-
-            </div>
-            <a href="#" class="menu-item active"><i class="fas fa-th-large"></i> Account Overview</a>
-            <a href="#" class="menu-item"><i class="fas fa-box"></i> My Orders</a>
-            <a href="#" class="menu-item"><i class="fas fa-address-book"></i> Manage Addresses</a>
-            <a href="#" class="menu-item"><i class="fas fa-wallet"></i> Wallet</a>
-            <a href="#" class="menu-item"><i class="fas fa-ticket-alt"></i> coupons</a>
-            <a href="#" class="menu-item"><i class="fas fa-users"></i> Refer & Earn</a>
-            <a href="#" class="menu-item" style="margin-top: 60px; border-bottom: none;"><i class="fas fa-sign-out-alt"></i> logout</a>
-        </aside>
+      <%- include("../partials/userpartial/userprofile-sidebar.ejs", { user, activePage: 'address' }) %>
 
         <main>
 
-  <h2 style="text-align:center; margin-bottom:6px;">EDIT Addresses</h2>
-  <p style="text-align:center; font-size:13px; color:#777; margin-bottom:30px;">
-    Fill in the below details to add new address
-  </p>
+          <h2 style="text-align:center; margin-bottom:6px;">EDIT Addresses</h2>
+          <p style="text-align:center; font-size:13px; color:#777; margin-bottom:30px;">
+            Fill in the below details to add new address
+          </p>
 
-  <form action="/updateAddress/<%= address._id %>" method="POST" style="max-width:520px; margin:0 auto;" onsubmit="return validateAddAddressForm()">
+          <form action="/updateAddress/<%= address._id %>" method="POST" style="max-width:520px; margin:0 auto;"
+            onsubmit="return validateAddAddressForm()">
 
 
-    <!-- NAME -->
-<div class="input-group">
-  <label>Name</label>
- <input
-  type="text"
-  name="fullName"
-  value="<%= address.fullName %>"
->
+            <!-- NAME -->
+            <div class="input-group">
+              <label>Name</label>
+              <input type="text" name="fullName" value="<%= address.fullName %>">
 
-  <small class="error"></small>
-</div>
+              <small class="error"></small>
+            </div>
 
-<!-- STATE -->
-<div class="input-group">
-  <label>State</label>
-  <input
-  type="text"
-  name="state"
-  value="<%= address.state %>"
->
-  <small class="error"></small>
-</div>
+            <!-- STATE -->
+            <div class="input-group">
+              <label>State</label>
+              <input type="text" name="state" value="<%= address.state %>">
+              <small class="error"></small>
+            </div>
 
-<!-- ADDRESS -->
-<div class="input-group">
-  <label>Address</label>
- <textarea
-  name="addressLine"
-  rows="3"
-><%= address.addressLine %></textarea>
+            <!-- ADDRESS -->
+            <div class="input-group">
+              <label>Address</label>
+              <textarea name="addressLine" rows="3"><%= address.addressLine %></textarea>
 
-  <small class="error"></small>
-</div>
+              <small class="error"></small>
+            </div>
 
-<!-- PINCODE -->
-<div class="input-group">
-  <label>Pin Code</label>
-   <input
-  type="text"
-  name="pincode"
-  value="<%= address.pincode %>"
->
+            <!-- PINCODE -->
+            <div class="input-group">
+              <label>Pin Code</label>
+              <input type="text" name="pincode" value="<%= address.pincode %>">
 
-  <small class="error"></small>
-</div>
+              <small class="error"></small>
+            </div>
 
-<!-- MOBILE -->
-<div class="input-group">
-  <label>Mobile Number</label>
-   <input
-  type="text"
-  name="phone"
-  value="<%= address.phone %>"
->
+            <!-- MOBILE -->
+            <div class="input-group">
+              <label>Mobile Number</label>
+              <input type="text" name="phone" value="<%= address.phone %>">
 
-  <small class="error"></small>
-</div>
+              <small class="error"></small>
+            </div>
 
-<!-- ALTERNATE -->
-<div class="input-group">
-  <label>Alternate Number</label>
-  <input type="text" name="alternatePhone">
-  <small class="error"></small>
-</div>
+            <!-- ALTERNATE -->
+            <div class="input-group">
+              <label>Alternate Number</label>
+              <input type="text" name="alternatePhone">
+              <small class="error"></small>
+            </div>
 
 
 
 
-    <!-- SUBMIT -->
-    <div style="text-align:center; margin-top:25px;">
-      <button type="submit" class="black-btn" style="padding:10px 50px;">
-       EDIT 
-      </button>
-    </div>
+            <!-- SUBMIT -->
+            <div style="text-align:center; margin-top:25px;">
+              <button type="submit" class="black-btn" style="padding:10px 50px;">
+                EDIT
+              </button>
+            </div>
 
-  </form>
+          </form>
 
-</main>
+        </main>
 
     </div>
 
     <%- include("../partials/userpartial/footer.ejs") %>
 
 </body>
+
 </html>
 
 
 <script>
-function validateAddAddressForm() {
+  function validateAddAddressForm() {
 
-  let isValid = true;
+    let isValid = true;
 
-  
-  document.querySelectorAll(".error").forEach(e => e.innerText = "");
-  document.querySelectorAll("input, textarea").forEach(el => el.classList.remove("input-error"));
 
-  function setError(input, message) {
-    input.classList.add("input-error");
-    input.parentElement.querySelector(".error").innerText = message;
-    isValid = false;
+    document.querySelectorAll(".error").forEach(e => e.innerText = "");
+    document.querySelectorAll("input, textarea").forEach(el => el.classList.remove("input-error"));
+
+    function setError(input, message) {
+      input.classList.add("input-error");
+      input.parentElement.querySelector(".error").innerText = message;
+      isValid = false;
+    }
+
+    const fullName = document.querySelector("input[name='fullName']");
+    const state = document.querySelector("input[name='state']");
+    const addressLine = document.querySelector("textarea[name='addressLine']");
+    const pincode = document.querySelector("input[name='pincode']");
+    const phone = document.querySelector("input[name='phone']");
+    const alternatePhone = document.querySelector("input[name='alternatePhone']");
+
+
+    if (!fullName.value.trim()) setError(fullName, "Name is required");
+    if (!state.value.trim()) setError(state, "State is required");
+    if (!addressLine.value.trim()) setError(addressLine, "Address is required");
+    if (!pincode.value.trim()) setError(pincode, "Pincode is required");
+    if (!phone.value.trim()) setError(phone, "Mobile number is required");
+
+
+    if (state.value && !/^[A-Za-z ]+$/.test(state.value))
+      setError(state, "State must contain only letters");
+
+    if (fullName.value && !/^[A-Za-z ]+$/.test(fullName.value))
+      setError(fullName, "Name  must contain only letters");
+
+
+
+
+    if (pincode.value && !/^\d{6}$/.test(pincode.value))
+      setError(pincode, "Enter valid 6 digit pincode");
+
+    if (phone.value && !/^\d{10}$/.test(phone.value))
+      setError(phone, "Enter valid 10 digit mobile number");
+
+    if (alternatePhone.value && !/^\d{10}$/.test(alternatePhone.value))
+      setError(alternatePhone, "Alternate number must be 10 digits");
+
+    return isValid;
   }
-
-  const fullName = document.querySelector("input[name='fullName']");
-  const state = document.querySelector("input[name='state']");
-  const addressLine = document.querySelector("textarea[name='addressLine']");
-  const pincode = document.querySelector("input[name='pincode']");
-  const phone = document.querySelector("input[name='phone']");
-  const alternatePhone = document.querySelector("input[name='alternatePhone']");
-
-  
-  if (!fullName.value.trim()) setError(fullName, "Name is required");
-  if (!state.value.trim()) setError(state, "State is required");
-  if (!addressLine.value.trim()) setError(addressLine, "Address is required");
-  if (!pincode.value.trim()) setError(pincode, "Pincode is required");
-  if (!phone.value.trim()) setError(phone, "Mobile number is required");
-
-  
-  if (state.value && !/^[A-Za-z ]+$/.test(state.value))
-    setError(state, "State must contain only letters");
-
-      if (fullName.value && !/^[A-Za-z ]+$/.test(fullName.value))
-    setError(fullName, "Name  must contain only letters");
-
-
-
-
-  if (pincode.value && !/^\d{6}$/.test(pincode.value))
-    setError(pincode, "Enter valid 6 digit pincode");
-
-  if (phone.value && !/^\d{10}$/.test(phone.value))
-    setError(phone, "Enter valid 10 digit mobile number");
-
-  if (alternatePhone.value && !/^\d{10}$/.test(alternatePhone.value))
-    setError(alternatePhone, "Alternate number must be 10 digits");
-
-  return isValid;
-}
 
 
 

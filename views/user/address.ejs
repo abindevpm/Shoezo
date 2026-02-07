@@ -1,122 +1,171 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHOEZOO - Account Settings</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SHOEZOO - Account Settings</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <style>
-        /* KEEP ALL THIS CSS - Your partials do not have these styles */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-        body { background-color: #fff; color: #333; }
+  <style>
+    /* KEEP ALL THIS CSS - Your partials do not have these styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
 
-        /* DASHBOARD LAYOUT */
-        .container {
-            display: flex;
-            width: 100%;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding-left: 40px; 
-        }
+    body {
+      background-color: #fff;
+      color: #333;
+    }
 
-        aside {
-            width: 280px;
-            border-right: 1px solid #eee;
-            padding-top: 30px;
-            flex-shrink: 0;
-        }
+    /* DASHBOARD LAYOUT */
+    .container {
+      display: flex;
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding-left: 40px;
+    }
 
-        .user-header {
-            background: #000;
-            color: #fff;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 5px;
-        }
+    main {
+      flex: 1;
+      padding: 30px 60px;
+    }
 
-        .user-header img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border: 2px solid #fff;
-            object-fit: cover;
-        }
+    /* FORMS & BUTTONS */
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 25px;
+      color: #444;
+    }
 
-        .menu-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px;
-            text-decoration: none;
-            color: #555;
-            font-size: 14px;
-            border-bottom: 1px solid #eee;
-        }
+    .form-row {
+      display: flex;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
 
-        .menu-item.active {
-            background-color: #d6e0e5; /* Highlight from your image */
-            color: #000;
-        }
-        
-        .menu-item i { width: 20px; text-align: center; }
+    .form-inputs {
+      flex: 1;
+      max-width: 500px;
+    }
 
-        main { flex: 1; padding: 30px 60px; }
+    .input-group {
+      margin-bottom: 15px;
+      position: relative;
+    }
 
-        /* FORMS & BUTTONS */
-        .section-title { font-size: 16px; font-weight: 600; margin-bottom: 25px; color: #444; }
-        .form-row { display: flex; gap: 40px; margin-bottom: 40px; }
-        .form-inputs { flex: 1; max-width: 500px; }
-        .input-group { margin-bottom: 15px; position: relative; }
-        .input-group label { display: block; font-size: 11px; color: #666; margin-bottom: 5px; }
-        .input-group input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #eee;
-            border-radius: 4px;
-            font-size: 13px;
-        }
+    .input-group label {
+      display: block;
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 5px;
+    }
 
-        .profile-pic-side { width: 200px; text-align: center; }
-        .profile-pic-side img { width: 160px; height: 160px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; }
+    .input-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #eee;
+      border-radius: 4px;
+      font-size: 13px;
+    }
 
-        .black-btn { background: #000; color: #fff; border: none; padding: 12px 30px; border-radius: 25px; font-size: 13px; cursor: pointer; }
-        .choose-img-btn { border: 1px solid #000; background: #fff; padding: 8px 20px; border-radius: 20px; font-size: 12px; cursor: pointer; }
+    .profile-pic-side {
+      width: 200px;
+      text-align: center;
+    }
 
-        /* CHANGE PASSWORD SECTION */
-        .password-section { border-top: 1px solid #eee; margin-top: 40px; padding-top: 30px; }
-        .pw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 800px; }
-        .pw-full-width { grid-column: span 2; }
+    .profile-pic-side img {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 15px;
+    }
 
-        /* REFERRAL SECTION */
-        .refer-container { margin-top: 50px; }
-        .refer-btn { background: #888; color: #fff; border: none; padding: 12px 60px; border-radius: 25px; font-size: 18px; cursor: pointer; margin-bottom: 15px; }
-        .refer-box {
-            background: #f8f9fa;
-            display: flex;
-            align-items: center;
-            width: fit-content;
-            padding: 12px 25px;
-            gap: 25px;
-            border: 1px solid #eee;
-        }
+    .black-btn {
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 25px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .choose-img-btn {
+      border: 1px solid #000;
+      background: #fff;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* CHANGE PASSWORD SECTION */
+    .password-section {
+      border-top: 1px solid #eee;
+      margin-top: 40px;
+      padding-top: 30px;
+    }
+
+    .pw-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      max-width: 800px;
+    }
+
+    .pw-full-width {
+      grid-column: span 2;
+    }
+
+    /* REFERRAL SECTION */
+    .refer-container {
+      margin-top: 50px;
+    }
+
+    .refer-btn {
+      background: #888;
+      color: #fff;
+      border: none;
+      padding: 12px 60px;
+      border-radius: 25px;
+      font-size: 18px;
+      cursor: pointer;
+      margin-bottom: 15px;
+    }
+
+    .refer-box {
+      background: #f8f9fa;
+      display: flex;
+      align-items: center;
+      width: fit-content;
+      padding: 12px 25px;
+      gap: 25px;
+      border: 1px solid #eee;
+    }
 
 
 
-        .black-btn-sm {
-  background: #000;
-  color: #fff;
-  border: none;
-  padding: 6px 14px;     /* 👈 smaller */
-  border-radius: 1px;
-  font-size: 11px;       /* 👈 smaller text */
-  cursor: pointer;
-}
+    .black-btn-sm {
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 6px 14px;
+      /* 👈 smaller */
+      border-radius: 1px;
+      font-size: 11px;
+      /* 👈 smaller text */
+      cursor: pointer;
+    }
 
-/* .grid-2 {
+    /* .grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
@@ -147,133 +196,112 @@
   object-fit: cover;
 } */
 
-.account-card {
-  background: #fff;
-  padding: 30px;
-  border-radius: 14px;
-  max-width: 520px;
-}
+    .account-card {
+      background: #fff;
+      padding: 30px;
+      border-radius: 14px;
+      max-width: 520px;
+    }
 
-.input-group {
-  margin-bottom: 18px;
-}
+    .input-group {
+      margin-bottom: 18px;
+    }
 
-.email-section {
-  margin-top: 30px;
-  border-top: 1px solid #eee;
-  padding-top: 20px;
-}
+    .email-section {
+      margin-top: 30px;
+      border-top: 1px solid #eee;
+      padding-top: 20px;
+    }
 
-.email-row {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-
-.edit-btn {
-  background: #000;
-  color: #fff;
-  border: none;
-  padding: 10px 26px;
-  border-radius: 25px;      /* same pill shape */
-  font-size: 13px;          /* same as black-btn */
-  font-weight: 500;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.edit-btn:hover {
-  opacity: 0.85;
-}
+    .email-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
 
 
-.address-card {
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 18px;
-  position: relative;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-}
+    .edit-btn {
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 10px 26px;
+      border-radius: 25px;
+      /* same pill shape */
+      font-size: 13px;
+      /* same as black-btn */
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-.address-card p {
-  font-size: 13px;
-  line-height: 1.6;
-  color: #444;
-}
-
-.badge {
-  background: #555;
-  color: #fff;
-  font-size: 10px;
-  padding: 3px 10px;
-  border-radius: 10px;
-  text-transform: uppercase;
-}
-
-.badge.blue {
-  background: #3b82f6;
-}
-
-.card-actions {
-  position: absolute;
-  bottom: 18px;
-  right: 20px;
-}
-
-.card-actions a {
-  font-size: 12px;
-  color: #333;
-  margin-left: 15px;
-  text-decoration: none;
-}
+    .edit-btn:hover {
+      opacity: 0.85;
+    }
 
 
+    .address-card {
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 18px;
+      position: relative;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    }
 
-    </style>
+    .address-card p {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #444;
+    }
+
+    .badge {
+      background: #555;
+      color: #fff;
+      font-size: 10px;
+      padding: 3px 10px;
+      border-radius: 10px;
+      text-transform: uppercase;
+    }
+
+    .badge.blue {
+      background: #3b82f6;
+    }
+
+    .card-actions {
+      position: absolute;
+      bottom: 18px;
+      right: 20px;
+    }
+
+    .card-actions a {
+      font-size: 12px;
+      color: #333;
+      margin-left: 15px;
+      text-decoration: none;
+    }
+  </style>
 </head>
+
 <body>
 
-    <%- include("../partials/userpartial/header.ejs") %>
+  <%- include("../partials/userpartial/header.ejs") %>
 
     <div class="container">
-        <aside>
-            <div class="user-header">
-           
-
-                <img
-    src="<%= user.profileImage && user.profileImage !== '' 
-          ? user.profileImage 
-          : '/images/default avatar ong.jpg' %>"
-    alt="User"
-  >
-            
-                <%= user.name %>
-
-            </div>
-            <a href="#" class="menu-item active"><i class="fas fa-th-large"></i> Account Overview</a>
-            <a href="#" class="menu-item"><i class="fas fa-box"></i> My Orders</a>
-            <a href="#" class="menu-item"><i class="fas fa-address-book"></i> Manage Addresses</a>
-            <a href="#" class="menu-item"><i class="fas fa-wallet"></i> Wallet</a>
-            <a href="#" class="menu-item"><i class="fas fa-ticket-alt"></i> coupons</a>
-            <a href="#" class="menu-item"><i class="fas fa-users"></i> Refer & Earn</a>
-            <a href="#" class="menu-item" style="margin-top: 60px; border-bottom: none;"><i class="fas fa-sign-out-alt"></i> logout</a>
-        </aside>
+      <%- include("../partials/userpartial/userprofile-sidebar.ejs", { user, activePage: 'address' }) %>
 
         <main>
 
 
-             <h2 style="font-size:22px; margin-bottom:6px;">Manage Addresses</h2>
-  <p style="font-size:13px; color:#777; margin-bottom:25px;">
-    Here you can manage the addresses. You can Add, edit or delete the addresses
-  </p>
+          <h2 style="font-size:22px; margin-bottom:6px;">Manage Addresses</h2>
+          <p style="font-size:13px; color:#777; margin-bottom:25px;">
+            Here you can manage the addresses. You can Add, edit or delete the addresses
+          </p>
 
-  <!-- Add Address Button -->
-<a href="/addAdress" style="
+          <!-- Add Address Button -->
+          <a href="/addAdress" style="
   display:block;
   width:100%;
   background:#000;
@@ -285,71 +313,70 @@
   margin-bottom:25px;
   text-decoration:none;
 ">
-  <i class="fas fa-plus-circle" style="margin-right:10px;"></i>
-  Add New Address
-</a>
-  <% if (addresses.length === 0) { %>
-  <p style="font-size:13px; color:#777;">
-    No addresses added yet.
-  </p>
-<% } %>
+            <i class="fas fa-plus-circle" style="margin-right:10px;"></i>
+            Add New Address
+          </a>
+          <% if (addresses.length===0) { %>
+            <p style="font-size:13px; color:#777;">
+              No addresses added yet.
+            </p>
+            <% } %>
 
-<% addresses.forEach(address => { %>
+              <% addresses.forEach(address=> { %>
 
-  <div class="address-card">
+                <div class="address-card">
 
-    <% if (address.isDefault) { %>
-      <span class="badge">Default</span>
-    <% } %>
+                  <% if (address.isDefault) { %>
+                    <span class="badge">Default</span>
+                    <% } %>
 
-    <p>
-      <%= address.fullName %>,<br>
-      <%= address.addressLine %>,<br>
-      <%= address.city %>, <%= address.state %><br>
-      <%= address.pincode %><br>
-      Mobile: <%= address.phone %>
-    </p>
+                      <p>
+                        <%= address.fullName %>,<br>
+                          <%= address.addressLine %>,<br>
+                            <%= address.city %>, <%= address.state %><br>
+                                <%= address.pincode %><br>
+                                  Mobile: <%= address.phone %>
+                      </p>
 
-    <div class="card-actions">
-      <a href="/editAddress/<%= address._id %>">Edit</a>
-<a href="javascript:void(0)"
-   onclick="confirmDelete('<%= address._id %>')">
-   Delete
-</a>
-
-
-    </div>
-
-  </div>
-
-<% }) %>
+                      <div class="card-actions">
+                        <a href="/editAddress/<%= address._id %>">Edit</a>
+                        <a href="javascript:void(0)" onclick="confirmDelete('<%= address._id %>')">
+                          Delete
+                        </a>
 
 
-   
+                      </div>
+
+                </div>
+
+                <% }) %>
+
+
+
         </main>
     </div>
 
     <%- include("../partials/userpartial/footer.ejs") %>
 
 </body>
+
 </html>
 
 <script>
-function confirmDelete(addressId) {
-  Swal.fire({
-    title: "Delete Address?",
-    text: "This address will be permanently removed",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#555",
-    confirmButtonText: "Yes, delete",
-    cancelButtonText: "Cancel"
-  }).then((result) => {
-    if (result.isConfirmed) {
-      window.location.href = `/address/delete/${addressId}`;
-    }
-  });
-}
+  function confirmDelete(addressId) {
+    Swal.fire({
+      title: "Delete Address?",
+      text: "This address will be permanently removed",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#555",
+      confirmButtonText: "Yes, delete",
+      cancelButtonText: "Cancel"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = `/address/delete/${addressId}`;
+      }
+    });
+  }
 </script>
-

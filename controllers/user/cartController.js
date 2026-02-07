@@ -19,33 +19,40 @@ const loadCart = async (req, res) => {
       });
     }
 
-  
+
     const validItems = cart.items.filter(item =>
       item.productId && item.productId.isListed === true
     );
 
-    
+
     if (validItems.length !== cart.items.length) {
       cart.items = validItems;
       await cart.save();
     }
 
-  
-    const cartItems = cart.items.map(item => ({
-      _id: item._id,
-      product: item.productId,
-      size: item.size,
-      quantity: item.quantity,
-      price: item.price,
-      total: item.quantity * item.price
-    }));
+
+    const cartItems = cart.items.map(item => {
+      const variant = item.productId.variants.find(
+        v => String(v.size) === String(item.size)
+      );
+      const price = variant ? Number(variant.offerPrice || variant.price) : item.price;
+
+      return {
+        _id: item._id,
+        product: item.productId,
+        size: item.size,
+        quantity: item.quantity,
+        price: price,
+        total: item.quantity * price
+      };
+    });
 
     const subtotal = cartItems.reduce(
       (sum, item) => sum + item.total,
       0
     );
 
-    const gst = Math.round(subtotal * 0.10);
+    const gst = Math.round(subtotal * 0.18);
     const discount = Math.round(subtotal * 0.30);
     const grandTotal = subtotal + gst - discount;
 
@@ -86,7 +93,7 @@ const addToCart = async (req, res) => {
 
 
 
-    
+
     const product = await Product.findById(productId);
     if (!product) return res.redirect("/productlist");
 
@@ -99,7 +106,7 @@ const addToCart = async (req, res) => {
       return res.redirect("/productlist");
     }
 
-    const price = matchedVariant.price;
+    const price = Number(matchedVariant.offerPrice || matchedVariant.price);
 
     let cart = await Cart.findOne({ userId });
 
@@ -121,7 +128,7 @@ const addToCart = async (req, res) => {
       );
 
       if (existingItem) {
-      
+
         if (existingItem.quantity < 10) {
           existingItem.quantity += 1;
         }
@@ -146,18 +153,18 @@ const addToCart = async (req, res) => {
 
 
 
-const updateCartQty = async(req,res)=>{
+const updateCartQty = async (req, res) => {
 
-  try{
-    
-        const userId = req.session.user?._id || req.session.user;
-       const { itemId, action } = req.body;
+  try {
 
-      const cart = await Cart.findOne({ userId });
+    const userId = req.session.user?._id || req.session.user;
+    const { itemId, action } = req.body;
+
+    const cart = await Cart.findOne({ userId });
     if (!cart) return res.json({ success: false });
 
 
-    
+
     const item = cart.items.id(itemId);
     if (!item) return res.json({ success: false });
 
@@ -177,10 +184,10 @@ const updateCartQty = async(req,res)=>{
       }
     }
 
-    
+
     await cart.save();
 
-      const subtotal = cart.items.reduce(
+    const subtotal = cart.items.reduce(
       (sum, i) => sum + i.quantity * i.price,
       0
     );
@@ -192,7 +199,7 @@ const updateCartQty = async(req,res)=>{
 
 
 
-        res.json({
+    res.json({
       success: true,
       quantity: item.quantity,
       subtotal,
@@ -203,12 +210,12 @@ const updateCartQty = async(req,res)=>{
     });
 
   } catch (err) {
-    console.log(err,"UpdateCartQty has error");
+    console.log(err, "UpdateCartQty has error");
     res.json({ success: false });
   }
 
 
-    
+
 
 }
 
@@ -223,18 +230,21 @@ const removeCartItem = async (req, res) => {
       return res.json({ success: false });
     }
 
-    // 🔥 remove item
+  
     cart.items = cart.items.filter(
       item => item._id.toString() !== itemId
     );
 
     await cart.save();
 
-    // 🔁 recalc totals
-    const subtotal = cart.items.reduce(
-      (sum, i) => sum + i.quantity * i.price,
-      0
-    );
+    const populatedCart = await Cart.findById(cart._id).populate("items.productId");
+
+
+    const subtotal = populatedCart.items.reduce((sum, i) => {
+      const v = i.productId.variants.find(varnt => String(varnt.size) === String(i.size));
+      const p = v ? Number(v.offerPrice || v.price) : i.price;
+      return sum + i.quantity * p;
+    }, 0);
 
     const gst = Math.round(subtotal * 0.18);
     const discount = Math.round(subtotal * 0.30);
@@ -266,8 +276,8 @@ const removeCartItem = async (req, res) => {
 
 
 module.exports = {
-    loadCart,
-    addToCart,
-    updateCartQty,
-    removeCartItem
+  loadCart,
+  addToCart,
+  updateCartQty,
+  removeCartItem
 }

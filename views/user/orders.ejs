@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHOEZOO - My Orders</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #fff;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-left: 40px;
+        }
+
+        main {
+            flex: 1;
+            padding: 40px 60px;
+        }
+
+        .page-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: #000;
+        }
+
+        /* Search Section */
+        .search-container {
+            display: flex;
+            margin-bottom: 40px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .search-container input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 1px solid #ddd;
+            border-right: none;
+            border-radius: 4px 0 0 4px;
+            font-size: 14px;
+        }
+
+        .search-btn {
+            background: #000;
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        /* Order Card */
+        .order-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .order-header {
+            background: #000;
+            color: #fff;
+            padding: 15px 25px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            font-size: 13px;
+        }
+
+        .order-header .label {
+            opacity: 0.8;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .order-header .value {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .order-header .total {
+            text-align: right;
+        }
+
+        .order-items {
+            padding: 20px;
+        }
+
+        .item-row {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .item-row:last-child {
+            border-bottom: none;
+        }
+
+        .item-row img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            background: #f9f9f9;
+            margin-right: 20px;
+            border-radius: 4px;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-category {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .item-price {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 5px;
+        }
+
+        .item-name {
+            font-size: 13px;
+            color: #555;
+        }
+
+        .item-status-col {
+            text-align: right;
+            min-width: 150px;
+        }
+
+        .status-tag {
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .status-date {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .action-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-left: 30px;
+        }
+
+        .btn {
+            display: inline-block !important;
+            padding: 10px 20px !important;
+            border-radius: 4px !important;
+            font-size: 13px !important;
+            font-weight: 700 !important;
+            text-align: center !important;
+            text-decoration: none !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease !important;
+            border: none !important;
+            min-width: 130px !important;
+            margin-bottom: 5px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+        }
+
+        .btn-track {
+            background-color: #0066cc !important;
+            color: #ffffff !important;
+        }
+
+        .btn-track:hover {
+            background-color: #004d99 !important;
+            color: #ffffff !important;
+        }
+
+        .btn-cancel {
+            background-color: #cc0000 !important;
+            color: #ffffff !important;
+        }
+
+        .btn-cancel:hover {
+            background-color: #990000 !important;
+            color: #ffffff !important;
+        }
+
+        .btn-return {
+            background-color: #ff9900 !important;
+            color: #ffffff !important;
+        }
+
+        .btn-return:hover {
+            background-color: #e68a00 !important;
+            color: #ffffff !important;
+        }
+
+        .btn-invoice {
+            background: #f8f9fa;
+            color: #495057;
+            border: 1px solid #dee2e6;
+        }
+
+        .status-tag {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .status-placed {
+            background: #e7f5ff;
+            color: #1971c2;
+        }
+
+        .status-shipped {
+            background: #f3f0ff;
+            color: #6741d9;
+        }
+
+        .status-delivered {
+            background: #ebfbee;
+            color: #2b8a3e;
+        }
+
+        .status-cancelled {
+            background: #fff5f5;
+            color: #c92a2a;
+        }
+
+        .status-return-requested {
+            background: #fff9db;
+            color: #f08c00;
+        }
+
+        .status-returned {
+            background: #f1f3f5;
+            color: #495057;
+        }
+
+        .status-return-rejected {
+            background: #fff5f5;
+            color: #c92a2a;
+        }
+
+        .no-orders {
+            text-align: center;
+            padding: 100px 0;
+            color: #888;
+        }
+    </style>
+</head>
+
+<body>
+
+    <%- include("../partials/userpartial/header.ejs") %>
+
+        <div class="container">
+            <%- include("../partials/userpartial/userprofile-sidebar.ejs", { user, activePage: 'orders' }) %>
+
+                <main>
+                    <h1 class="page-title">Manage your orders</h1>
+
+                    <form action="/orders" method="GET" class="search-container">
+                        <input type="text" name="search" placeholder="Search your Orders using name, Order ID, Amount"
+                            value="<%= searchQuery %>">
+                        <button type="submit" class="search-btn">Search</button>
+                    </form>
+
+                    <% if (orders && orders.length> 0) { %>
+                        <% orders.forEach(order=> { %>
+                            <div class="order-card">
+                                <div class="order-header">
+                                    <div>
+                                        <span class="label">Order Date:</span>
+                                        <span class="value">
+                                            <%= new Date(order.createdAt).toLocaleDateString() %>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span class="label">Order Number:</span>
+                                        <span class="value">#<%= order.orderId %></span>
+                                    </div>
+                                    <div>
+                                        <span class="label">Ship To:</span>
+                                        <span class="value">
+                                            <%= order.address.fullName %>
+                                        </span>
+                                    </div>
+                                    <div class="total">
+                                        <span class="label">Total:</span>
+                                        <span class="value">₹ <%= order.totalAmount.toLocaleString() %></span>
+                                    </div>
+                                </div>
+
+                                <div class="order-items">
+                                    <% order.items.forEach(item=> { %>
+                                        <div class="item-row">
+                                            <img src="/uploads/product-images/<%= item.productId.images[0] %>"
+                                                alt="<%= item.productId.name %>">
+                                            <div class="item-info">
+                                                <div class="item-category">Category: <%= item.productId.category.name
+                                                        || 'FOOTWEAR' %>
+                                                </div>
+                                                <div class="item-name">
+                                                    <%= item.productId.name %> (Size: <%= item.size %>)
+                                                </div>
+                                            </div>
+
+                                            <div class="item-status-col">
+                                                <% let statusClass='status-' +
+                                                    item.itemStatus.toLowerCase().replace(' ', ' -'); let
+                                                    displayStatus=item.itemStatus; if(item.itemStatus==='Returned' )
+                                                    displayStatus='RETURNED' ; if(item.itemStatus==='Return Requested' )
+                                                    displayStatus='RETURN REQUESTED' ;
+                                                    if(item.itemStatus==='Return Rejected' )
+                                                    displayStatus='RETURN REJECTED' ; %>
+                                                    <span class="status-tag <%= statusClass %>">STATUS: <%=
+                                                            displayStatus %></span>
+                                                    <span class="status-date">Date: <%= new
+                                                            Date(order.createdAt).toLocaleDateString() %></span>
+                                            </div>
+
+                                            <div class="action-btns">
+                                                <a href="/orders/track/<%= order._id %>/<%= item._id %>"
+                                                    class="btn btn-track">Track Order</a>
+
+                                                <% if (['Placed', 'Processing' ].includes(item.itemStatus)) { %>
+                                                    <% if (order.items.length> 1) { %>
+                                                        <button
+                                                            onclick="cancelItem('<%= order._id %>', '<%= item._id %>')"
+                                                            class="btn btn-cancel">Cancel Item</button>
+                                                        <% } %>
+                                                            <% } else if (item.itemStatus==='Delivered' ) { %>
+                                                                <button
+                                                                    onclick="returnItem('<%= order._id %>', '<%= item._id %>')"
+                                                                    class="btn btn-return">Return Item</button>
+                                                                <% } %>
+                                            </div>
+                                        </div>
+                                        <% }) %>
+
+                                            <div
+                                                style="display: flex; justify-content: flex-end; padding-top: 15px; border-top: 1px solid #f5f5f5; margin-top: 10px; gap: 10px; align-items: center;">
+                                                <a href="/orders/invoice/<%= order._id %>" class="btn btn-invoice"><i
+                                                        class="fas fa-file-invoice"></i> Invoice</a>
+
+                                                <% if (order.status==='Delivered' ) { %>
+                                                    <button onclick="returnOrder('<%= order._id %>')"
+                                                        class="btn btn-return">Return Order</button>
+                                                    <% } else if (order.status==='Return Requested' ) { %>
+                                                        <span class="status-tag status-return-requested">RETURN
+                                                            REQUESTED</span>
+                                                        <% } else if (order.status==='Returned' ) { %>
+                                                            <span class="status-tag status-returned">RETURNED</span>
+                                                            <% } else if (order.status==='Return Rejected' ) { %>
+                                                                <span class="status-tag status-return-rejected">RETURN
+                                                                    REJECTED</span>
+                                                                <% } else if (['Placed', 'Processing'
+                                                                    ].includes(order.status)) { %>
+                                                                    <button onclick="cancelOrder('<%= order._id %>')"
+                                                                        class="btn btn-cancel">Cancel Order</button>
+                                                                    <% } %>
+                                            </div>
+                                </div>
+                            </div>
+                            <% }) %>
+                                <% } else { %>
+                                    <div class="no-orders">
+                                        <i class="fas fa-box-open fa-3x" style="margin-bottom: 20px;"></i>
+                                        <p>No orders found.</p>
+                                    </div>
+                                    <% } %>
+                </main>
+        </div>
+
+        <%- include("../partials/userpartial/footer.ejs") %>
+
+            <script>
+                async function cancelOrder(orderId) {
+                    const { value: reason } = await Swal.fire({
+                        title: 'Cancel Order',
+                        input: 'text',
+                        inputLabel: 'Reason for cancellation (optional)',
+                        inputPlaceholder: 'Tell us why...',
+                        showCancelButton: true,
+                        confirmButtonColor: '#000',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, cancel it!',
+                        inputValidator: (value) => {
+                            if (!value || !value.trim()) {
+                                return 'You need to provide a reason!'
+                            }
+                        }
+                    });
+
+                    if (reason !== undefined) {
+                        try {
+                            const response = await fetch(`/orders/cancel/${orderId}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ reason })
+                            });
+                            const result = await response.json();
+                            if (result.success) {
+                                Swal.fire('Cancelled!', result.message, 'success').then(() => location.reload());
+                            } else {
+                                Swal.fire('Error!', result.message, 'error');
+                            }
+                        } catch (error) {
+                            Swal.fire('Error!', 'Something went wrong', 'error');
+                        }
+                    }
+                }
+
+                async function cancelItem(orderId, itemId) {
+                    const { value: reason } = await Swal.fire({
+                        title: 'Cancel Item',
+                        input: 'text',
+                        inputLabel: 'Reason for cancellation (optional)',
+                        inputPlaceholder: 'Tell us why...',
+                        showCancelButton: true,
+                        confirmButtonColor: '#000',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, cancel item',
+                        inputValidator: (value) => {
+                            if (!value || !value.trim()) {
+                                return 'You need to provide a reason!'
+                            }
+                        }
+                    });
+
+                    if (reason !== undefined) {
+                        try {
+                            const response = await fetch(`/orders/cancel-item/${orderId}/${itemId}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ reason })
+                            });
+                            const result = await response.json();
+                            if (result.success) {
+                                Swal.fire('Cancelled!', result.message, 'success').then(() => location.reload());
+                            } else {
+                                Swal.fire('Error!', result.message, 'error');
+                            }
+                        } catch (error) {
+                            Swal.fire('Error!', 'Something went wrong', 'error');
+                        }
+                    }
+                }
+
+                async function returnOrder(orderId) {
+                    const { value: reason } = await Swal.fire({
+                        title: 'Return Order',
+                        input: 'text',
+                        inputLabel: 'Reason for return (Mandatory)',
+                        inputPlaceholder: 'Required...',
+                        showCancelButton: true,
+                        confirmButtonColor: '#000',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Submit Return',
+                        inputValidator: (value) => {
+                            if (!value) {
+                                return 'You need to write something!'
+                            }
+                        }
+                    });
+
+                    if (reason) {
+                        try {
+                            const response = await fetch(`/orders/return/${orderId}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ reason })
+                            });
+                            const result = await response.json();
+                            if (result.success) {
+                                Swal.fire('Success!', result.message, 'success').then(() => location.reload());
+                            } else {
+                                Swal.fire('Error!', result.message, 'error');
+                            }
+                        } catch (error) {
+                            Swal.fire('Error!', 'Something went wrong', 'error');
+                        }
+                    }
+                }
+
+                async function returnItem(orderId, itemId) {
+                    const { value: reason } = await Swal.fire({
+                        title: 'Return Item',
+                        input: 'text',
+                        inputLabel: 'Reason for return (Mandatory)',
+                        inputPlaceholder: 'Required...',
+                        showCancelButton: true,
+                        confirmButtonColor: '#000',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Submit Return',
+                        inputValidator: (value) => {
+                            if (!value) {
+                                return 'You need to write something!'
+                            }
+                        }
+                    });
+
+                    if (reason) {
+                        try {
+                            const response = await fetch(`/orders/return-item/${orderId}/${itemId}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ reason })
+                            });
+                            const result = await response.json();
+                            if (result.success) {
+                                Swal.fire('Success!', result.message, 'success').then(() => location.reload());
+                            } else {
+                                Swal.fire('Error!', result.message, 'error');
+                            }
+                        } catch (error) {
+                            Swal.fire('Error!', 'Something went wrong', 'error');
+                        }
+                    }
+                }
+            </script>
+</body>
+
+</html>
