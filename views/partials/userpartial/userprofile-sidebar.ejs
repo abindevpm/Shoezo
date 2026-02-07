@@ -1,36 +1,68 @@
- <aside>
-            <div class="user-header">
-           
+<style>
+  /* DASHBOARD LAYOUT & SIDEBAR STYLES */
+  aside {
+    width: 280px;
+    border-right: 1px solid #eee;
+    padding-top: 30px;
+    flex-shrink: 0;
+  }
 
-                <img
-    src="<%= user.profileImage && user.profileImage !== '' 
+  .user-header {
+    background: #000;
+    color: #fff;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 5px;
+  }
+
+  .sidebar-profile-img {
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    object-fit: cover;
+  }
+
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    text-decoration: none;
+    color: #555;
+    font-size: 14px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .menu-item.active {
+    background-color: #d6e0e5;
+    color: #000;
+  }
+
+  .menu-item i {
+    width: 20px;
+    text-align: center;
+  }
+</style>
+
+<aside>
+  <div class="user-header">
+    <img src="<%= user.profileImage && user.profileImage !== '' 
           ? user.profileImage 
-          : '/images/default avatar ong.jpg' %>"
-    alt="User"
-       class="sidebar-profile-img"
-  >
-            
-                <%= user.name %>
-
-            </div>
-            <a href="#" class="menu-item active"><i class="fas fa-th-large"></i> Account Overview</a>
-            <a href="#" class="menu-item"><i class="fas fa-box"></i> My Orders</a>
-            <a href="/address" class="menu-item"><i class="fas fa-address-book"></i> Manage Addresses</a>
-            <a href="#" class="menu-item"><i class="fas fa-wallet"></i> Wallet</a>
-            <a href="#" class="menu-item"><i class="fas fa-ticket-alt"></i> coupons</a>
-            <a href="#" class="menu-item"><i class="fas fa-users"></i> Refer & Earn</a>
-            <a href="#" class="menu-item" style="margin-top: 60px; border-bottom: none;"><i class="fas fa-sign-out-alt"></i> logout</a>
-        </aside>
-
-
-        <style>
-            /* Sidebar profile image fix */
-.sidebar-profile-img {
-  width: 70px !important;
-  height: 70px !important;
-  border-radius: 50%;
-  object-fit: cover;
-  display: block;
-}
-
-        </style>
+          : '/images/default avatar ong.jpg' %>" alt="User" class="sidebar-profile-img">
+    <%= user.name %>
+  </div>
+  <a href="/profile" class="menu-item <%= activePage === 'profile' ? 'active' : '' %>"><i class="fas fa-th-large"></i>
+    Account Overview</a>
+  <a href="/orders" class="menu-item <%= activePage === 'orders' ? 'active' : '' %>"><i class="fas fa-box"></i> My
+    Orders</a>
+  <a href="/address" class="menu-item <%= activePage === 'address' ? 'active' : '' %>"><i
+      class="fas fa-address-book"></i> Manage Addresses</a>
+  <a href="#" class="menu-item"><i class="fas fa-wallet"></i> Wallet</a>
+  <a href="#" class="menu-item"><i class="fas fa-ticket-alt"></i> coupons</a>
+  <a href="#" class="menu-item"><i class="fas fa-users"></i> Refer & Earn</a>
+  <a href="/logout" class="menu-item" style="margin-top: 60px; border-bottom: none;"><i class="fas fa-sign-out-alt"></i>
+    logout</a>
+</aside>

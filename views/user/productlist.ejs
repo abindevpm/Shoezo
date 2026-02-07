@@ -1,299 +1,322 @@
-    <%- include("../partials/userpartial/header.ejs") %>
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>SHOEZO - Comfort & Style</title>
+<%- include("../partials/userpartial/header.ejs") %>
+  <!DOCTYPE html>
+  <html lang="en">
 
-        <script src="https://cdn.tailwindcss.com"></script>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHOEZO - Comfort & Style</title>
 
-        <style>
-            /* Import Inter font from Google Fonts */
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+    <script src="https://cdn.tailwindcss.com"></script>
 
-            /* Base styles for body */
-            body { background: #ffffff; }
+    <style>
+      /* Import Inter font from Google Fonts */
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
 
-            /* General container and filter bar styles */
-            .filter-container { max-width: 1280px; margin: auto; padding: 1rem; margin-bottom: 2rem; }
-            .filter-bar {
-                display: flex; flex-direction: column; gap: 1.5rem;
-                padding: 1rem 0; 
-                border-top: 1px solid #e5e7eb; /* Light gray border */
-                border-bottom: 1px solid #e5e7eb; /* Light gray border */
-            }
-            @media(min-width:768px){
-                .filter-bar{ flex-direction: row; justify-content: space-between; align-items: center; }
-            }
+      /* Base styles for body */
+      body {
+        background: #ffffff;
+      }
 
-            /* Filter elements styling */
-            .filter-title{ 
-                font-size: .875rem; /* text-sm */ 
-                font-weight: 700; /* font-bold */ 
-                color: #1f2937; /* dark text */
-                margin-bottom: 0.5rem;
-                text-transform: uppercase;
-                letter-spacing: 0.05em;
-            }
-            .filter-checklist{ 
-                display: flex; flex-direction: column; gap: .5rem; 
-            }
-            .filter-checklist label {
-                font-size: .9rem; 
-                color: #4b5563; /* medium gray text */
-                cursor: pointer;
-                transition: color 0.2s;
-            }
-            .filter-checklist label:hover {
-                color: #1f2937; /* dark text on hover */
-            }
-            .filter-checklist input[type="checkbox"] {
-                margin-right: 0.5rem;
-                accent-color: #1f2937; /* Checkbox color */
-            }
+      /* General container and filter bar styles */
+      .filter-container {
+        max-width: 1280px;
+        margin: auto;
+        padding: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .filter-bar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        padding: 1rem 0;
+        border-top: 1px solid #e5e7eb;
+        /* Light gray border */
+        border-bottom: 1px solid #e5e7eb;
+        /* Light gray border */
+      }
+
+      @media(min-width:768px) {
+        .filter-bar {
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+        }
+      }
+
+      /* Filter elements styling */
+      .filter-title {
+        font-size: .875rem;
+        /* text-sm */
+        font-weight: 700;
+        /* font-bold */
+        color: #1f2937;
+        /* dark text */
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .filter-checklist {
+        display: flex;
+        flex-direction: column;
+        gap: .5rem;
+      }
+
+      .filter-checklist label {
+        font-size: .9rem;
+        color: #4b5563;
+        /* medium gray text */
+        cursor: pointer;
+        transition: color 0.2s;
+      }
+
+      .filter-checklist label:hover {
+        color: #1f2937;
+        /* dark text on hover */
+      }
+
+      .filter-checklist input[type="checkbox"] {
+        margin-right: 0.5rem;
+        accent-color: #1f2937;
+        /* Checkbox color */
+      }
 
 
-            .no-box {
-  border: none;
-  padding: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
+      .no-box {
+        border: none;
+        padding: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
 
-/* 🔥 THIS IS THE KEY FIX */
-.checkbox-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
+      /* 🔥 THIS IS THE KEY FIX */
+      .checkbox-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
 
-  width: 100%;          /* force new line */
-}
+        width: 100%;
+        /* force new line */
+      }
+    </style>
+  </head>
 
-
-            
-        </style>
-    </head>
-
-    <body>
+  <body>
 
 
 
-    <main class="max-w-8xl mx-auto"> 
+    <main class="max-w-8xl mx-auto">
 
-        
-            <section class="relative h-[650px] overflow-hidden rounded-b-lg mb-12">
-                
-                <img src="/images/PPP.jpg"
-                    alt="Fashion Background" 
-                    class="absolute inset-0 w-full h-full object-cover" 
-                    onerror="this.src='https://placehold.co/1200x650/111827/fff?text=HIGH+FASHION+BACKGROUND+IMAGE+GOES+HERE'">
-                
-                <div class="relative z-10 h-full flex items-start p-10 md:p-20">
-                    <div class="max-w-md">
-                        <!-- <p class="text-xl font-medium text-gray-200 mb-2 tracking-widest">STYLE THAT MOVES WITH YOU</p> -->
-                        <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-6 leading-tight">
-                            STYLE THAT MOVES WITH YOU
-                        </h1>
-                        <p class="text-gray-300 mb-8">
-                            Curated footwear for comfort, durability, and modern design.
-                    Upgrade your walk. Elevate your look.
-                        </p>
-                        <a href="#" class="cta-button inline-block text-white font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 text-lg uppercase tracking-wider">
-                            EXPLORE Collection
-                        </a>
+
+      <section class="relative h-[650px] overflow-hidden rounded-b-lg mb-12">
+
+        <img src="/images/PPP.jpg" alt="Fashion Background" class="absolute inset-0 w-full h-full object-cover"
+          onerror="this.src='https://placehold.co/1200x650/111827/fff?text=HIGH+FASHION+BACKGROUND+IMAGE+GOES+HERE'">
+
+        <div class="relative z-10 h-full flex items-start p-10 md:p-20">
+          <div class="max-w-md">
+            <!-- <p class="text-xl font-medium text-gray-200 mb-2 tracking-widest">STYLE THAT MOVES WITH YOU</p> -->
+            <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-6 leading-tight">
+              STYLE THAT MOVES WITH YOU
+            </h1>
+            <p class="text-gray-300 mb-8">
+              Curated footwear for comfort, durability, and modern design.
+              Upgrade your walk. Elevate your look.
+            </p>
+            <a href="#"
+              class="cta-button inline-block text-white font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 text-lg uppercase tracking-wider">
+              EXPLORE Collection
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <form id="filterForm" method="GET" action="/productlist">
+
+
+        <section class="filter-container">
+          <div class="filter-bar">
+
+            <!-- CATEGORY -->
+            <div class="filter-col">
+              <p class="filter-title">Category</p>
+
+              <% categories.forEach(cat=> { %>
+                <label class="checkbox-row">
+                  <input type="checkbox" name="category" value="<%= cat.name %>" <%=selectedCategory.includes(cat.name)
+                    ? "checked" : "" %>
+                  onchange="applyFilters()">
+                  <span>
+                    <%= cat.name %>
+                  </span>
+                </label>
+                <% }) %>
+            </div>
+
+            <!-- NAME -->
+            <div class="filter-col name-col">
+              <p class="filter-title">NAME</p>
+
+
+
+              <label class="checkbox-row">
+                <input type="radio" name="nameSort" value="" <%=!selectedNameSort ? "checked" : "" %>
+                onchange="this.form.submit()">
+                <span>Default</span>
+              </label>
+
+              <label class="checkbox-row">
+                <input type="radio" name="nameSort" value="name_asc" <%=selectedNameSort==="name_asc" ? "checked" : ""
+                  %>
+                onchange="this.form.submit()">
+                <span>A – Z</span>
+              </label>
+
+              <label class="checkbox-row">
+                <input type="radio" name="nameSort" value="name_desc" <%=selectedNameSort==="name_desc" ? "checked" : ""
+                  %>
+                onchange="this.form.submit()">
+                <span>Z – A</span>
+              </label>
+
+
+            </div>
+
+            <!-- BRAND -->
+            <div class="filter-col">
+              <p class="filter-title">BRAND</p>
+
+              <% brands.forEach(brand=> { %>
+                <label class="checkbox-row">
+                  <input type="checkbox" name="brand" <%=selectedBrand.includes(brand.name) ? "checked" : "" %>
+                  value="<%= brand.name %>"
+                    onchange="this.form.submit()">
+
+                    <span>
+                      <%= brand.name %>
+                    </span>
+                </label>
+                <% }) %>
+            </div>
+
+            <!-- SORT -->
+            <div class="filter-col sort-col">
+              <p class="filter-title">Sort By</p>
+
+              <select name="sort" class="border border-gray-300 rounded-lg px-4 py-2 text-sm shadow-sm"
+                onchange="this.form.submit()">
+                <option value="latest">Latest</option>
+                <option value="low_to_high">Price: Low → High</option>
+                <option value="high_to_low">Price: High → Low</option>
+              </select>
+            </div>
+
+          </div>
+        </section>
+      </form>
+
+      </div>
+
+
+      <h2 class="text-3xl font-extrabold mb-8 px-4 text-gray-900 tracking-tight">Featured Products</h2>
+
+
+      <section class="grid grid-cols-2 md:grid-cols-3 gap-8 px-4 mb-20">
+
+        <% if(products && products.length> 0){ %>
+
+          <% products.forEach(p=> { %>
+
+            <a href="/productdetails/<%= p._id %>"
+              class="group block bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition duration-300 ease-in-out transform hover:-translate-y-1">
+
+              <div class="relative overflow-hidden aspect-square">
+                <% const totalStock=p.variants ? p.variants.reduce((acc, v)=> acc + (v.stock || 0), 0) : 0;
+                  %>
+                  <% if (totalStock===0) { %>
+                    <div class="absolute top-2 left-2 z-10">
+                      <span
+                        class="bg-red-600 text-white text-[9px] font-bold tracking-wider px-2 py-0.5 uppercase rounded-sm shadow-sm">
+                        Out of Stock
+                      </span>
                     </div>
-                </div>
-            </section>
-            
-  <form id="filterForm" method="GET" action="/productlist">
+                    <% } %>
+                      <img src="/uploads/product-images/<%= p.images[0] %>"
+                        onerror="this.src='https://placehold.co/400x400/eeeeee/333333?text=Image+Missing'"
+                        class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
+              </div>
 
+              <div class="p-4">
+                <h3 class="font-bold text-lg mb-1 text-gray-900 truncate">
+                  <%= p.name %>
+                </h3>
+                <p class="text-xs text-gray-500 uppercase tracking-wider mb-3">
+                  <%= p.category?.name %>
+                </p>
 
-<section class="filter-container">
-  <div class="filter-bar">
+                <% const firstVariant=p.variants && p.variants.length> 0
+                  ? p.variants[0]
+                  : null;
 
-    <!-- CATEGORY -->
-    <div class="filter-col">
-      <p class="filter-title">Category</p>
+                  const displayPrice = firstVariant ? firstVariant.offerPrice : 0;
+                  const originalPrice = firstVariant ? firstVariant.price : 0;
+                  %>
 
-      <% categories.forEach(cat => { %>
-        <label class="checkbox-row">
-          <input type="checkbox"
-                 name="category"
-                 value="<%= cat.name %>"
-                  <%= selectedCategory.includes(cat.name) ? "checked" : "" %>
-                 onchange="applyFilters()">
-          <span><%= cat.name %></span>
-        </label>
-      <% }) %>
-    </div>
+                  <div class="flex justify-between items-center pt-2 border-t border-gray-100">
+                    <p class="text-xl font-extrabold">
+                      ₹<%= (displayPrice || 0).toLocaleString() %>
+                    </p>
 
-    <!-- NAME -->
-    <div class="filter-col name-col">
-      <p class="filter-title">NAME</p>
+                    <% if ((displayPrice || 0) < (originalPrice || 0)) { %>
+                      <p class="line-through text-sm text-gray-400">
+                        ₹<%= (originalPrice || 0).toLocaleString() %>
+                      </p>
+                      <% } %>
+                  </div>
 
+              </div>
 
-
-      <label class="checkbox-row">
-  <input type="radio"
-         name="nameSort"
-         value=""
-         <%= !selectedNameSort ? "checked" : "" %>
-         onchange="this.form.submit()">
-  <span>Default</span>
-</label>
-
-      <label class="checkbox-row">
-  <input type="radio"
-         name="nameSort"
-         value="name_asc"
-          <%= selectedNameSort === "name_asc" ? "checked" : "" %>
-         onchange="this.form.submit()">
-  <span>A – Z</span>
-</label>
-
-<label class="checkbox-row">
-  <input type="radio"
-         name="nameSort"
-         value="name_desc"
-             <%= selectedNameSort === "name_desc" ? "checked" : "" %>
-         onchange="this.form.submit()">
-  <span>Z – A</span>
-</label>
-
-      
-    </div>
-
-    <!-- BRAND -->
-    <div class="filter-col">
-      <p class="filter-title">BRAND</p>
-
-      <% brands.forEach(brand => { %>
-        <label class="checkbox-row">
-          <input type="checkbox"
-       name="brand"
-        <%= selectedBrand.includes(brand.name) ? "checked" : "" %>
-       value="<%= brand.name %>"
-       onchange="this.form.submit()">
-
-          <span><%= brand.name %></span>
-        </label>
-      <% }) %>
-    </div>
-
-    <!-- SORT -->
-    <div class="filter-col sort-col">
-      <p class="filter-title">Sort By</p>
-
-      <select name="sort"
-              class="border border-gray-300 rounded-lg px-4 py-2 text-sm shadow-sm"
-              onchange="this.form.submit()">
-        <option value="latest">Latest</option>
-        <option value="low_to_high">Price: Low → High</option>
-        <option value="high_to_low">Price: High → Low</option>
-      </select>
-    </div>
-
-  </div>
-</section>
-  </form>
-
-</div>
-
-
-        <h2 class="text-3xl font-extrabold mb-8 px-4 text-gray-900 tracking-tight">Featured Products</h2>
-
-    
-    <section class="grid grid-cols-2 md:grid-cols-3 gap-8 px-4 mb-20">
-
-        <% if(products && products.length > 0){ %>
-
-            <% products.forEach(p => { %>
-
-                <a href="/productdetails/<%= p._id %>" 
-                class="group block bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition duration-300 ease-in-out transform hover:-translate-y-1">
-
-                    <div class="relative overflow-hidden aspect-square">
-                        <img 
-                            src="/uploads/product-images/<%= p.images[0] %>"
-                            onerror="this.src='https://placehold.co/400x400/eeeeee/333333?text=Image+Missing'"
-                            class="w-full h-full object-cover transition group-hover:scale-105">
-                    </div>
-
-                    <div class="p-4">
-                        <h3 class="font-bold text-lg mb-1 text-gray-900 truncate"><%= p.name %></h3>
-                        <p class="text-xs text-gray-500 uppercase tracking-wider mb-3"><%= p.category?.name %></p>
-
-                       <%
-  const firstVariant =
-    p.variants && p.variants.length > 0
-      ? p.variants[0]
-      : null;
-
-  const displayPrice = firstVariant ? firstVariant.offerPrice : 0;
-  const originalPrice = firstVariant ? firstVariant.price : 0;
-%>
-
-<div class="flex justify-between items-center pt-2 border-t border-gray-100">
-  <p class="text-xl font-extrabold">
-    ₹<%= (displayPrice || 0).toLocaleString() %>
-  </p>
-
-  <% if ((displayPrice || 0) < (originalPrice || 0)) { %>
-    <p class="line-through text-sm text-gray-400">
-      ₹<%= (originalPrice || 0).toLocaleString() %>
-    </p>
-  <% } %>
-</div>
-
-                    </div>
-
-                </a>
+            </a>
 
             <% }) %>
 
-        <% } else { %>
+              <% } else { %>
 
-            <p class="text-center text-xl text-gray-500 col-span-3 py-12">
-                No products available at the moment.
-            </p>
+                <p class="text-center text-xl text-gray-500 col-span-3 py-12">
+                  No products available at the moment.
+                </p>
 
-        <% } %>
+                <% } %>
 
-    </section>
+      </section>
 
-                    <div class="flex justify-center mt-10 space-x-3">
+      <div class="flex justify-center mt-10 space-x-3">
 
-        <% if (page > 1) { %>
-            <a 
-                href="?page=<%= page - 1 %><%= search ? `&search=${search}` : '' %>"
-                class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-            >
-                Prev
-            </a>
-        <% } %>
+        <% if (page> 1) { %>
+          <a href="?page=<%= page - 1 %><%= search ? `&search=${search}` : '' %>"
+            class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
+            Prev
+          </a>
+          <% } %>
 
-        <% for (let i = 1; i <= totalPages; i++) { %>
-            <a 
-                href="?page=<%= i %><%= search ? `&search=${search}` : '' %>"
-                class="px-4 py-2 rounded 
-                    <%= page === i ? 'bg-black text-white' : 'bg-gray-200 hover:bg-gray-300' %>"
-            >
+            <% for (let i=1; i <=totalPages; i++) { %>
+              <a href="?page=<%= i %><%= search ? `&search=${search}` : '' %>" class="px-4 py-2 rounded 
+                    <%= page === i ? 'bg-black text-white' : 'bg-gray-200 hover:bg-gray-300' %>">
                 <%= i %>
-            </a>
-        <% } %>
+              </a>
+              <% } %>
 
-        <% if (page < totalPages) { %>
-            <a 
-                href="?page=<%= page + 1 %><%= search ? `&search=${search}` : '' %>"
-                class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-            >
-                Next
-            </a>
-        <% } %>
+                <% if (page < totalPages) { %>
+                  <a href="?page=<%= page + 1 %><%= search ? `&search=${search}` : '' %>"
+                    class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
+                    Next
+                  </a>
+                  <% } %>
 
-    </div>
+      </div>
 
 
 
@@ -308,23 +331,22 @@
 
 
 
-    <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const form = document.getElementById("filterForm");
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          const form = document.getElementById("filterForm");
 
-    if (!form) return;
+          if (!form) return;
 
-    const checkboxes = form.querySelectorAll("input[type='checkbox']");
+          const checkboxes = form.querySelectorAll("input[type='checkbox']");
 
-    checkboxes.forEach(cb => {
-      cb.addEventListener("change", function () {
-        form.submit();
-      });
-    });
-  });
-</script>
+          checkboxes.forEach(cb => {
+            cb.addEventListener("change", function () {
+              form.submit();
+            });
+          });
+        });
+      </script>
 
-    </body>
-    </html>
+  </body>
 
-
+  </html>

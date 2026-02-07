@@ -91,7 +91,7 @@ const userSchema = new Schema({
     default: ""
   },
 
-  
+
   addresses: [addressSchema]
 
 }, { timestamps: true });

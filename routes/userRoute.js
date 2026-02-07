@@ -8,59 +8,59 @@ const addressController = require("../controllers/user/addressController");
 const cartController = require("../controllers/user/cartController")
 const checkoutController = require("../controllers/user/checkoutController")
 const orderController = require("../controllers/user/orderController")
-const {uploadProfile} = require("../middlewares/multer")
+const { uploadProfile } = require("../middlewares/multer")
 
 
 
 const passport = require("passport");
 const { userAuth } = require("../middlewares/auth");
 
- // page Not found
-router.get("/pageNotFound",userController.pageNotFound)
+// page Not found
+router.get("/pageNotFound", userController.pageNotFound)
 
- // user 
- router.get("/",userController.loadHomepage)
- router.get("/landingpage",userController.landingpage)
- router.get("/pageNotFound",userAuth,userController.pageNotFound)
- router.get("/signup",userController.loadSignup)
- router.post("/signup",userController.signup)
+// user 
+router.get("/", userController.loadHomepage)
+router.get("/landingpage", userController.landingpage)
+router.get("/pageNotFound", userAuth, userController.pageNotFound)
+router.get("/signup", userController.loadSignup)
+router.post("/signup", userController.signup)
 
- router.post("/otp",userController.otp)
- router.post("/resend-otp",userController.resendOtp)
- 
-  router.get('/login',userController.loadlogin)
-  router.post("/login",userController.login)
-  
-  // user logout
-  router.get("/logout",userController.logout)
+router.post("/otp", userController.otp)
+router.post("/resend-otp", userController.resendOtp)
+
+router.get('/login', userController.loadlogin)
+router.post("/login", userController.login)
+
+// user logout
+router.get("/logout", userController.logout)
 
 
-  // google auth
-  router.get("/auth/google",passport.authenticate("google", { scope: ["profile", "email"] }));
+// google auth
+router.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
-router.get("/auth/google/callback", passport.authenticate("google", { failureRedirect: "/signup" }),(req, res) => {
+router.get("/auth/google/callback", passport.authenticate("google", { failureRedirect: "/signup" }), (req, res) => {
 
-    
-    req.session.user = req.user._id;
 
-    res.redirect("/");
-  }
+  req.session.user = req.user._id;
+
+  res.redirect("/");
+}
 );
 
 
-   //   product list  
+//   product list  
 
-   router.get("/productlist",productlistController.loadShopPage)
+router.get("/productlist", productlistController.loadShopPage)
 
 
 
-   // productdetails
+// productdetails
 
-router.get("/productdetails/:id",productDetailsController.loadProductDetails)
+router.get("/productdetails/:id", productDetailsController.loadProductDetails)
 
 
 //  forgot pass
-router.get("/forgot-password",userController.loadForgotPage);
+router.get("/forgot-password", userController.loadForgotPage);
 router.post("/forgot-password", userController.sendResetOTP);
 
 router.get("/verify-otp", userController.loadOtpPage);
@@ -74,33 +74,33 @@ router.post("/reset-password", userController.resetPassword);
 
 
 //  user profile
- router.get("/profile", profileController.loadProfile)
+router.get("/profile", profileController.loadProfile)
 router.get("/edit-profile", profileController.loadEditProfile)
 router.post("/edit-profile", profileController.editProfile)
-router.post("/upload-profile-image",userAuth,uploadProfile.single("profileImage"),profileController.uploadProfileImage)
-router.post("/change-password",userAuth,profileController.changePassword)
+router.post("/upload-profile-image", userAuth, uploadProfile.single("profileImage"), profileController.uploadProfileImage)
+router.post("/change-password", userAuth, profileController.changePassword)
 
-router.post("/send-email-otp", userAuth,profileController.sendEmailOtp);
-router.get("/verify-email-otp",profileController.loadVerifyEmailOtp);
-router.post("/verify-email-otp", userAuth,profileController.verifyEmailOtp);
-router.post("/resend-email-otp",userAuth,profileController.resendEmailOtp)
-router.get("/remove-profile-image",userAuth,profileController.removeProfileImage);
+router.post("/send-email-otp", userAuth, profileController.sendEmailOtp);
+router.get("/verify-email-otp", profileController.loadVerifyEmailOtp);
+router.post("/verify-email-otp", userAuth, profileController.verifyEmailOtp);
+router.post("/resend-email-otp", userAuth, profileController.resendEmailOtp)
+router.get("/remove-profile-image", userAuth, profileController.removeProfileImage);
 
 
 
 //  address management
-router.get("/address",addressController.loadAddresses)
-router.get("/addAdress",addressController.loadaddAdresses)
-router.post("/addAdress",addressController.addAdress)
+router.get("/address", addressController.loadAddresses)
+router.get("/addAdress", addressController.loadaddAdresses)
+router.post("/addAdress", addressController.addAdress)
 router.get("/address/delete/:addressId", addressController.deleteAddress)
-router.get("/editAddress/:id",userAuth,addressController.loadEditAddress)
-router.post("/updateAddress/:id",addressController.updateAddress)
+router.get("/editAddress/:id", userAuth, addressController.loadEditAddress)
+router.post("/updateAddress/:id", addressController.updateAddress)
 
 
 //  cart management
-router.get("/cart",cartController.loadCart)
+router.get("/cart", cartController.loadCart)
 router.post("/cart/:id", cartController.addToCart);
-router.patch("/cart/update-qty",cartController.updateCartQty)
+router.patch("/cart/update-qty", cartController.updateCartQty)
 router.delete("/cart/remove-item", cartController.removeCartItem);
 
 
@@ -112,6 +112,7 @@ router.delete("/cart/remove-item", cartController.removeCartItem);
 
 
 router.get("/checkout", checkoutController.loadCheckout);
+router.post("/checkout/add-address", checkoutController.addAddressCheckout);
 router.post("/place-order", checkoutController.placeOrder);
 router.get("/order-success", checkoutController.loadOrderSuccess);
 
@@ -120,10 +121,18 @@ router.get("/order-success", checkoutController.loadOrderSuccess);
 
 //  order managemant
 
-router.get("/orders",orderController.loadorders)
+router.get("/orders", orderController.loadorders)
+router.get("/orders/:id", userAuth, orderController.getOrderDetails)
+router.get("/orders/track/:id", userAuth, orderController.loadTrackOrder)
+router.get("/orders/track/:id/:itemId", userAuth, orderController.loadTrackOrder)
+router.post("/orders/cancel/:orderId", userAuth, orderController.cancelOrder)
+router.post("/orders/cancel-item/:orderId/:itemId", userAuth, orderController.cancelOrderItem)
+router.post("/orders/return/:orderId", userAuth, orderController.returnOrder)
+router.post("/orders/return-item/:orderId/:itemId", userAuth, orderController.returnOrderItem)
+router.get("/orders/invoice/:orderId", userAuth, orderController.downloadInvoice)
 
 
 
 
 
-   module.exports =  router;
+module.exports = router;

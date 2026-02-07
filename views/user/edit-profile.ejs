@@ -1,120 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHOEZOO - Account Settings</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        /* KEEP ALL THIS CSS - Your partials do not have these styles */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-        body { background-color: #fff; color: #333; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SHOEZOO - Account Settings</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* KEEP ALL THIS CSS - Your partials do not have these styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
 
-        /* DASHBOARD LAYOUT */
-        .container {
-            display: flex;
-            width: 100%;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding-left: 40px; 
-        }
+    body {
+      background-color: #fff;
+      color: #333;
+    }
 
-        aside {
-            width: 280px;
-            border-right: 1px solid #eee;
-            padding-top: 30px;
-            flex-shrink: 0;
-        }
+    /* DASHBOARD LAYOUT */
+    .container {
+      display: flex;
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding-left: 40px;
+    }
 
-        .user-header {
-            background: #000;
-            color: #fff;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 5px;
-        }
+    main {
+      flex: 1;
+      padding: 30px 60px;
+    }
 
-        .user-header img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border: 2px solid #fff;
-            object-fit: cover;
-        }
+    /* FORMS & BUTTONS */
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 25px;
+      color: #444;
+    }
 
-        .menu-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px;
-            text-decoration: none;
-            color: #555;
-            font-size: 14px;
-            border-bottom: 1px solid #eee;
-        }
+    .form-row {
+      display: flex;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
 
-        .menu-item.active {
-            background-color: #d6e0e5; /* Highlight from your image */
-            color: #000;
-        }
-        
-        .menu-item i { width: 20px; text-align: center; }
+    .form-inputs {
+      flex: 1;
+      max-width: 500px;
+    }
 
-        main { flex: 1; padding: 30px 60px; }
+    .input-group {
+      margin-bottom: 15px;
+      position: relative;
+    }
 
-        /* FORMS & BUTTONS */
-        .section-title { font-size: 16px; font-weight: 600; margin-bottom: 25px; color: #444; }
-        .form-row { display: flex; gap: 40px; margin-bottom: 40px; }
-        .form-inputs { flex: 1; max-width: 500px; }
-        .input-group { margin-bottom: 15px; position: relative; }
-        .input-group label { display: block; font-size: 11px; color: #666; margin-bottom: 5px; }
-        .input-group input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #eee;
-            border-radius: 4px;
-            font-size: 13px;
-        }
+    .input-group label {
+      display: block;
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 5px;
+    }
 
-        .profile-pic-side { width: 200px; text-align: center; }
-        .profile-pic-side img { width: 160px; height: 160px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; }
+    .input-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #eee;
+      border-radius: 4px;
+      font-size: 13px;
+    }
 
-        .black-btn { background: #000; color: #fff; border: none; padding: 12px 30px; border-radius: 25px; font-size: 13px; cursor: pointer; }
-        .choose-img-btn { border: 1px solid #000; background: #fff; padding: 8px 20px; border-radius: 20px; font-size: 12px; cursor: pointer; }
+    .profile-pic-side {
+      width: 200px;
+      text-align: center;
+    }
 
-        /* CHANGE PASSWORD SECTION */
-        .password-section { border-top: 1px solid #eee; margin-top: 40px; padding-top: 30px; }
-        .pw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 800px; }
-        .pw-full-width { grid-column: span 2; }
+    .profile-pic-side img {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 15px;
+    }
 
-        /* REFERRAL SECTION */
-        .refer-container { margin-top: 50px; }
-        .refer-btn { background: #888; color: #fff; border: none; padding: 12px 60px; border-radius: 25px; font-size: 18px; cursor: pointer; margin-bottom: 15px; }
-        .refer-box {
-            background: #f8f9fa;
-            display: flex;
-            align-items: center;
-            width: fit-content;
-            padding: 12px 25px;
-            gap: 25px;
-            border: 1px solid #eee;
-        }
+    .black-btn {
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 25px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .choose-img-btn {
+      border: 1px solid #000;
+      background: #fff;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* CHANGE PASSWORD SECTION */
+    .password-section {
+      border-top: 1px solid #eee;
+      margin-top: 40px;
+      padding-top: 30px;
+    }
+
+    .pw-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      max-width: 800px;
+    }
+
+    .pw-full-width {
+      grid-column: span 2;
+    }
+
+    /* REFERRAL SECTION */
+    .refer-container {
+      margin-top: 50px;
+    }
+
+    .refer-btn {
+      background: #888;
+      color: #fff;
+      border: none;
+      padding: 12px 60px;
+      border-radius: 25px;
+      font-size: 18px;
+      cursor: pointer;
+      margin-bottom: 15px;
+    }
+
+    .refer-box {
+      background: #f8f9fa;
+      display: flex;
+      align-items: center;
+      width: fit-content;
+      padding: 12px 25px;
+      gap: 25px;
+      border: 1px solid #eee;
+    }
 
 
 
-        .black-btn-sm {
-  background: #000;
-  color: #fff;
-  border: none;
-  padding: 6px 14px;     /* 👈 smaller */
-  border-radius: 1px;
-  font-size: 11px;       /* 👈 smaller text */
-  cursor: pointer;
-}
+    .black-btn-sm {
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 6px 14px;
+      /* 👈 smaller */
+      border-radius: 1px;
+      font-size: 11px;
+      /* 👈 smaller text */
+      cursor: pointer;
+    }
 
-/* .grid-2 {
+    /* .grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
@@ -145,395 +194,371 @@
   object-fit: cover;
 } */
 
-.account-card {
-  background: #fff;
-  padding: 30px;
-  border-radius: 14px;
-  max-width: 520px;
-}
+    .account-card {
+      background: #fff;
+      padding: 30px;
+      border-radius: 14px;
+      max-width: 520px;
+    }
 
-.input-group {
-  margin-bottom: 18px;
-}
+    .input-group {
+      margin-bottom: 18px;
+    }
 
-.email-section {
-  margin-top: 30px;
-  border-top: 1px solid #eee;
-  padding-top: 20px;
-}
+    .email-section {
+      margin-top: 30px;
+      border-top: 1px solid #eee;
+      padding-top: 20px;
+    }
 
-.email-row {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
+    .email-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
 
-.error {
-  color: #e53935;   /* 🔴 red */
-  font-size: 11px;
-  margin-top: 4px;
-  display: block;
-}
+    .error {
+      color: #e53935;
+      /* 🔴 red */
+      font-size: 11px;
+      margin-top: 4px;
+      display: block;
+    }
 
-.error {
-  color: #e53935;
-  font-size: 11px;
-  margin-top: 4px;
-  display: block;
-}
-
-
-
-    </style>
+    .error {
+      color: #e53935;
+      font-size: 11px;
+      margin-top: 4px;
+      display: block;
+    }
+  </style>
 </head>
+
 <body>
 
-    <%- include("../partials/userpartial/header.ejs") %>
+  <%- include("../partials/userpartial/header.ejs") %>
 
     <div class="container">
-        <%- include("../partials/userpartial/userprofile-sidebar.ejs", {
-    user: user,
-    activePage: "profile"
-  }) %>
+      <%- include("../partials/userpartial/userprofile-sidebar.ejs", { user: user, activePage: "profile" }) %>
 
         <main>
           <h3 class="section-title">Account Settings</h3>
 
-<div class="form-row">
+          <div class="form-row">
 
-  <!-- LEFT SIDE : FORM CONTENT -->
-  <div class="form-inputs">
+            <!-- LEFT SIDE : FORM CONTENT -->
+            <div class="form-inputs">
 
-    <!-- PROFILE UPDATE FORM -->
-    <form action="/user/edit-profile" method="POST" onsubmit="validateForm('profile')">
+              <!-- PROFILE UPDATE FORM -->
+              <form action="/user/edit-profile" method="POST" onsubmit="validateForm('profile')">
 
-      <div class="input-group">
-        <label>Full name</label>
-        <input type="text" id="name"    name="name" value="<%= user.name %>" >
-        <small class="error" id="nameError"></small>
-      </div>
-
-      <div class="input-group">
-        <label>Phone Number</label>
-       <input type="text" name="phone" id="phone" value="<%= user.phone || '' %>">
-
-        <small class="error" id="phoneError"></small>
-      </div>
-
-      <button class="black-btn" type="submit">
-        Save Changes
-      </button>
-    </form>
-
-
-
-
-    <div class="input-group">
-  <label>Email</label>
-  <input type="text" value="<%= user.email %>" disabled>
-
-  <button type="button" class="black-btn-sm" onclick="showEmailChangeBox()">
-    Change
-  </button>
-</div>
-
-<!-- Hidden Email Change Box -->
-<div id="emailChangeBox" style="display:none; margin-top:10px;">
-  <input type="email" id="newEmail" placeholder="Enter new email" required>
-  <button type="button" onclick="sendEmailOtp()">Send OTP</button>
-  <small id="emailError" class="text-danger"></small>
-</div>
-
-    
-  </div>
-
-
-  
-
-<div class="profile-pic-side">
-
-  <img
-    src="<%= user.profileImage && user.profileImage !== '' 
-          ? user.profileImage 
-          : '/images/default avatar ong.jpg' %>"
-    alt="Profile"
-  />
-
-  <form
-    action="/upload-profile-image"
-    method="POST"
-    enctype="multipart/form-data"
-    id="profileForm"
-  >
-    <input
-      type="file"
-      name="profileImage"
-      id="profileImageInput"
-      hidden
-      accept="image/*"
-      onchange="document.getElementById('profileForm').submit()"
-    >
-
-    <button
-      type="button"
-      class="choose-img-btn"
-      onclick="document.getElementById('profileImageInput').click()"
-    >
-      Choose Image
-    </button>
-
-
-    <button
-  type="button"
-  class="choose-img-btn"
-  onclick="location.href='/remove-profile-image'">
-  Remove Image
-</button>
-
-
-
-
-  </form>
-
-</div>
-
-
-
-</div>
-
-<form action="/user/change-password" method="POST"
-      onsubmit="return validatePasswordForm()">
-
-  <div class="input-group">
-    <label>Current Password</label>
-    <input type="password" id="currentPassword" name="currentPassword">
-    <small class="error" id="currentPasswordError"></small>
-  </div>
-  <small>
-  <a href="/user/forgot-password" style="font-size:12px;">
-    Forgot Password?
-  </a>
-</small>
-
-
-  <div class="input-group">
-    <label>New Password</label>
-    <input type="password" id="newPassword" name="newPassword">
-    <small class="error" id="newPasswordError"></small>
-  </div>
-
-  <div class="input-group">
-    <label>Confirm Password</label>
-    <input type="password" id="confirmPassword" name="confirmPassword">
-    <small class="error" id="confirmPasswordError"></small>
-  </div>
-
-  <button class="black-btn" type="submit">
-    Change Password
-  </button>
-</form>
-
-
-
-            <div class="refer-container">
-                <button class="refer-btn">Refer & Earn</button>
-                <div class="refer-box">
-                    <span style="font-size: 18px; color: #555;">ox3291756</span>
-                    <i class="far fa-copy" style="cursor: pointer; font-size: 20px;"></i>
+                <div class="input-group">
+                  <label>Full name</label>
+                  <input type="text" id="name" name="name" value="<%= user.name %>">
+                  <small class="error" id="nameError"></small>
                 </div>
-          
+
+                <div class="input-group">
+                  <label>Phone Number</label>
+                  <input type="text" name="phone" id="phone" value="<%= user.phone || '' %>">
+
+                  <small class="error" id="phoneError"></small>
+                </div>
+
+                <button class="black-btn" type="submit">
+                  Save Changes
+                </button>
+              </form>
+
+
+
+
+              <div class="input-group">
+                <label>Email</label>
+                <input type="text" value="<%= user.email %>" disabled>
+
+                <button type="button" class="black-btn-sm" onclick="showEmailChangeBox()">
+                  Change
+                </button>
+              </div>
+
+              <!-- Hidden Email Change Box -->
+              <div id="emailChangeBox" style="display:none; margin-top:10px;">
+                <input type="email" id="newEmail" placeholder="Enter new email" required>
+                <button type="button" onclick="sendEmailOtp()">Send OTP</button>
+                <small id="emailError" class="text-danger"></small>
+              </div>
+
+
             </div>
+
+
+
+
+            <div class="profile-pic-side">
+
+              <img src="<%= user.profileImage && user.profileImage !== '' 
+          ? user.profileImage 
+          : '/images/default avatar ong.jpg' %>" alt="Profile" />
+
+              <form action="/upload-profile-image" method="POST" enctype="multipart/form-data" id="profileForm">
+                <input type="file" name="profileImage" id="profileImageInput" hidden accept="image/*"
+                  onchange="document.getElementById('profileForm').submit()">
+
+                <button type="button" class="choose-img-btn"
+                  onclick="document.getElementById('profileImageInput').click()">
+                  Choose Image
+                </button>
+
+
+                <button type="button" class="choose-img-btn" onclick="location.href='/remove-profile-image'">
+                  Remove Image
+                </button>
+
+
+
+
+              </form>
+
+            </div>
+
+
+
+          </div>
+
+          <form action="/user/change-password" method="POST" onsubmit="return validatePasswordForm()">
+
+            <div class="input-group">
+              <label>Current Password</label>
+              <input type="password" id="currentPassword" name="currentPassword">
+              <small class="error" id="currentPasswordError"></small>
+            </div>
+            <small>
+              <a href="/user/forgot-password" style="font-size:12px;">
+                Forgot Password?
+              </a>
+            </small>
+
+
+            <div class="input-group">
+              <label>New Password</label>
+              <input type="password" id="newPassword" name="newPassword">
+              <small class="error" id="newPasswordError"></small>
+            </div>
+
+            <div class="input-group">
+              <label>Confirm Password</label>
+              <input type="password" id="confirmPassword" name="confirmPassword">
+              <small class="error" id="confirmPasswordError"></small>
+            </div>
+
+            <button class="black-btn" type="submit">
+              Change Password
+            </button>
+          </form>
+
+
+
+          <div class="refer-container">
+            <button class="refer-btn">Refer & Earn</button>
+            <div class="refer-box">
+              <span style="font-size: 18px; color: #555;">ox3291756</span>
+              <i class="far fa-copy" style="cursor: pointer; font-size: 20px;"></i>
+            </div>
+
+          </div>
         </main>
     </div>
 
     <%- include("../partials/userpartial/footer.ejs") %>
 
 </body>
+
 </html>
 
 
 
 
 <script>
-const nameInput = document.getElementById("name");
-const phoneInput = document.getElementById("phone");
+  const nameInput = document.getElementById("name");
+  const phoneInput = document.getElementById("phone");
 
-const nameError = document.getElementById("nameError");
-const phoneError = document.getElementById("phoneError");
+  const nameError = document.getElementById("nameError");
+  const phoneError = document.getElementById("phoneError");
 
-const emailInput = document.getElementById("newEmail");
-const emailError = document.getElementById("emailError");
+  const emailInput = document.getElementById("newEmail");
+  const emailError = document.getElementById("emailError");
 
-nameInput.addEventListener("input", () => {
-  if (nameInput.value.trim().length < 3) {
-    nameError.innerText = "Name must be at least 3 characters";
-  } else {
-    nameError.innerText = "";
-  }
+  nameInput.addEventListener("input", () => {
+    if (nameInput.value.trim().length < 3) {
+      nameError.innerText = "Name must be at least 3 characters";
+    } else {
+      nameError.innerText = "";
+    }
 
-  if(!name){
-    nameError.innerHTML = "Name is required"
-  }
-
-
-  
-nameInput.addEventListener("keypress", (e) => {
-  if (!/[A-Za-z\s]/.test(e.key)) {
-    e.preventDefault();
-  }
-});
-
-nameInput.addEventListener("input", () => {
-  nameInput.value = nameInput.value.replace(/[^A-Za-z\s]/g, "");
-});
-
-
-});
-
-
-phoneInput.addEventListener("input", () => {
-  const phone = phoneInput.value.trim();
-  if (phone && !/^[6-9]\d{9}$/.test(phone)) {
-    phoneError.innerText = "Enter valid 10 digit phone number";
-  } else {
-    phoneError.innerText = "";
-  }
-});
-
-
-function validateForm() {
-  let valid = true;
-
-  const name = nameInput.value.trim();
-  const phone = phoneInput.value.trim();
-
-  nameError.innerText = "";
-  phoneError.innerText = "";
-
-  if (name.length < 3) {
-    nameError.innerText = "Name must be at least 3 characters";
-    valid = false;
-  }
-
-  if (phone && !/^[6-9]\d{9}$/.test(phone)) {
-    phoneError.innerText = "Enter valid 10 digit phone number";
-    valid = false;
-  }
-
-  return valid; 
-}
-
-
-function validatePasswordForm() {
-  let valid = true;
-
-  document.querySelectorAll(".error").forEach(e => e.innerText = "");
-
-  const currentPassword = document.getElementById("currentPassword").value.trim();
-  const newPassword = document.getElementById("newPassword").value.trim();
-  const confirmPassword = document.getElementById("confirmPassword").value.trim();
-
-  if (!currentPassword) {
-    document.getElementById("currentPasswordError").innerText =
-      "Current password is required";
-    valid = false;
-  }
-
-  
-  if (!newPassword) {
-    document.getElementById("newPasswordError").innerText =
-      "New password is required";
-    valid = false;
-  } else if (newPassword.length < 6) {
-    document.getElementById("newPasswordError").innerText =
-      "Password must be at least 6 characters";
-    valid = false;
-  }
-
-
-  if (!confirmPassword) {
-    document.getElementById("confirmPasswordError").innerText =
-      "Confirm password is required";
-    valid = false;
-  } else if (newPassword !== confirmPassword) {
-    document.getElementById("confirmPasswordError").innerText =
-      "Passwords do not match";
-    valid = false;
-  }
-
-  return valid;
-}
+    if (!name) {
+      nameError.innerHTML = "Name is required"
+    }
 
 
 
+    nameInput.addEventListener("keypress", (e) => {
+      if (!/[A-Za-z\s]/.test(e.key)) {
+        e.preventDefault();
+      }
+    });
+
+    nameInput.addEventListener("input", () => {
+      nameInput.value = nameInput.value.replace(/[^A-Za-z\s]/g, "");
+    });
 
 
-
-
-window.addEventListener("DOMContentLoaded", () => {
-  const params = new URLSearchParams(window.location.search);
-
-  if (params.get("error") === "currentPassword") {
-    document.getElementById("currentPasswordError").innerText =
-      "Current password is incorrect";
-  }
-});
-
-
-
-function showEmailChangeBox() {
-  document.getElementById("emailChangeBox").style.display = "block";
-}
-
-
-
-async function sendEmailOtp() {
-  const email = document.getElementById("newEmail").value.trim();
-  const error = document.getElementById("emailError");
-
-  error.innerText = "";
-
-  if (!email) {
-    error.innerText = "Email required";
-    return;
-  }
-
-  const res = await fetch("/user/send-email-otp", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email })
   });
 
-  const data = await res.json();
 
-  if (data.success) {
-    window.location.href = "/user/verify-email-otp";
-  } else {
-    error.innerText = data.message;
+  phoneInput.addEventListener("input", () => {
+    const phone = phoneInput.value.trim();
+    if (phone && !/^[6-9]\d{9}$/.test(phone)) {
+      phoneError.innerText = "Enter valid 10 digit phone number";
+    } else {
+      phoneError.innerText = "";
+    }
+  });
+
+
+  function validateForm() {
+    let valid = true;
+
+    const name = nameInput.value.trim();
+    const phone = phoneInput.value.trim();
+
+    nameError.innerText = "";
+    phoneError.innerText = "";
+
+    if (name.length < 3) {
+      nameError.innerText = "Name must be at least 3 characters";
+      valid = false;
+    }
+
+    if (phone && !/^[6-9]\d{9}$/.test(phone)) {
+      phoneError.innerText = "Enter valid 10 digit phone number";
+      valid = false;
+    }
+
+    return valid;
   }
-}
 
 
+  function validatePasswordForm() {
+    let valid = true;
 
-emailInput.addEventListener("input", () => {
-  const email = emailInput.value.trim();
+    document.querySelectorAll(".error").forEach(e => e.innerText = "");
 
-  if (!email) {
-    emailError.innerText = "Email is required";
-    return;
+    const currentPassword = document.getElementById("currentPassword").value.trim();
+    const newPassword = document.getElementById("newPassword").value.trim();
+    const confirmPassword = document.getElementById("confirmPassword").value.trim();
+
+    if (!currentPassword) {
+      document.getElementById("currentPasswordError").innerText =
+        "Current password is required";
+      valid = false;
+    }
+
+
+    if (!newPassword) {
+      document.getElementById("newPasswordError").innerText =
+        "New password is required";
+      valid = false;
+    } else if (newPassword.length < 6) {
+      document.getElementById("newPasswordError").innerText =
+        "Password must be at least 6 characters";
+      valid = false;
+    }
+
+
+    if (!confirmPassword) {
+      document.getElementById("confirmPasswordError").innerText =
+        "Confirm password is required";
+      valid = false;
+    } else if (newPassword !== confirmPassword) {
+      document.getElementById("confirmPasswordError").innerText =
+        "Passwords do not match";
+      valid = false;
+    }
+
+    return valid;
   }
 
-  
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  if (!emailRegex.test(email)) {
-    emailError.innerText = "Invalid email address";
-    return;
+
+
+
+
+
+  window.addEventListener("DOMContentLoaded", () => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("error") === "currentPassword") {
+      document.getElementById("currentPasswordError").innerText =
+        "Current password is incorrect";
+    }
+  });
+
+
+
+  function showEmailChangeBox() {
+    document.getElementById("emailChangeBox").style.display = "block";
   }
 
 
-  emailError.innerText = "";
-});
+
+  async function sendEmailOtp() {
+    const email = document.getElementById("newEmail").value.trim();
+    const error = document.getElementById("emailError");
+
+    error.innerText = "";
+
+    if (!email) {
+      error.innerText = "Email required";
+      return;
+    }
+
+    const res = await fetch("/user/send-email-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      window.location.href = "/user/verify-email-otp";
+    } else {
+      error.innerText = data.message;
+    }
+  }
+
+
+
+  emailInput.addEventListener("input", () => {
+    const email = emailInput.value.trim();
+
+    if (!email) {
+      emailError.innerText = "Email is required";
+      return;
+    }
+
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      emailError.innerText = "Invalid email address";
+      return;
+    }
+
+
+    emailError.innerText = "";
+  });
 
 
 
@@ -547,10 +572,3 @@ emailInput.addEventListener("input", () => {
 
 
 </script>
-
-
-
-
-
-
-

@@ -25,20 +25,31 @@ const orderSchema = new mongoose.Schema({
       quantity: Number,
       price: Number,
 
-      
+
       itemStatus: {
         type: String,
-        default: "Placed" 
+        default: "Placed"
+      },
+      cancelReason: {
+        type: String
+      },
+      returnReason: {
+        type: String
+      },
+      isRestocked: {
+        type: Boolean,
+        default: false
       }
     }
   ],
 
   address: {
-    name: String,
+    fullName: String,
     phone: String,
     city: String,
     state: String,
-    pincode: String
+    pincode: String,
+    addressLine: String
   },
 
   paymentMethod: {
@@ -46,13 +57,12 @@ const orderSchema = new mongoose.Schema({
     default: "COD"
   },
 
-  status: {
+  paymentStatus: {
     type: String,
-    enum: ["Placed", "Shipped", "Delivered", "Cancelled", "Returned"],
-    default: "Placed"
+    enum: ["Pending", "Paid", "Failed", "Refunded"],
+    default: "Pending"
   },
 
-  
   cancelReason: {
     type: String
   },
@@ -68,6 +78,24 @@ const orderSchema = new mongoose.Schema({
   totalAmount: {
     type: Number,
     required: true
+  },
+
+  status: {
+    type: String,
+    enum: [
+      "Placed",
+      "Processing",
+      "Shipped",
+      "Out for Delivery",
+      "Delivered",
+      "Cancelled",
+      "Return Requested",
+      "Return Request Sent",
+      "Return Approved",
+      "Return Rejected",
+      "Returned"
+    ],
+    default: "Placed"
   }
 
 }, { timestamps: true });
