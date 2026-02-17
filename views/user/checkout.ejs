@@ -62,38 +62,49 @@
 
 
 
-<h2 class=" section-title">Delivery Address</h2>
+<h2 class="section-title">Delivery Address</h2>
 
-              <% const defaultAddress=user.addresses.find(a=> a.isDefault) || user.addresses[0];
-                %>
+<%
+  const defaultAddress = (user.addresses && user.addresses.length > 0)
+    ? (user.addresses.find(a => a.isDefault) || user.addresses[0])
+    : null;
+%>
 
-                <div class="address-row" id="selectedAddressBox">
-                  <div class="address-info">
-                    <span class="addr-label">Default</span>
+<% if (defaultAddress) { %>
 
-                    <p class="addr-name">
-                      <strong>
-                        <%= defaultAddress.fullName %>,<br>
-                          <%= defaultAddress.addressLine %>,<br>
-                            <%= defaultAddress.pincode %>
-                      </strong>
-                    </p>
+  <div class="address-row" id="selectedAddressBox">
+    <div class="address-info">
+      <span class="addr-label">Default</span>
 
-                    <p class="addr-desc">
-                      <%= formatAddress(defaultAddress) %>
-                    </p>
+      <p class="addr-name">
+        <strong>
+          <%= defaultAddress.fullName %>,<br>
+          <%= defaultAddress.addressLine %>,<br>
+          <%= defaultAddress.pincode %>
+        </strong>
+      </p>
 
-                    <p class="addr-phone">
-                      Mobile: +91 <%= defaultAddress.phone %>
-                    </p>
-                  </div>
+      <p class="addr-desc">
+        <%= formatAddress(defaultAddress) %>
+      </p>
 
-                  <button class="btn-black-sm" id="changeAddressBtn">
-                    Select Address
-                  </button>
-                </div>
+      <p class="addr-phone">
+        Mobile: +91 <%= defaultAddress.phone %>
+      </p>
+    </div>
 
+    <button class="btn-black-sm" id="changeAddressBtn">
+      Select Address
+    </button>
+  </div>
 
+<% } else { %>
+
+  <div style="padding:20px; border:1px dashed #ccc;">
+    No address found. Please add address in profile.
+  </div>
+
+<% } %>
 
 
 
