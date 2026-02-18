@@ -10,6 +10,7 @@ const checkoutController = require("../controllers/user/checkoutController")
 const orderController = require("../controllers/user/orderController")
 const { uploadProfile } = require("../middlewares/multer")
 const paymentController  = require("../controllers/user/paymentController")
+const WishlistController = require("../controllers/user/wishlistController")
 
 
 
@@ -138,8 +139,16 @@ router.get("/order-failure", userController.orderFailure);
 
 
 //  payment
-router.post("/create-order",paymentController.createOrder)
-router.post("/verify-payment",paymentController.verifyPayment)
+router.post("/create-order",userAuth,paymentController.createOrder)
+router.post("/verify-payment",userAuth,paymentController.verifyPayment)
+
+
+// Wishlist
+router.get("/wishlist",userAuth,WishlistController.getWishlist)
+router.post("/wishlist/add",userAuth,WishlistController.addToWishlist)
+router.post("/wishlist/remove",userAuth,WishlistController.removeFromWishlist)
+router.post("/wishlist/move-to-cart",userAuth,WishlistController.moveToCart);
+
 
 
 

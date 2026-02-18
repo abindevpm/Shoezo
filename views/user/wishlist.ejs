@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+  <title>Wishlist</title>
+</head>
+
+<body>
+  <%- include('../partials/userpartial/header.ejs') %>
+
+    <div class="wishlist-container">
+      <div class="wishlist-header">
+        <span class="heart-icon">❤️</span>
+        <h1>My Wishlist (<span id="wishlist-count">
+            <%= wishlistItems.length %>
+          </span>)</h1>
+      </div>
+
+      <div id="wishlist-items-container" class="wishlist-items">
+        <% if (wishlistItems.length> 0) { %>
+          <% wishlistItems.forEach(item=> { %>
+            <div class="wishlist-card" id="wishlist-<%= item._id %>">
+
+              <div class="product-image">
+                <img
+                  src="/uploads/product-images/<%= item.images && item.images.length > 0 ? item.images[0] : 'default.jpg' %>"
+                  alt="<%= item.name %>" style="width:120px; height:120px; object-fit:cover;">
+              </div>
+
+              <div class="product-details">
+                <h2 class="product-name">
+                  <%= item.name.toUpperCase() %>
+                </h2>
+                <p class="added-date">Added On: <%= item.date %>
+                </p>
+                <button class="remove-btn text-red-500 underline" data-id="<%= item._id %>">
+                  Remove Item
+                </button>
+              
+              </div>
+
+              <div class="product-action">
+                <% const firstVariant=item.variants && item.variants.length> 0
+                  ? item.variants[0]
+                  : null;
+                  const displayPrice = firstVariant ? firstVariant.offerPrice || firstVariant.price : 0;
+                  %>
+                  <span class="price">
+                    ₹ <%= displayPrice.toLocaleString() %>
+                  </span>
+
+                  <button class="add-to-cart-btn" onclick="moveToCart('<%= item._id %>')">
+                    Add to Cart
+                  </button>
+
+
+
+
+
+              </div>
+            </div>
+            <% }) %>
+              <% } else { %>
+                <div id="empty-wishlist-message" class="text-center py-5">
+                  <p class="text-xl text-gray-500 mb-4">Your wishlist is empty</p>
+                  <a href="/productlist" class="shop-now-btn">Continue Shopping</a>
+                </div>
+                <% } %>
+      </div>
+    </div>
+
+    <%- include('../partials/userpartial/footer.ejs') %>
+</body>
+
+</html>
+
+<style>
+  /* ... (Existing styles) ... */
+  :root {
+    --gray-pill: #9e9e9e;
+    --text-main: #000;
+    --text-secondary: #555;
+    --border-color: #333;
+  }
+
+  .wishlist-container {
+    font-family: Arial, sans-serif;
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 0 20px;
+  }
+
+  .wishlist-header {
+    background-color: var(--gray-pill);
+    color: white;
+    padding: 15px 40px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 50px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .wishlist-header h1 {
+    font-size: 1.2rem;
+    margin: 0;
+    font-weight: 500;
+  }
+
+  .wishlist-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 60px;
+    gap: 30px;
+  }
+
+  .product-image img {
+    width: 180px;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .product-details {
+    flex-grow: 1;
+  }
+
+  .product-name {
+    font-size: 1.1rem;
+    margin: 0 0 5px 0;
+  }
+
+  .added-date,
+  .remove-btn {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 2px 0;
+  }
+
+  .remove-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    text-decoration: underline;
+    cursor: pointer;
+    display: block;
+  }
+
+  .stock-status {
+    font-size: 0.8rem;
+    margin-top: 15px;
+    font-weight: bold;
+  }
+
+  .in-stock {
+    color: #2ecc71;
+  }
+
+  .out-of-stock {
+    color: #e74c3c;
+  }
+
+  .product-action {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+  }
+
+  .price {
+    font-weight: bold;
+    font-size: 1rem;
+  }
+
+  .add-to-cart-btn,
+  .shop-now-btn {
+    background: white;
+    border: 1px solid var(--border-color);
+    padding: 10px 25px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.2s;
+    text-decoration: none;
+    color: black;
+    display: inline-block;
+  }
+
+  .add-to-cart-btn:hover,
+  .shop-now-btn:hover {
+    background: #f0f0f0;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  .py-5 {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  .text-xl {
+    font-size: 1.25rem;
+  }
+
+  .text-gray-500 {
+    color: #6b7280;
+  }
+
+  .mb-4 {
+    margin-bottom: 1rem;
+  }
+</style>
+
+<script>
+  document.querySelectorAll(".remove-btn").forEach(button => {
+    button.addEventListener("click", async function () {
+      const productId = this.dataset.id;
+      const currentCard = this.closest(".wishlist-card");
+
+      const result = await Swal.fire({
+        title: "Remove Item?",
+        text: "Are you sure you want to remove this from wishlist?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, remove it!",
+        cancelButtonText: "Cancel"
+      });
+
+      if (result.isConfirmed) {
+        try {
+          const response = await fetch("/wishlist/remove", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ productId })
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            Swal.fire({
+              title: "Removed!",
+              text: "Item removed from wishlist.",
+              icon: "success",
+              timer: 1200,
+              showConfirmButton: false
+            });
+
+            if (currentCard) {
+              currentCard.remove();
+              const countElement = document.getElementById("wishlist-count");
+              let count = parseInt(countElement.innerText);
+              count = Math.max(0, count - 1);
+              countElement.innerText = count;
+
+
+              if (count === 0) {
+                const container = document.getElementById("wishlist-items-container");
+                container.innerHTML = `
+                <div id="empty-wishlist-message" class="text-center py-5">
+                  <p class="text-xl text-gray-500 mb-4">Your wishlist is empty</p>
+                  <a href="/productlist" class="shop-now-btn">Continue Shopping</a>
+                </div>
+              `;
+              }
+            }
+          } else {
+            Swal.fire("Error", "Could not remove item", "error");
+          }
+        } catch (error) {
+          console.error("Error removing item:", error);
+          Swal.fire("Error", "An unexpected error occurred", "error");
+        }
+      }
+    });
+  });
+
+
+
+  async function moveToCart(productId) {
+
+    try {
+
+      const response = await fetch("/wishlist/move-to-cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ productId })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+
+        Swal.fire({
+          title: "Moved!",
+          text: "Product moved to cart",
+          icon: "success",
+          timer: 1000,
+          showConfirmButton: false
+        });
+
+    
+        setTimeout(() => {
+          window.location.href = "/cart";
+        }, 1000);
+
+      } else {
+        Swal.fire("Error", "Could not move to cart", "error");
+      }
+
+    } catch (error) {
+      console.error(error);
+      Swal.fire("Error", "Something went wrong", "error");
+    }
+  }
+
+
+
+
+
+</script>
