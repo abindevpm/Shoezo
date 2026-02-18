@@ -9,6 +9,7 @@ const cartController = require("../controllers/user/cartController")
 const checkoutController = require("../controllers/user/checkoutController")
 const orderController = require("../controllers/user/orderController")
 const { uploadProfile } = require("../middlewares/multer")
+const paymentController  = require("../controllers/user/paymentController")
 
 
 
@@ -131,6 +132,14 @@ router.post("/orders/return/:orderId", userAuth, orderController.returnOrder)
 router.post("/orders/return-item/:orderId/:itemId", userAuth, orderController.returnOrderItem)
 router.get("/orders/invoice/:orderId", userAuth, orderController.downloadInvoice)
 
+// order-failure
+router.get("/order-failure", userController.orderFailure);
+
+
+
+//  payment
+router.post("/create-order",paymentController.createOrder)
+router.post("/verify-payment",paymentController.verifyPayment)
 
 
 

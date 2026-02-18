@@ -46,7 +46,7 @@ const loadCheckout = async (req, res) => {
 
     const totalPrice = subtotal + gstAmount - discountAmount;
 
-    const addresses = user.address || [];
+    const addresses = user.addresses || [];
 
 
 
@@ -63,8 +63,8 @@ const loadCheckout = async (req, res) => {
       discountAmount,
       deliveryCharge,
       totalPrice,
-
-      addresses
+      addresses,
+      razorpayKey: process.env.RAZORPAY_KEY_ID
     });
 
 
@@ -181,7 +181,7 @@ const addAddressCheckout = async (req, res) => {
       landmark
     } = req.body;
 
-  
+
     if (!fullName || !phone || !addressLine || !city || !state || !pincode) {
       return res.status(400).json({ success: false, message: "Required fields are missing" });
     }

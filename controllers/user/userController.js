@@ -1,6 +1,8 @@
 
 const User = require("../../models/userSchema")
 const Product = require("../../models/productSchema");
+const Order = require("../../models/orderSchema");
+
 
 const env = require("dotenv").config()
 
@@ -17,20 +19,20 @@ const loadHomepage = async (req, res) => {
     }
 
 
-    if(userData && userData.isBlocked){
-      req.session.user=null;
+    if (userData && userData.isBlocked) {
+      req.session.user = null;
       return res.redirect('/login?isBlocked=true')
     }
 
 
-    
-    const featuredProducts = await Product.find({ isDeleted:true,isListed:true })
+
+    const featuredProducts = await Product.find({ isDeleted: true, isListed: true })
       .sort({ createdAt: -1 })
       .limit(3);
 
-    return res.render("home", { 
+    return res.render("home", {
       user: userData,
-      featuredProducts  
+      featuredProducts
     });
 
   } catch (error) {
@@ -62,8 +64,8 @@ const pageNotFound = async (req, res) => {
 
 const loadSignup = async (req, res) => {
   try {
-    return res.render("signup",{
-      formData:{}
+    return res.render("signup", {
+      formData: {}
     })
 
   } catch (error) {
@@ -95,10 +97,10 @@ async function sendVerificationEmail(email, otp) {
     })
 
     const info = await transporter.sendMail({
-  from: `"Shoezo 👟" <${process.env.NODEMAILER_EMAIL}>`,
-  to: email,
-  subject: "Verify your Shoezo account",
-  html: `
+      from: `"Shoezo 👟" <${process.env.NODEMAILER_EMAIL}>`,
+      to: email,
+      subject: "Verify your Shoezo account",
+      html: `
   <div style="font-family: Arial, sans-serif; background-color:#f4f4f4; padding:20px;">
     <div style="max-width:500px; margin:auto; background:#ffffff; border-radius:8px; overflow:hidden;">
       
@@ -153,7 +155,7 @@ async function sendVerificationEmail(email, otp) {
     </div>
   </div>
   `
-});
+    });
 
     return info.accepted.length > 0
 
@@ -174,13 +176,13 @@ const resendOtp = async (req, res) => {
     const newOtp = generateOtp();
     req.session.userOtp = newOtp;
 
-     req.session.otpExpiry = Date.now() + (101* 1000); 
+    req.session.otpExpiry = Date.now() + (101 * 1000);
 
     const email = req.session.userData.email;
 
     const sent = await sendVerificationEmail(email, newOtp);
 
-  
+
 
     if (!sent) {
       return res.status(500).json({ success: false, message: "Email failed" });
@@ -204,17 +206,17 @@ const signup = async (req, res) => {
     const { name, phone, email, password, confirmPassword } = req.body;
 
     if (!email || !password || !confirmPassword) {
-      return res.render("signup", { message: "All required fields must be filled",formData:req.body });
+      return res.render("signup", { message: "All required fields must be filled", formData: req.body });
     }
 
     if (password !== confirmPassword) {
-      return res.render("signup", { message: "Password does not match",formData:req.body });
+      return res.render("signup", { message: "Password does not match", formData: req.body });
     }
 
     const findUser = await User.findOne({ email });
 
     if (findUser) {
-      return res.render("signup", { message: "User already exists",formData:req.body });
+      return res.render("signup", { message: "User already exists", formData: req.body });
 
     }
 
@@ -222,7 +224,7 @@ const signup = async (req, res) => {
     const emailSent = await sendVerificationEmail(email, otp);
 
     if (!emailSent) {
-      return res.render("signup", { message: "Email sending failed",formData:req.body });
+      return res.render("signup", { message: "Email sending failed", formData: req.body });
     }
 
     req.session.userOtp = otp;
@@ -258,7 +260,7 @@ const otp = async (req, res) => {
   try {
     const { otp } = req.body;
 
-    
+
     if (!req.session.userOtp || !req.session.otpExpiry) {
       return res.status(400).json({
         success: false,
@@ -266,7 +268,7 @@ const otp = async (req, res) => {
       });
     }
 
-    
+
     if (Date.now() > req.session.otpExpiry) {
       req.session.userOtp = null;
       req.session.otpExpiry = null;
@@ -277,13 +279,13 @@ const otp = async (req, res) => {
       });
     }
 
-      console.log("OTP:", req.session.userOtp);
-console.log("OTP Expiry:", req.session.otpExpiry);
-console.log("Now:", Date.now());
-console.log("Remaining (sec):", (req.session.otpExpiry - Date.now()) / 1000);
+    console.log("OTP:", req.session.userOtp);
+    console.log("OTP Expiry:", req.session.otpExpiry);
+    console.log("Now:", Date.now());
+    console.log("Remaining (sec):", (req.session.otpExpiry - Date.now()) / 1000);
 
 
-    
+
     if (otp !== req.session.userOtp) {
       return res.status(400).json({
         success: false,
@@ -291,7 +293,7 @@ console.log("Remaining (sec):", (req.session.otpExpiry - Date.now()) / 1000);
       });
     }
 
-    
+
     const user = req.session.userData;
     const passwordHash = await securePassword(user.password);
 
@@ -305,7 +307,7 @@ console.log("Remaining (sec):", (req.session.otpExpiry - Date.now()) / 1000);
     await saveUserData.save();
 
     req.session.user = user;
-    
+
     req.session.userOtp = null;
     req.session.otpExpiry = null;
     req.session.userData = null;
@@ -327,15 +329,15 @@ console.log("Remaining (sec):", (req.session.otpExpiry - Date.now()) / 1000);
 
 const loadlogin = async (req, res) => {
   try {
-    let message="";
+    let message = "";
 
-    if(req.query.isBlocked==="true"){
-      message="Your account has been blocked by admin"
+    if (req.query.isBlocked === "true") {
+      message = "Your account has been blocked by admin"
     }
     if (req.session.user) {
       return res.redirect("login")
     } else {
-      res.render("login",{message})
+      res.render("login", { message })
     }
 
   } catch (error) {
@@ -369,12 +371,12 @@ const login = async (req, res) => {
       return res.render("login", { message: "Incorrect Password" })
     }
     req.session.user = {
-      _id:findUser._id,
-      name:findUser.name,
-      email:findUser.email
+      _id: findUser._id,
+      name: findUser.name,
+      email: findUser.email
     }
 
-     await User.findByIdAndUpdate(findUser._id, {
+    await User.findByIdAndUpdate(findUser._id, {
       lastLogin: new Date()
     });
 
@@ -408,14 +410,14 @@ const logout = async (req, res) => {
 
 
 
-const productlist = async(req,res)=>{
+const productlist = async (req, res) => {
 
   return res.render("productlist")
 }
 
 
-   const loadForgotPage = (req, res) => {
-    res.render("forgot-password", { message: "" });
+const loadForgotPage = (req, res) => {
+  res.render("forgot-password", { message: "" });
 };
 
 const sendResetOTP = async (req, res) => {
@@ -425,15 +427,15 @@ const sendResetOTP = async (req, res) => {
     if (!user) {
       return res.render("forgot-password", { message: "Email does not exist" });
     }
-    
-    const otp = Math.floor(1000 + Math.random() * 9000).toString();
-    console.log("Your OTP is:",otp)
 
-    
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    console.log("Your OTP is:", otp)
+
+
     req.session.resetEmail = email;
     req.session.resetOtp = otp;
 
-    
+
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -474,15 +476,15 @@ const verifyOtp = (req, res) => {
   const email = req.session.resetEmail;
 
   if (!email) {
-    return res.redirect("/forgot-password"); 
+    return res.redirect("/forgot-password");
   }
 
   const maskedEmail = email.replace(/(.{2}).+(@.+)/, "$1****$2");
 
   if (enteredOtp !== storedOtp) {
-    return res.render("verify-otp", { 
+    return res.render("verify-otp", {
       message: "Invalid OTP",
-      maskedEmail 
+      maskedEmail
     });
   }
 
@@ -520,7 +522,7 @@ const resetPassword = async (req, res) => {
       { $set: { password: hashedPassword } }
     );
 
-    
+
     delete req.session.resetEmail;
     delete req.session.resetOtp;
 
@@ -531,6 +533,30 @@ const resetPassword = async (req, res) => {
     res.send("Server Error");
   }
 };
+
+const orderFailure = async (req, res) => {
+  try {
+
+    const orderId = req.query.orderId;
+
+    if (!orderId) {
+      return res.render("order-failure", { order: null });
+    }
+
+    const order = await Order.findById(orderId).populate("items.productId");
+
+    if (!order) {
+      return res.render("order-failure", { order: null });
+    }
+
+    res.render("order-failure", { order });
+
+  } catch (error) {
+    console.log("Order Failure Page Error:", error);
+    res.render("order-failure", { order: null });
+  }
+};
+
 
 
 
@@ -549,10 +575,10 @@ module.exports = {
   logout, resendOtp,
   productlist,
   loadForgotPage,
-sendResetOTP,
-loadOtpPage,
-verifyOtp,
-loadResetPage,
-resetPassword,
-
+  sendResetOTP,
+  loadOtpPage,
+  verifyOtp,
+  loadResetPage,
+  resetPassword,
+  orderFailure
 }

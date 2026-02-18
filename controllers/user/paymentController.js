@@ -1,0 +1,168 @@
+const razorpay = require("../../config/razorpay");
+const crypto = require("crypto");
+const Cart = require("../../models/cartSchema");
+const Order = require("../../models/orderSchema");
+const Product = require("../../models/productSchema");
+const User = require("../../models/userSchema");
+
+
+
+
+
+const createOrder = async (req, res) => {
+  try {
+    const sessionUser = req.session.user;
+    const userId = sessionUser._id || sessionUser;
+    const { addressId } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Login required" });
+    }
+
+    if (!addressId) {
+      return res.status(400).json({ success: false, message: "Address is required" });
+    }
+
+    const cart = await Cart.findOne({ userId }).populate("items.productId");
+    if (!cart || cart.items.length === 0) {
+      return res.status(400).json({ success: false, message: "Cart is empty" });
+    }
+
+    const user = await User.findById(userId);
+    const selectedAddress = user.addresses.id(addressId);
+    if (!selectedAddress) {
+      return res.status(400).json({ success: false, message: "Address not found" });
+    }
+
+    let subtotal = 0;
+    let orderItems = [];
+    for (const item of cart.items) {
+      const variant = item.productId.variants.find(
+        v => Number(v.size) === Number(item.size)
+      );
+      if (!variant) continue;
+      const price = Number(variant.offerPrice || variant.price);
+      subtotal += price * item.quantity;
+
+      orderItems.push({
+        productId: item.productId._id,
+        size: item.size,
+        quantity: item.quantity,
+        price
+      });
+    }
+
+    const gstAmount = Math.round(subtotal * 0.18);
+    const discountAmount = Math.round(subtotal * 0.30);
+    const totalAmount = subtotal + gstAmount - discountAmount;
+
+    const options = {
+      amount: totalAmount * 100,
+      currency: "INR",
+      receipt: "order_" + Date.now(),
+    };
+
+    const razorpayOrder = await razorpay.orders.create(options);
+
+
+    const newOrder = new Order({
+      orderId: razorpayOrder.id,
+      userId: userId,
+      items: orderItems,
+      address: {
+        fullName: selectedAddress.fullName,
+        phone: selectedAddress.phone,
+        city: selectedAddress.city,
+        state: selectedAddress.state,
+        pincode: selectedAddress.pincode,
+        addressLine: selectedAddress.addressLine
+      },
+      paymentMethod: "ONLINE",
+      paymentStatus: "Pending",
+      totalAmount,
+      subtotal,
+      gstAmount,
+      discountAmount,
+      status: "Placed"
+    });
+
+    await newOrder.save();
+
+    res.json({
+      success: true,
+      order: razorpayOrder,
+      dbOrderId: newOrder._id
+    });
+
+  } catch (error) {
+    console.log("Create Order Error:", error);
+    res.status(500).json({ success: false });
+  }
+};
+
+
+const verifyPayment = async (req, res) => {
+  try {
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature
+    } = req.body;
+
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(body)
+      .digest("hex");
+
+    if (expectedSignature !== razorpay_signature) {
+      await Order.findOneAndUpdate(
+        { orderId: razorpay_order_id },
+        { paymentStatus: "Failed" }
+      );
+      return res.status(400).json({ success: false, message: "Invalid signature" });
+    }
+
+    const sessionUser = req.session.user;
+    const userId = sessionUser._id || sessionUser;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "User not authenticated" });
+    }
+
+
+    const updatedOrder = await Order.findOneAndUpdate(
+      { orderId: razorpay_order_id },
+      { paymentStatus: "Paid" },
+      { new: true }
+    );
+
+    if (!updatedOrder) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+
+    for (const item of updatedOrder.items) {
+      await Product.updateOne(
+        { _id: item.productId, "variants.size": item.size },
+        { $inc: { "variants.$.stock": -item.quantity } }
+      );
+    }
+
+    await Cart.deleteOne({ userId });
+
+    return res.json({ success: true });
+
+  } catch (error) {
+    console.log("Verify Payment Error:", error);
+    return res.status(500).json({ success: false });
+  }
+};
+
+
+module.exports = {
+  createOrder,
+  verifyPayment
+}
+

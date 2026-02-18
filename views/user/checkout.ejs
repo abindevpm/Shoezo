@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 
 </head>
 
@@ -62,127 +64,126 @@
 
 
 
-<h2 class="section-title">Delivery Address</h2>
+<h2 class=" section-title">Delivery Address</h2>
 
-<%
-  const defaultAddress = (user.addresses && user.addresses.length > 0)
-    ? (user.addresses.find(a => a.isDefault) || user.addresses[0])
-    : null;
-%>
+              <% const defaultAddress=(user.addresses && user.addresses.length> 0)
+                ? (user.addresses.find(a => a.isDefault) || user.addresses[0])
+                : null;
+                %>
 
-<% if (defaultAddress) { %>
+                <% if (defaultAddress) { %>
 
-  <div class="address-row" id="selectedAddressBox">
-    <div class="address-info">
-      <span class="addr-label">Default</span>
+                  <div class="address-row" id="selectedAddressBox">
+                    <div class="address-info">
+                      <span class="addr-label">Default</span>
 
-      <p class="addr-name">
-        <strong>
-          <%= defaultAddress.fullName %>,<br>
-          <%= defaultAddress.addressLine %>,<br>
-          <%= defaultAddress.pincode %>
-        </strong>
-      </p>
-
-      <p class="addr-desc">
-        <%= formatAddress(defaultAddress) %>
-      </p>
-
-      <p class="addr-phone">
-        Mobile: +91 <%= defaultAddress.phone %>
-      </p>
-    </div>
-
-    <button class="btn-black-sm" id="changeAddressBtn">
-      Select Address
-    </button>
-  </div>
-
-<% } else { %>
-
-  <div style="padding:20px; border:1px dashed #ccc;">
-    No address found. Please add address in profile.
-  </div>
-
-<% } %>
-
-
-
-                <div id="addressList" class="address-modal" style="display:none;">
-
-                  <h3>Select Delivery Address</h3>
-
-                  <% user.addresses.forEach(addr=> { %>
-                    <label class="address-option">
-
-                      <input type="radio" name="addressRadio" value="<%= addr._id %>"
-                        <%=addr._id.toString()===defaultAddress._id.toString() ? "checked" : "" %>>
-
-                      <div class="address-text">
+                      <p class="addr-name">
                         <strong>
-                          <%= addr.fullName %> <br>
-                            <%= addr.addressLine %><br>
-                              <%= addr.pincode %>
+                          <%= defaultAddress.fullName %>,<br>
+                            <%= defaultAddress.addressLine %>,<br>
+                              <%= defaultAddress.pincode %>
                         </strong>
+                      </p>
 
-                        <% if (addr.isDefault) { %>
-                          <span class="badge">HOME</span>
-                          <% } %>
+                      <p class="addr-desc">
+                        <%= formatAddress(defaultAddress) %>
+                      </p>
 
-                            <p>
-                              <%= formatAddress(addr) %>
-                            </p>
-                            <p>Mobile: +91 <%= addr.phone %>
-                            </p>
+                      <p class="addr-phone">
+                        Mobile: +91 <%= defaultAddress.phone %>
+                      </p>
+                    </div>
+
+                    <button class="btn-black-sm" id="changeAddressBtn">
+                      Select Address
+                    </button>
+                  </div>
+
+                  <% } else { %>
+
+                    <div style="padding:20px; border:1px dashed #ccc;">
+                      No address found. Please add address in profile.
+                    </div>
+
+                    <% } %>
+
+
+
+                      <div id="addressList" class="address-modal" style="display:none;">
+
+                        <h3>Select Delivery Address</h3>
+
+                        <% user.addresses.forEach(addr=> { %>
+                          <label class="address-option">
+
+                            <input type="radio" name="addressRadio" value="<%= addr._id %>"
+                              <%=addr._id.toString()===defaultAddress._id.toString() ? "checked" : "" %>>
+
+                            <div class="address-text">
+                              <strong>
+                                <%= addr.fullName %> <br>
+                                  <%= addr.addressLine %><br>
+                                    <%= addr.pincode %>
+                              </strong>
+
+                              <% if (addr.isDefault) { %>
+                                <span class="badge">HOME</span>
+                                <% } %>
+
+                                  <p>
+                                    <%= formatAddress(addr) %>
+                                  </p>
+                                  <p>Mobile: +91 <%= addr.phone %>
+                                  </p>
+                            </div>
+
+                          </label>
+                          <% }) %>
+
+                            <button class="btn-black" id="confirmAddressBtn">
+                              Deliver Here
+                            </button>
+
+                            <hr>
+
+                            <button class="btn-black-sm" id="showAddAddressFormBtn" style="background:#444;">
+                              + Add New Address
+                            </button>
+
+                            <div id="newAddressForm"
+                              style="display:none; margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 20px;">
+                              <h4>Add New Address</h4>
+                              <div class="form-row-two">
+                                <div class="form-group">
+                                  <label>Full Name</label>
+                                  <input type="text" id="newFullName" placeholder="Full Name">
+                                </div>
+                                <div class="form-group">
+                                  <label>Phone Number</label>
+                                  <input type="text" id="newPhone" placeholder="10-digit mobile number">
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <label>Address Line</label>
+                                <input type="text" id="newAddressLine" placeholder="House No., Building, Street, Area">
+                              </div>
+                              <div class="form-row-three">
+                                <div class="form-group">
+                                  <label>City</label>
+                                  <input type="text" id="newCity" placeholder="City">
+                                </div>
+                                <div class="form-group">
+                                  <label>State</label>
+                                  <input type="text" id="newState" placeholder="State">
+                                </div>
+                                <div class="form-group">
+                                  <label>Pincode</label>
+                                  <input type="text" id="newPincode" placeholder="6-digit Pincode">
+                                </div>
+                              </div>
+                              <button class="btn-black-sm" id="saveNewAddressBtn">Save & Deliver Here</button>
+                            </div>
                       </div>
-
-                    </label>
-                    <% }) %>
-
-                      <button class="btn-black" id="confirmAddressBtn">
-                        Deliver Here
-                      </button>
-
-                      <hr>
-
-                      <button class="btn-black-sm" id="showAddAddressFormBtn" style="background:#444;">
-                        + Add New Address
-                      </button>
-
-                      <div id="newAddressForm"
-                        style="display:none; margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 20px;">
-                        <h4>Add New Address</h4>
-                        <div class="form-row-two">
-                          <div class="form-group">
-                            <label>Full Name</label>
-                            <input type="text" id="newFullName" placeholder="Full Name">
-                          </div>
-                          <div class="form-group">
-                            <label>Phone Number</label>
-                            <input type="text" id="newPhone" placeholder="10-digit mobile number">
-                          </div>
-                        </div>
-                        <div class="form-group">
-                          <label>Address Line</label>
-                          <input type="text" id="newAddressLine" placeholder="House No., Building, Street, Area">
-                        </div>
-                        <div class="form-row-three">
-                          <div class="form-group">
-                            <label>City</label>
-                            <input type="text" id="newCity" placeholder="City">
-                          </div>
-                          <div class="form-group">
-                            <label>State</label>
-                            <input type="text" id="newState" placeholder="State">
-                          </div>
-                          <div class="form-group">
-                            <label>Pincode</label>
-                            <input type="text" id="newPincode" placeholder="6-digit Pincode">
-                          </div>
-                        </div>
-                        <button class="btn-black-sm" id="saveNewAddressBtn">Save & Deliver Here</button>
-                      </div>
-                </div>
 
 
           </div>
@@ -192,7 +193,8 @@
             <h2 class="section-title">Payment Method</h2>
             <p class="payment-hint">Select any payment method</p>
             <form action="/place-order" method="POST">
-              <input type="hidden" name="addressId" id="addressIdInput">
+              <input type="hidden" name="addressId" id="addressIdInput"
+                value="<%= defaultAddress ? defaultAddress._id : '' %>">
 
               <div class="payment-section">
 
@@ -203,10 +205,13 @@
                   <input type="radio" name="paymentMethod" value="ONLINE">
                   <div class="payment-content">
                     <div class="payment-left">
-                      <img src="/images/razorpay.png" class="payment-icon" />
+                      <img src="/images/Razorpay logo vector (svg, eps) formats free download - Brandlogos_net (1).jpeg"
+                        class="payment-icon" />
                       <div>
-                        <p class="payment-title">Razorpay</p>
+                        <p class="payment-title">Online Payment</p>
                         <p class="payment-desc">Pay securely with netbanking</p>
+                        <button type="button" id="rzp-button">Pay with Razorpay</button>
+
                       </div>
                     </div>
                   </div>
@@ -217,7 +222,7 @@
                   <input type="radio" name="paymentMethod" value="WALLET">
                   <div class="payment-content">
                     <div class="payment-left">
-                      <img src="/images/wallet.png" class="payment-icon" />
+                      <img src="/images/wallet.jpeg" class="payment-icon" />
                       <div>
                         <p class="payment-title">Wallet</p>
                         <p class="payment-desc">
@@ -662,6 +667,30 @@
     color: #16a34a;
     font-weight: 600;
   }
+
+  #rzp-button {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: #ffffff;
+    border: none;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    letter-spacing: 0.5px;
+  }
+
+  #rzp-button:hover {
+    background: linear-gradient(135deg, #1e293b, #334155);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  #rzp-button:active {
+    transform: scale(0.98);
+  }
 </style>
 
 <script>
@@ -708,7 +737,7 @@
       if (result.success) {
         const addr = result.address;
 
-        // Add to list and select it
+
         const option = document.createElement("label");
         option.className = "address-option";
         option.innerHTML = `
@@ -757,4 +786,86 @@
     selectedInput.value = selected.value;
     addressList.style.display = "none";
   };
+
+
+  document.getElementById("rzp-button").addEventListener("click", async function (e) {
+    const addressId = document.getElementById("addressIdInput") ? document.getElementById("addressIdInput").value : "";
+
+    if (!addressId) {
+      return Swal.fire({
+        icon: "warning",
+        title: "Select Address",
+        text: "Please select delivery address"
+      });
+    }
+
+    try {
+      const response = await fetch("/create-order", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ addressId })
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        return Swal.fire("Error", data.message || "Unable to create order", "error");
+      }
+
+      const dbOrderId = data.dbOrderId;
+
+      const options = {
+        key: "<%= razorpayKey %>",
+        amount: data.order.amount,
+        currency: "INR",
+        name: "Shoezo",
+        description: "Order Payment",
+        order_id: data.order.id,
+
+        handler: async function (response) {
+          const verifyRes = await fetch("/verify-payment", {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            })
+          });
+
+          const verifyData = await verifyRes.json();
+
+          if (verifyData.success) {
+            window.location.href = "/order-success";
+          } else {
+            window.location.href = `/order-failure?orderId=${dbOrderId}`;
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            window.location.href = `/order-failure?orderId=${dbOrderId}`;
+          }
+        }
+      };
+
+      const rzp = new Razorpay(options);
+
+      rzp.on("payment.failed", function (response) {
+        window.location.href = `/order-failure?orderId=${dbOrderId}`;
+      });
+
+      rzp.open();
+
+    } catch (error) {
+      console.error("Payment Error:", error);
+      Swal.fire("Error", "Something went wrong", "error");
+    }
+  });
+
 </script>
