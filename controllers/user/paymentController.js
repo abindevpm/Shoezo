@@ -11,8 +11,7 @@ const User = require("../../models/userSchema");
 
 const createOrder = async (req, res) => {
   try {
-    const sessionUser = req.session.user;
-    const userId = sessionUser._id || sessionUser;
+    const userId = req.session.user;
     const { addressId } = req.body;
 
     if (!userId) {
@@ -64,7 +63,7 @@ const createOrder = async (req, res) => {
 
     const razorpayOrder = await razorpay.orders.create(options);
 
-
+    
     const newOrder = new Order({
       orderId: razorpayOrder.id,
       userId: userId,
@@ -124,14 +123,12 @@ const verifyPayment = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid signature" });
     }
 
-    const sessionUser = req.session.user;
-    const userId = sessionUser._id || sessionUser;
-
+    const userId = req.session.user;
     if (!userId) {
       return res.status(401).json({ success: false, message: "User not authenticated" });
     }
 
-
+  
     const updatedOrder = await Order.findOneAndUpdate(
       { orderId: razorpay_order_id },
       { paymentStatus: "Paid" },
@@ -142,7 +139,7 @@ const verifyPayment = async (req, res) => {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
 
-
+  
     for (const item of updatedOrder.items) {
       await Product.updateOne(
         { _id: item.productId, "variants.size": item.size },
