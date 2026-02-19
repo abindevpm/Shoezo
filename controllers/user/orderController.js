@@ -83,6 +83,28 @@ const cancelOrder = async (req, res) => {
     order.cancelReason = reason
     order.items.forEach(item => item.itemStatus = "Cancelled")
 
+    if (order.paymentStatus === "Paid") {
+
+      const user = await User.findById(userId);
+      if (!user.wallet || Array.isArray(user.wallet)) {
+        user.wallet = { balance: 0, transactions: [] };
+      }
+
+      user.wallet.balance += order.totalAmount;
+      user.wallet.transactions.push({
+        type: "credit",
+        amount: order.totalAmount,
+        description: "Refund for Cancel Order",
+        orderId: order._id,
+        date: new Date()
+      });
+      await user.save({ validateBeforeSave: false });
+
+      order.paymentStatus = "Refunded";
+    }
+
+
+
     await order.save()
     res.json({ success: true, message: "Order cancelled successfully" })
   } catch (error) {
@@ -102,10 +124,16 @@ const cancelOrderItem = async (req, res) => {
     }
 
     const order = await Order.findOne({ _id: orderId, userId })
+    if (!order) return res.status(404).json({ success: false, message: "Order not found" })
+
+    const itemIndex = order.items.findIndex(item => item._id.toString() === itemId)
+    if (itemIndex === -1) {
+      return res.status(404).json({ success: false, message: "Item not found in this order" })
+    }
 
     const item = order.items[itemIndex]
 
-    if (["Shipped", "Delivered", "Returned", "Return Requested"].includes(item.itemStatus)) {
+    if (["Shipped", "Delivered", "Returned", "Return Requested", "Cancelled"].includes(item.itemStatus)) {
       return res.status(400).json({ success: false, message: "Item cannot be cancelled at its current stage" })
     }
 
@@ -118,11 +146,37 @@ const cancelOrderItem = async (req, res) => {
     item.itemStatus = "Cancelled"
     item.cancelReason = reason
 
+  
+    if (order.paymentStatus === "Paid") {
+      const refundAmount = item.price * item.quantity
+
+      const user = await User.findById(userId);
+      if (!user.wallet || Array.isArray(user.wallet)) {
+        user.wallet = { balance: 0, transactions: [] };
+      }
+
+      user.wallet.balance += refundAmount;
+      user.wallet.transactions.push({
+        type: "credit",
+        amount: refundAmount,
+        description: `Refund for Cancelled Item (${item.productId.name || 'Product'})`,
+        orderId: order._id,
+        date: new Date()
+      });
+      await user.save({ validateBeforeSave: false });
+
+      
+      order.totalAmount -= refundAmount
+  
+    }
 
     const allCancelled = order.items.every(i => i.itemStatus === "Cancelled")
     if (allCancelled) {
       order.status = "Cancelled"
       order.cancelReason = "All items cancelled: " + (reason || "")
+      if (order.paymentStatus === "Paid") {
+        order.paymentStatus = "Refunded"
+      }
     }
 
     await order.save()

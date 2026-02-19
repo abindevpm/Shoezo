@@ -90,6 +90,8 @@ const getEditOrderAdmin = async (req, res) => {
     }
 };
 
+
+
 const updateOrderStatus = async (req, res) => {
     try {
         const { orderId, status } = req.body;
@@ -121,7 +123,29 @@ const updateOrderStatus = async (req, res) => {
                     item.itemStatus = "Returned";
                 }
             }
-            order.paymentStatus = "Refunded";
+            if (order.paymentStatus === "Paid") {
+                const user = await User.findById(order.userId);
+                if (!user.wallet || Array.isArray(user.wallet)) {
+                    user.wallet = { balance: 0, transactions: [] };
+                }
+
+                user.wallet.balance += order.totalAmount;
+
+                user.wallet.transactions.push({
+                    type: "credit",
+                    amount: order.totalAmount,
+                    description: "Refund for returned order",
+                    orderId: order._id
+                })
+                order.paymentStatus = "Refunded";
+
+                await user.save({ validateBeforeSave: false })
+
+            }
+
+
+
+
         } else if (status === "Return Rejected" && oldStatus === "Return Requested") {
             order.items.forEach(item => {
                 if (item.itemStatus === "Return Requested") {
@@ -140,6 +164,10 @@ const updateOrderStatus = async (req, res) => {
         res.status(500).json({ success: false, message: "Internal server error" });
     }
 };
+
+
+
+
 
 const updatePaymentStatus = async (req, res) => {
     try {
@@ -175,11 +203,37 @@ const approveItemReturn = async (req, res) => {
         item.itemStatus = "Returned";
 
 
-        const allTerminal = order.items.every(i => ["Cancelled", "Returned"].includes(i.itemStatus));
+
+        if (order.paymentStatus === "Paid") {
+
+            const user = await User.findById(order.userId);
+            if (!user.wallet || Array.isArray(user.wallet)) {
+                user.wallet = { balance: 0, transactions: [] };
+            }
+
+            const refundAmount = item.price * item.quantity;
+
+            user.wallet.balance += refundAmount;
+
+            user.wallet.transactions.push({
+                type: "credit",
+                amount: refundAmount,
+                description: "Refund for returned item",
+                orderId: order._id
+            });
+
+            await user.save({ validateBeforeSave: false });
+        }
+
+        const allTerminal = order.items.every(i =>
+            ["Cancelled", "Returned"].includes(i.itemStatus)
+        );
+
         if (allTerminal) {
             order.status = "Returned";
             order.paymentStatus = "Refunded";
         }
+
 
         await order.save();
         res.json({ success: true, message: "Item return approved and customer refunded" });

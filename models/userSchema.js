@@ -60,7 +60,49 @@ const userSchema = new Schema({
 
   cart: [{ type: Schema.Types.ObjectId, ref: "Cart" }],
 
-  wallet: [{ type: Schema.Types.ObjectId, ref: "Wallet" }],
+
+  wallet: {
+  balance: {
+    type: Number,
+    default: 0
+  },
+  transactions: [
+    {
+      type: {
+        type: String, // credit or debit
+        enum: ["credit", "debit"]
+      },
+      amount: {
+        type: Number,
+        required: true
+      },
+      description: {
+        type: String
+      },
+      orderId: {
+        type: Schema.Types.ObjectId,
+        ref: "Order"
+      },
+      date: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  ]
+},
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   orderHistory: [{ type: Schema.Types.ObjectId, ref: "Order" }],
 

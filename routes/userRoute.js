@@ -11,6 +11,7 @@ const orderController = require("../controllers/user/orderController")
 const { uploadProfile } = require("../middlewares/multer")
 const paymentController  = require("../controllers/user/paymentController")
 const WishlistController = require("../controllers/user/wishlistController")
+const WalletController = require("../controllers/user/walletController")
 
 
 
@@ -150,6 +151,9 @@ router.post("/wishlist/remove",userAuth,WishlistController.removeFromWishlist)
 router.post("/wishlist/move-to-cart",userAuth,WishlistController.moveToCart);
 
 
+// wallet 
+
+router.get("/wallet",WalletController.loadWallet)
 
 
 

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wallet - Shoezo</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #f8f9fa;
+      color: #333;
+    }
+
+    .container {
+      display: flex;
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding-left: 20px;
+    }
+
+    main {
+      flex: 1;
+      padding: 40px 60px;
+    }
+
+    .details-wrapper {
+      background: #fff;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      min-height: 400px;
+    }
+  </style>
+</head>
+
+<body>
+  <%- include("../partials/userpartial/header.ejs") %>
+
+    <div class="container">
+      <%- include("../partials/userpartial/userprofile-sidebar.ejs", { user, activePage: 'wallet' }) %>
+
+        <main>
+          <div class="details-wrapper">
+
+            <!-- Wallet Balance Card -->
+            <div class="card shadow-sm p-4 mb-4">
+              <div class="d-flex justify-content-between align-items-center">
+
+                <div class="d-flex align-items-center">
+                  <div class="me-3" style="font-size:40px;">
+                    💼
+                  </div>
+                  <div>
+                    <h3 class="mb-0">₹ <%= user.wallet?.balance || 0 %>
+                    </h3>
+                    <small class="text-muted">My Wallet Balance</small>
+                  </div>
+                </div>
+
+                <button class="btn btn-dark px-4">
+                  <i class="fa-solid fa-plus"></i> Add Money
+                </button>
+
+
+              </div>
+            </div>
+
+
+            <!-- Transaction Details -->
+            <div class="card shadow-sm p-4">
+
+              <h6 class="text-uppercase mb-3 text-muted">Transaction Details</h6>
+
+              <div class="table-responsive">
+                <table class="table align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Transaction ID</th>
+                      <th>Description</th>
+                      <th>Date</th>
+                      <th>Withdrawal</th>
+                      <th>Deposit</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <% if(user.wallet && !Array.isArray(user.wallet) && user.wallet.transactions &&
+                      user.wallet.transactions.length> 0){ %>
+
+                      <% user.wallet.transactions.slice().reverse().forEach(function(transaction, index){ %>
+
+                        <tr>
+                          <td>#<%= transaction._id.toString().slice(-6) %>
+                          </td>
+
+                          <td>
+                            <%= transaction.description %>
+                          </td>
+
+                          <td>
+                            <%= new Date(transaction.date).toLocaleDateString() %>
+                          </td>
+
+                          <!-- Withdrawal -->
+                          <td>
+                            <% if(transaction.type==="debit" ){ %>
+                              ₹ <%= transaction.amount %>
+                                <% } else { %>
+                                  -
+                                  <% } %>
+                          </td>
+
+                          <!-- Deposit -->
+                          <td>
+                            <% if(transaction.type==="credit" ){ %>
+                              ₹ <%= transaction.amount %>
+                                <% } else { %>
+                                  -
+                                  <% } %>
+                          </td>
+
+                        </tr>
+
+                        <% }) %>
+
+                          <% } else { %>
+
+                            <tr>
+                              <td colspan="5" class="text-center text-muted py-4">
+                                <i class="fa-solid fa-wallet" style="font-size:24px;"></i>
+                                <p class="mt-2 mb-0">No wallet transactions yet</p>
+                              </td>
+                            </tr>
+
+
+                            <% } %>
+                  </tbody>
+                </table>
+              </div>
+
+
+
+
+
+            </div>
+        </main>
+    </div>
+
+    <%- include("../partials/userpartial/footer.ejs") %>
+</body>
+
+</html>

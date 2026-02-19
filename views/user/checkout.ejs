@@ -220,15 +220,19 @@
                 <!-- Wallet -->
                 <label class="payment-card">
                   <input type="radio" name="paymentMethod" value="WALLET">
+
                   <div class="payment-content">
                     <div class="payment-left">
                       <img src="/images/wallet.jpeg" class="payment-icon" />
                       <div>
                         <p class="payment-title">Wallet</p>
                         <p class="payment-desc">
-                          Available Balance:
-                          <span class="wallet-balance">₹<%= user.wallet || 0 %></span>
+                          Available Balance: <span class="wallet-balance">₹ <%= user.wallet?.balance || 0 %></span>
                         </p>
+                        <button type="button" class="wallet-pay-btn" id="wallet-pay-btn"
+                          style="display:none; margin-top:10px;">
+                          Pay with Wallet
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -668,7 +672,8 @@
     font-weight: 600;
   }
 
-  #rzp-button {
+  #rzp-button,
+  .wallet-pay-btn {
     background: linear-gradient(135deg, #0f172a, #1e293b);
     color: #ffffff;
     border: none;
@@ -682,13 +687,15 @@
     letter-spacing: 0.5px;
   }
 
-  #rzp-button:hover {
+  #rzp-button:hover,
+  .wallet-pay-btn:hover {
     background: linear-gradient(135deg, #1e293b, #334155);
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
   }
 
-  #rzp-button:active {
+  #rzp-button:active,
+  .wallet-pay-btn:active {
     transform: scale(0.98);
   }
 </style>
@@ -865,6 +872,67 @@
     } catch (error) {
       console.error("Payment Error:", error);
       Swal.fire("Error", "Something went wrong", "error");
+    }
+  });
+
+  // Toggle buttons based on payment method selection
+  const paymentOptions = document.querySelectorAll('input[name="paymentMethod"]');
+  const placeOrderBtn = document.querySelector('.btn-place-order');
+  const rzpBtn = document.getElementById('rzp-button');
+  const walletPayBtn = document.getElementById('wallet-pay-btn');
+
+  function toggleButtons() {
+    const selected = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+    // Hide all first
+    placeOrderBtn.style.display = 'none';
+    if (rzpBtn) rzpBtn.style.display = 'none';
+    if (walletPayBtn) walletPayBtn.style.display = 'none';
+
+    if (selected === 'COD') {
+      placeOrderBtn.style.display = 'block';
+    } else if (selected === 'ONLINE') {
+      if (rzpBtn) rzpBtn.style.display = 'block';
+    } else if (selected === 'WALLET') {
+      if (walletPayBtn) walletPayBtn.style.display = 'block';
+    }
+  }
+
+  paymentOptions.forEach(opt => opt.addEventListener('change', toggleButtons));
+
+  // Initial toggle
+  toggleButtons();
+
+  // Wallet payment handler
+  if (walletPayBtn) {
+    walletPayBtn.addEventListener('click', () => {
+      Swal.fire({
+        title: 'Confirm Payment',
+        text: "Are you sure you want to pay using your wallet?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#000',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, Pay Now'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Submit the main form
+          document.querySelector('form[action="/place-order"]').submit();
+        }
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get('error');
+    if (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Order Failed',
+        text: error,
+        confirmButtonColor: '#000'
+      });
     }
   });
 
