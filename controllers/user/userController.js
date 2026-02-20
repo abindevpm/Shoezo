@@ -2,12 +2,14 @@
 const User = require("../../models/userSchema")
 const Product = require("../../models/productSchema");
 const Order = require("../../models/orderSchema");
+const Coupon = require("../../models/couponSchema")
 
 
 const env = require("dotenv").config()
 
 const nodemailer = require("nodemailer")
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcrypt");
+const { removeFromWishlist } = require("./wishlistController");
 
 const loadHomepage = async (req, res) => {
   try {
@@ -558,7 +560,87 @@ const orderFailure = async (req, res) => {
 };
 
 
+const getAvailableCoupons = async (req, res) => {
+  try {
 
+    const today = new Date();
+
+    const coupons = await Coupon.find({
+      isActive: true,
+      expiryDate: { $gt: today }
+    }).select("code discountValue discountType minPurchase expiryDate")
+
+    res.json({ success: true, coupons });
+
+  } catch (error) {
+    console.log("Available Coupon error", error)
+    res.json({ success: false });
+
+  }
+}
+const applyCoupon = async (req, res) => {
+  try {
+    const { code } = req.body;
+
+    if (!code) {
+      return res.json({ success: false, message: "Coupon code required" });
+    }
+
+    const coupon = await Coupon.findOne({
+      code: code.toUpperCase(),
+      isActive: true,
+      expiryDate: { $gt: new Date() }
+    });
+
+    if (!coupon) {
+      return res.json({ success: false, message: "Invalid or Expired coupon" });
+    }
+
+    const subtotal = req.session.subtotal || 0;
+    const totalPrice = req.session.totalPrice || subtotal; // after 30% discount + GST
+
+    if (subtotal < coupon.minPurchase) {
+      return res.json({
+        success: false,
+        message: `Minimum purchase ₹${coupon.minPurchase} required`
+      });
+    }
+
+    let discount = 0;
+
+    if (coupon.discountType === "percentage") {
+      discount = Math.round((totalPrice * coupon.discountValue) / 100);
+    } else {
+      discount = coupon.discountValue;
+    }
+
+    const finalTotal = totalPrice - discount;
+
+
+    req.session.discountAmount = discount;
+    req.session.appliedCoupon = coupon.code;
+
+    res.json({
+      success: true,
+      discount,
+      finalTotal
+    });
+
+  } catch (error) {
+    console.log("Apply coupon error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+
+const removeCoupon = (req, res) => {
+  req.session.discountAmount = 0;
+  req.session.appliedCoupon = null;
+
+  const totalPrice = req.session.totalPrice || 0;
+
+  res.json({ success: true, totalPrice });
+};
 
 
 
@@ -580,5 +662,8 @@ module.exports = {
   verifyOtp,
   loadResetPage,
   resetPassword,
-  orderFailure
+  orderFailure,
+  getAvailableCoupons,
+  applyCoupon,
+  removeCoupon
 }

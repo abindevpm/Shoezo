@@ -146,4 +146,75 @@
         margin-left: 240px;
         width: calc(100% - 240px);
     }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f1f5f9;
+      overflow-x: hidden;
+    }
+
+    /* FIX LAYOUT (Sidebar + Navbar height) */
+    .main-wrapper {
+      margin-left: 240px;      /* Sidebar width */
+      margin-top: 70px;        /* Navbar height */
+      padding: 30px;
+      min-height: calc(100vh - 70px);
+    }
+
+    .page-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #1e293b;
+      margin-bottom: 25px;
+    }
+
+    /* Search input */
+    .search-input {
+      height: 56px;
+      border-radius: 1rem;
+      padding: 0 1.5rem;
+      font-size: 1rem;
+      border: 1px solid #d1d5db;
+      max-width: 450px;
+    }
+
+    /* Button */
+    .btn-add-user {
+      background-color: #010714;
+      color: white;
+      border-radius: 1rem;
+      padding: 0.75rem 2rem;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .table-card {
+      border-radius: 1.3rem;
+      overflow: hidden;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+      background: white;
+    }
+
+    .table thead {
+      background-color: #010714;
+      color: white;
+    }
+
+    .btn-action {
+      padding: 0.5rem 1.2rem;
+      border-radius: 0.75rem;
+      font-weight: 500;
+    }
+
+    /* Pagination bottom only */
+    .pagination-wrapper {
+      margin-top: 25px;
+    }
+
+    .page-item.active .page-link {
+      background-color: #010714;
+      border-color: #010714;
+      color: white;
+    }
+
 </style>

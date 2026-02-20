@@ -285,32 +285,51 @@
             </div>
 
             <div class="summary-line">
-              <span>GST Amount</span>
+              <span>GST Amount (5%)</span>
               <span>₹<%= gstAmount %></span>
             </div>
 
             <div class="summary-line discount">
-              <span>Discount 30%</span>
-              <span>-₹<%= discountAmount %></span>
+              <span>Discount (30%)</span>
+              <span style="color:#d32f2f;">-₹<span id="discountAmount">
+                  <%= discountAmount %>
+                </span></span>
             </div>
+
+            <div class="summary-line discount" id="couponDiscountRow" style="display:none;">
+              <span>
+                Coupon Discount
+                <button onclick="removeCoupon()" id="removeCouponBtn" style="
+                  background:none; border:none; color:#d32f2f; font-size:12px;
+                  cursor:pointer; text-decoration:underline; padding:0; margin-left:6px;
+                ">Remove</button>
+              </span>
+              <span style="color:#d32f2f;">-₹<span id="couponDiscountAmount">0</span></span>
+            </div>
+
+            <hr>
 
             <div class="total-line">
               <span>Total Price</span>
-              <span>₹<%= totalPrice %></span>
+              <span>₹<span id="finalTotal">
+                  <%= totalPrice %>
+                </span></span>
             </div>
-
-
-
-
 
           </div>
 
           <div class="coupon-row">
-            <input type="text" placeholder="coupon code">
-            <button class="btn-view-all">View all</button>
+            <input type="text" id="couponCode" placeholder="Enter coupon code">
+            <button type="button" onclick="applyCoupon()">Apply</button>
           </div>
+
+          <p id="couponMessage"></p>
+          <div id="couponList" style="margin-top:15px;"></div>
         </div>
       </div>
+      </div>
+
+
     </main>
 
     <%- include('../partials/userpartial/footer.ejs') %>
@@ -572,24 +591,61 @@
 
   .coupon-row {
     display: flex;
-    gap: 10px;
+    gap: 12px;
+    margin-top: 25px;
+    background: #fdfdfd;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid #eaeaea;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
   }
 
   .coupon-row input {
     flex: 1;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 12px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.25s ease;
+    outline: none;
+    letter-spacing: 0.3px;
   }
 
-  .btn-view-all {
+  .coupon-row input:focus {
+    border-color: #000;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.03);
+  }
+
+  .coupon-row button {
     background: #000;
     color: #fff;
     border: none;
-    padding: 0 15px;
-    border-radius: 4px;
+    padding: 0 28px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
-    font-size: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .coupon-row button:hover {
+    background: #222;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+  }
+
+  .coupon-row button:active {
+    transform: translateY(0);
+  }
+
+  #couponMessage {
+    font-size: 13px;
+    margin-top: 10px;
+    padding-left: 4px;
+    font-weight: 500;
   }
 
   /* Mobile View */
@@ -697,6 +753,44 @@
   #rzp-button:active,
   .wallet-pay-btn:active {
     transform: scale(0.98);
+  }
+
+
+
+
+
+  .coupon-card {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: 0.3s;
+  }
+
+  .coupon-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  }
+
+  .coupon-card strong {
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .coupon-card button {
+    margin-top: 8px;
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .coupon-card button:hover {
+    background: #333;
   }
 </style>
 
@@ -875,7 +969,7 @@
     }
   });
 
-  // Toggle buttons based on payment method selection
+
   const paymentOptions = document.querySelectorAll('input[name="paymentMethod"]');
   const placeOrderBtn = document.querySelector('.btn-place-order');
   const rzpBtn = document.getElementById('rzp-button');
@@ -884,7 +978,7 @@
   function toggleButtons() {
     const selected = document.querySelector('input[name="paymentMethod"]:checked').value;
 
-    // Hide all first
+
     placeOrderBtn.style.display = 'none';
     if (rzpBtn) rzpBtn.style.display = 'none';
     if (walletPayBtn) walletPayBtn.style.display = 'none';
@@ -900,10 +994,10 @@
 
   paymentOptions.forEach(opt => opt.addEventListener('change', toggleButtons));
 
-  // Initial toggle
+
   toggleButtons();
 
-  // Wallet payment handler
+
   if (walletPayBtn) {
     walletPayBtn.addEventListener('click', () => {
       Swal.fire({
@@ -935,5 +1029,117 @@
       });
     }
   });
+
+
+
+  async function applyCoupon() {
+
+    const code = document.getElementById("couponCode").value.trim();
+
+    if (!code) {
+      return Swal.fire("Error", "Please enter coupon code", "warning");
+    }
+
+    try {
+      const response = await fetch("/apply-coupon", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ code })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        document.getElementById("couponDiscountRow").style.display = "flex";
+        document.getElementById("couponDiscountAmount").innerText = data.discount;
+        document.getElementById("finalTotal").innerText = data.finalTotal;
+
+        document.getElementById("couponMessage").innerText =
+          "Coupon Applied Successfully ✅";
+
+      } else {
+        document.getElementById("couponMessage").innerText = data.message;
+      }
+
+    } catch (error) {
+      console.error(error);
+      Swal.fire("Error", "Something went wrong", "error");
+    }
+  }
+
+  async function removeCoupon() {
+    try {
+      const res = await fetch("/remove-coupon", { method: "POST" });
+      const data = await res.json();
+
+      if (data.success) {
+        // hide coupon discount row
+        document.getElementById("couponDiscountRow").style.display = "none";
+        document.getElementById("couponDiscountAmount").innerText = "0";
+
+        // reset total back to original discounted price
+        document.getElementById("finalTotal").innerText = data.totalPrice;
+
+        // clear coupon input and message
+        document.getElementById("couponCode").value = "";
+        document.getElementById("couponMessage").innerText = "Coupon removed.";
+      }
+    } catch (err) {
+      console.error("Remove coupon error:", err);
+    }
+  }
+
+
+
+
+
+  async function loadCoupons() {
+    try {
+      const response = await fetch("/available-coupons");
+      const data = await response.json();
+
+      if (!data.success) return;
+
+      const container = document.getElementById("couponList");
+      container.innerHTML = "";
+
+      data.coupons.forEach(coupon => {
+
+        const div = document.createElement("div");
+        div.className = "coupon-card";
+
+        div.innerHTML = `
+        <strong>${coupon.code}</strong><br>
+         ${coupon.discountType === "percentage"
+            ? coupon.discountValue + "% OFF"
+            : "₹" + coupon.discountValue + " OFF"}
+
+<br>
+Min Purchase: ₹${coupon.minPurchase}
+        <br>
+        <button onclick="autoApply('${coupon.code}')">
+          Apply
+        </button>
+      `;
+
+        container.appendChild(div);
+      });
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  function autoApply(code) {
+    document.getElementById("couponCode").value = code;
+    applyCoupon();
+  }
+
+  document.addEventListener("DOMContentLoaded", loadCoupons);
+
+
+
 
 </script>

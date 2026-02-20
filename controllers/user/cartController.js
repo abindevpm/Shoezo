@@ -52,7 +52,7 @@ const loadCart = async (req, res) => {
       0
     );
 
-    const gst = Math.round(subtotal * 0.18);
+    const gst = Math.round(subtotal * 0.05);
     const discount = Math.round(subtotal * 0.30);
     const grandTotal = subtotal + gst - discount;
 
@@ -192,7 +192,7 @@ const updateCartQty = async (req, res) => {
       0
     );
 
-    const gst = Math.round(subtotal * 0.18);
+    const gst = Math.round(subtotal * 0.05);
     const discount = Math.round(subtotal * 0.30);
     const grandTotal = subtotal + gst - discount;
     const itemTotal = item.quantity * item.price;
@@ -230,7 +230,7 @@ const removeCartItem = async (req, res) => {
       return res.json({ success: false });
     }
 
-  
+
     cart.items = cart.items.filter(
       item => item._id.toString() !== itemId
     );
@@ -246,7 +246,7 @@ const removeCartItem = async (req, res) => {
       return sum + i.quantity * p;
     }, 0);
 
-    const gst = Math.round(subtotal * 0.18);
+    const gst = Math.round(subtotal * 0.05);
     const discount = Math.round(subtotal * 0.30);
     const grandTotal = subtotal + gst - discount;
 

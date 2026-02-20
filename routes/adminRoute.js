@@ -7,6 +7,7 @@ const categoryController = require("../controllers/admin/categoryController")
 const brandController = require("../controllers/admin/brandController")
 const productController = require("../controllers/admin/productController")
 const { uploadProduct } = require("../middlewares/multer")
+const couponController = require("../controllers/admin/couponController")
 
 
 
@@ -74,6 +75,11 @@ router.post("/orders/cancel-item/:orderId/:itemId", adminAuth, adminOrderControl
 router.post("/orders/update-item-status", adminAuth, adminOrderController.updateItemStatusAdmin);
 router.post("/orders/restock-item/:orderId/:itemId", adminAuth, adminOrderController.restockItem);
 
+
+router.get("/coupons", couponController.loadCouponPage)
+router.post("/createCoupon", adminAuth, couponController.createCoupon)
+router.patch("/toggleCoupon/:id", adminAuth, couponController.toggleCouponStatus)
+router.patch("/updateCoupon/:id", adminAuth, couponController.updateCoupon)
 
 
 

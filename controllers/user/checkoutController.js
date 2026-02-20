@@ -36,15 +36,15 @@ const loadCheckout = async (req, res) => {
     });
 
 
+    const gstAmount = Math.round(subtotal * 0.05);
 
-    const gstRate = 0.18;
-    const discountRate = 0.30;
+    const discountAmount = Math.round(subtotal * 0.30);
 
-    const gstAmount = Math.round(subtotal * gstRate);
-    const discountAmount = Math.round(subtotal * discountRate);
     const deliveryCharge = 0;
 
     const totalPrice = subtotal + gstAmount - discountAmount;
+    req.session.subtotal = subtotal;
+    req.session.totalPrice = totalPrice;
 
     const addresses = user.addresses || [];
 
@@ -99,7 +99,7 @@ const placeOrder = async (req, res) => {
     let subtotal = 0;
     let orderItems = [];
 
-    // Calculate subtotal and prepare order items
+
     for (const item of cart.items) {
       const variant = item.productId.variants.find(
         v => Number(v.size) === Number(item.size)
@@ -120,9 +120,10 @@ const placeOrder = async (req, res) => {
       });
     }
 
-    const gstAmount = Math.round(subtotal * 0.18);
-    const discountAmount = Math.round(subtotal * 0.30);
+    const gstAmount = Math.round(subtotal * 0.05);
+    const discountAmount = req.session.discountAmount || 0;
     const totalAmount = subtotal + gstAmount - discountAmount;
+
 
     console.log(`Processing ${paymentMethod} order for user ${userId}. Total: ${totalAmount}`);
 
@@ -135,42 +136,42 @@ const placeOrder = async (req, res) => {
       return res.redirect("/checkout?error=Please select a valid address");
     }
 
-    
-      if (paymentMethod && paymentMethod.toUpperCase() === "WALLET") {
-        if (!user.wallet || Array.isArray(user.wallet)) {
-          user.wallet = { balance: 0, transactions: [] };
-        }
 
-        if (user.wallet.balance < totalAmount) {
-          console.log("Insufficient wallet balance for user", userId, "Balance:", user.wallet.balance, "Need:", totalAmount);
-          return res.redirect(`/checkout?error=Insufficient Wallet Balance (Current: ₹${user.wallet.balance})`);
-        }
+    if (paymentMethod && paymentMethod.toUpperCase() === "WALLET") {
+      if (!user.wallet || Array.isArray(user.wallet)) {
+        user.wallet = { balance: 0, transactions: [] };
       }
 
-      for (const item of cart.items) {
-        const variant = item.productId.variants.find(
-          v => Number(v.size) === Number(item.size)
-        );
-        if (variant) {
-          variant.stock -= item.quantity;
-          await item.productId.save();
-        }
+      if (user.wallet.balance < totalAmount) {
+        console.log("Insufficient wallet balance for user", userId, "Balance:", user.wallet.balance, "Need:", totalAmount);
+        return res.redirect(`/checkout?error=Insufficient Wallet Balance (Current: ₹${user.wallet.balance})`);
       }
+    }
 
-      const generatedOrderId = "ORD-" + Date.now();
+    for (const item of cart.items) {
+      const variant = item.productId.variants.find(
+        v => Number(v.size) === Number(item.size)
+      );
+      if (variant) {
+        variant.stock -= item.quantity;
+        await item.productId.save();
+      }
+    }
 
-    
-      if (paymentMethod && paymentMethod.toUpperCase() === "WALLET") {
-        user.wallet.balance -= totalAmount;
-        user.wallet.transactions.push({
-          type: "debit",
-          amount: totalAmount,
-          description: `Order Payment (${generatedOrderId})`,
-          orderId: null,
-          date: new Date()
-        });
-        await user.save({ validateBeforeSave: false });
-        console.log("Wallet deducted for user", userId);
+    const generatedOrderId = "ORD-" + Date.now();
+
+
+    if (paymentMethod && paymentMethod.toUpperCase() === "WALLET") {
+      user.wallet.balance -= totalAmount;
+      user.wallet.transactions.push({
+        type: "debit",
+        amount: totalAmount,
+        description: `Order Payment (${generatedOrderId})`,
+        orderId: null,
+        date: new Date()
+      });
+      await user.save({ validateBeforeSave: false });
+      console.log("Wallet deducted for user", userId);
     }
 
     const order = new Order({
@@ -196,7 +197,7 @@ const placeOrder = async (req, res) => {
 
     await order.save();
 
-    // Link transaction to order ID
+
     if (paymentMethod && paymentMethod.toUpperCase() === "WALLET") {
       const lastTransaction = user.wallet.transactions[user.wallet.transactions.length - 1];
       lastTransaction.orderId = order._id;
@@ -206,6 +207,10 @@ const placeOrder = async (req, res) => {
     await Cart.deleteOne({ userId });
     console.log("Order created successfully:", order.orderId);
     res.redirect("/order-success");
+
+
+    req.session.discountAmount = null;
+    req.session.appliedCoupon = null;
 
   } catch (err) {
     console.error("Order placement error:", err);

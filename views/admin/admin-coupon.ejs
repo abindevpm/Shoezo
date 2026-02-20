@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coupon Management</title>
+
+    <!-- If Bootstrap not already included in navbar, include this -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            overflow-x: hidden;
+        }
+
+        /* Layout Fix */
+        .main-wrapper {
+            margin-left: 240px;
+            /* Sidebar width */
+            margin-top: 70px;
+            /* Navbar height */
+            padding: 30px;
+            min-height: calc(100vh - 70px);
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0;
+        }
+
+        .table-card {
+            border-radius: 1.3rem;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+            background: white;
+        }
+
+        .table thead {
+            background-color: #010714;
+            color: white;
+        }
+
+        .btn-dark-custom {
+            background-color: #010714;
+            color: white;
+            border-radius: 12px;
+            padding: 8px 20px;
+        }
+
+        .btn-dark-custom:hover {
+            background-color: #0f172a;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar & Sidebar -->
+    <%- include('../partials/admin/navbar.ejs') %>
+        <%- include('../partials/admin/sidebar.ejs') %>
+
+            <div class="main-wrapper">
+
+                <div class="page-header">
+                    <h2 class="page-title">Coupon Management</h2>
+                    <button class="btn btn-dark-custom" data-bs-toggle="modal" data-bs-target="#addCouponModal">
+                        <i class="fas fa-plus me-2"></i>Create Coupon
+                    </button>
+                </div>
+
+                <!-- Coupon Table -->
+                <div class="table-card p-4">
+                    <table class="table table-bordered align-middle text-center">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Coupon Type</th>
+                                <th>Min Purchase</th>
+                                <th>Discount</th>
+                                <th>Usage Limit</th>
+                                <th>Starting Date</th>
+                                <th>Expiry Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <% if (coupons && coupons.length> 0) { %>
+                                <% coupons.forEach(coupon=> { %>
+                                    <tr>
+                                        <td class="fw-bold">
+                                            <%= coupon.code %>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border">
+                                                <%= coupon.couponType || 'General' %>
+                                            </span>
+                                        </td>
+                                        <td>₹<%= coupon.minPurchase %>
+                                        </td>
+                                        <td>
+                                            <% if (coupon.discountType==='percentage' ) { %>
+                                                <%= coupon.discountValue %>% Off
+                                                    <% if (coupon.maxDiscount) { %>
+                                                        <br><small class="text-muted">(Max ₹<%= coupon.maxDiscount %>
+                                                                )</small>
+                                                        <% } %>
+                                                            <% } else { %>
+                                                                ₹<%= coupon.discountValue %> Off
+                                                                    <% } %>
+                                        </td>
+                                        <td>
+                                            <%= coupon.usageLimit %>
+                                        </td>
+                                        <td>
+                                            <%= new Date(coupon.startDate).toLocaleDateString() %>
+                                        </td>
+                                        <td>
+                                            <%= new Date(coupon.expiryDate).toLocaleDateString() %>
+                                        </td>
+                                        <td>
+                                            <% if (coupon.isActive && new Date(coupon.expiryDate)> new Date()) { %>
+                                                <span class="badge bg-success">Active</span>
+                                                <% } else if (!coupon.isActive) { %>
+                                                    <span class="badge bg-danger">Cancelled</span>
+                                                    <% } else { %>
+                                                        <span class="badge bg-warning text-dark">Expired</span>
+                                                        <% } %>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex justify-content-center gap-2">
+                                                <button class="btn btn-outline-primary btn-sm edit-coupon-btn"
+                                                    data-coupon='<%= JSON.stringify(coupon).replace(/' /g, "&#39;" )
+                                                    %>'>
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <% if (coupon.isActive) { %>
+                                                    <button class="btn btn-outline-danger btn-sm"
+                                                        onclick="toggleCoupon('<%= coupon._id %>')">
+                                                        <i class="fas fa-times-circle"></i> Cancel
+                                                    </button>
+                                                    <% } else { %>
+                                                        <button class="btn btn-outline-success btn-sm"
+                                                            onclick="toggleCoupon('<%= coupon._id %>')">
+                                                            <i class="fas fa-check-circle"></i> Activate
+                                                        </button>
+                                                        <% } %>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                                        <% } else { %>
+                                            <tr>
+                                                <td colspan="10" class="text-muted py-4">No coupons found</td>
+                                            </tr>
+                                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Add Coupon Modal -->
+            <div class="modal fade" id="addCouponModal" tabindex="-1" aria-labelledby="addCouponModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content border-0 shadow" style="border-radius: 1.3rem;">
+                        <div class="modal-header border-0 pb-0">
+                            <h5 class="modal-title fw-bold" id="addCouponModalLabel">Create New Coupon</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <form id="addCouponForm">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Coupon Code</label>
+                                        <input type="text" name="code" class="form-control" placeholder="e.g. SUMMER50"
+                                            required style="border-radius: 10px;">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Coupon Type</label>
+                                        <select name="couponType" class="form-select" required
+                                            style="border-radius: 10px;">
+                                            <option value="General">General</option>
+                                            <option value="New user Join">New user Join</option>
+                                            <option value="Above 1000 order">Above 1000 order</option>
+                                            <option value="Above 5000 order">Above 5000 order</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Discount Type</label>
+                                        <select name="discountType" class="form-select" required
+                                            style="border-radius: 10px;">
+                                            <option value="percentage">Percentage (%)</option>
+                                            <option value="fixed">Fixed Amount (₹)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Discount Value</label>
+                                        <input type="number" name="discountValue" class="form-control" required
+                                            style="border-radius: 10px;">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Min Purchase Amount (₹)</label>
+                                        <input type="number" name="minPurchase" class="form-control" value="0"
+                                            style="border-radius: 10px;">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Max Discount Amount (₹)</label>
+                                        <input type="number" name="maxDiscount" class="form-control"
+                                            placeholder="Optional" style="border-radius: 10px;">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Usage Limit</label>
+                                        <input type="number" name="usageLimit" class="form-control" value="1"
+                                            style="border-radius: 10px;">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Starting Date</label>
+                                        <input type="date" name="startDate" class="form-control" required
+                                            style="border-radius: 10px;">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Expiry Date</label>
+                                        <input type="date" name="expiryDate" class="form-control" required
+                                            style="border-radius: 10px;">
+                                    </div>
+                                </div>
+                                <div class="mt-4 text-end">
+                                    <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal"
+                                        style="border-radius: 10px;">Cancel</button>
+                                    <button type="submit" class="btn btn-dark-custom"
+                                        style="border-radius: 10px;">Create Coupon</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Coupon Modal -->
+            <div class="modal fade" id="editCouponModal" tabindex="-1" aria-labelledby="editCouponModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content border-0 shadow" style="border-radius: 1.3rem;">
+                        <div class="modal-header border-0 pb-0">
+                            <h5 class="modal-title fw-bold" id="editCouponModalLabel">Edit Coupon</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <form id="editCouponForm">
+                                <input type="hidden" id="editCouponId" name="id">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Coupon Code</label>
+                                        <input type="text" id="editCode" name="code" class="form-control" required
+                                            style="border-radius: 10px;">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Coupon Type</label>
+                                        <select name="couponType" id="editCouponType" class="form-select" required
+                                            style="border-radius: 10px;">
+                                            <option value="General">General</option>
+                                            <option value="New user Join">New user Join</option>
+                                            <option value="Above 1000 order">Above 1000 order</option>
+                                            <option value="Above 5000 order">Above 5000 order</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Discount Type</label>
+                                        <select id="editDiscountType" name="discountType" class="form-select" required
+                                            style="border-radius: 10px;">
+                                            <option value="percentage">Percentage (%)</option>
+                                            <option value="fixed">Fixed Amount (₹)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Discount Value</label>
+                                        <input type="number" id="editDiscountValue" name="discountValue"
+                                            class="form-control" required style="border-radius: 10px;">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Min Purchase Amount (₹)</label>
+                                        <input type="number" id="editMinPurchase" name="minPurchase"
+                                            class="form-control" style="border-radius: 10px;">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Max Discount Amount (₹)</label>
+                                        <input type="number" id="editMaxDiscount" name="maxDiscount"
+                                            class="form-control" placeholder="Optional" style="border-radius: 10px;">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Usage Limit</label>
+                                        <input type="number" id="editUsageLimit" name="usageLimit" class="form-control"
+                                            style="border-radius: 10px;">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Starting Date</label>
+                                        <input type="date" id="editStartDate" name="startDate" class="form-control"
+                                            required style="border-radius: 10px;">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Expiry Date</label>
+                                        <input type="date" id="editExpiryDate" name="expiryDate" class="form-control"
+                                            required style="border-radius: 10px;">
+                                    </div>
+                                </div>
+                                <div class="mt-4 text-end">
+                                    <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal"
+                                        style="border-radius: 10px;">Cancel</button>
+                                    <button type="submit" class="btn btn-dark-custom"
+                                        style="border-radius: 10px;">Update Coupon</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+            <script>
+                async function handleResponse(response) {
+                    const contentType = response.headers.get("content-type");
+                    if (contentType && contentType.indexOf("application/json") !== -1) {
+                        return await response.json();
+                    } else {
+                        if (response.redirected || response.url.includes('/login')) {
+                            throw new Error("Session expired. Please re-login.");
+                        }
+                        throw new Error("Server returned an unexpected response (non-JSON)");
+                    }
+                }
+
+                document.getElementById('addCouponForm').addEventListener('submit', async function (e) {
+                    e.preventDefault();
+
+                    const formData = new FormData(this);
+                    const data = Object.fromEntries(formData.entries());
+
+                    try {
+                        const response = await fetch('/admin/createCoupon', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data)
+                        });
+
+                        const result = await handleResponse(response);
+
+                        if (response.ok) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: result.message,
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => window.location.reload());
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: result.message || 'Something went wrong!'
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: error.message || 'An unexpected error occurred'
+                        });
+                    }
+                });
+
+                // Attach event listeners for edit buttons
+                document.querySelectorAll('.edit-coupon-btn').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        try {
+                            const coupon = JSON.parse(this.getAttribute('data-coupon'));
+                            document.getElementById('editCouponId').value = coupon._id;
+                            document.getElementById('editCode').value = coupon.code;
+                            document.getElementById('editCouponType').value = coupon.couponType || "General";
+                            document.getElementById('editDiscountType').value = coupon.discountType;
+                            document.getElementById('editDiscountValue').value = coupon.discountValue;
+                            document.getElementById('editMinPurchase').value = coupon.minPurchase;
+                            document.getElementById('editMaxDiscount').value = coupon.maxDiscount || '';
+                            document.getElementById('editUsageLimit').value = coupon.usageLimit;
+
+                            const startDate = new Date(coupon.startDate).toISOString().split('T')[0];
+                            const expiryDate = new Date(coupon.expiryDate).toISOString().split('T')[0];
+                            document.getElementById('editStartDate').value = startDate;
+                            document.getElementById('editExpiryDate').value = expiryDate;
+
+                            new bootstrap.Modal(document.getElementById('editCouponModal')).show();
+                        } catch (err) {
+                            console.error("Error parsing coupon data:", err);
+                        }
+                    });
+                });
+
+                document.getElementById('editCouponForm').addEventListener('submit', async function (e) {
+                    e.preventDefault();
+                    const id = document.getElementById('editCouponId').value;
+                    const formData = new FormData(this);
+                    const data = Object.fromEntries(formData.entries());
+
+                    try {
+                        const response = await fetch(`/admin/updateCoupon/${id}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data)
+                        });
+
+                        const result = await handleResponse(response);
+
+                        if (response.ok) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Updated!',
+                                text: result.message,
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => window.location.reload());
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: result.message || 'Something went wrong!'
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: error.message || 'An unexpected error occurred'
+                        });
+                    }
+                });
+
+                async function toggleCoupon(id) {
+                    try {
+                        const response = await fetch(`/admin/toggleCoupon/${id}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+
+                        const result = await handleResponse(response);
+
+                        if (response.ok) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Updated!',
+                                text: result.message,
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => window.location.reload());
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: result.message || 'Failed to toggle coupon status'
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: error.message || 'An unexpected error occurred'
+                        });
+                    }
+                }
+            </script>
+</body>
+
+</html>
