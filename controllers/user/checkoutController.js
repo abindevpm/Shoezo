@@ -37,7 +37,7 @@ const loadCheckout = async (req, res) => {
       if (!variant) return;
 
       let appliedDiscount = 0;
-    
+
       if (product.productOffer &&
         product.productOffer.isActive &&
         product.productOffer.startDate <= today &&
@@ -45,7 +45,7 @@ const loadCheckout = async (req, res) => {
         appliedDiscount = Math.max(appliedDiscount, Number(product.productOffer.discountValue) || 0);
       }
 
-  
+
       if (product.category &&
         product.category.categoryOffer &&
         product.category.categoryOffer.isActive &&
@@ -130,6 +130,7 @@ const placeOrder = async (req, res) => {
     const today = new Date();
     let subtotal = 0;
     let orderItems = [];
+    let totalOfferDiscount = 0;
 
     for (const item of cart.items) {
       const product = item.productId;
@@ -142,7 +143,7 @@ const placeOrder = async (req, res) => {
       }
 
       let appliedDiscount = 0;
-  
+
       if (product.productOffer &&
         product.productOffer.isActive &&
         product.productOffer.startDate <= today &&
@@ -150,7 +151,7 @@ const placeOrder = async (req, res) => {
         appliedDiscount = Math.max(appliedDiscount, Number(product.productOffer.discountValue) || 0);
       }
 
-    
+
       if (product.category &&
         product.category.categoryOffer &&
         product.category.categoryOffer.isActive &&
@@ -162,6 +163,9 @@ const placeOrder = async (req, res) => {
       const currentPrice = appliedDiscount > 0
         ? Math.floor(variant.price * (1 - appliedDiscount / 100))
         : variant.price;
+
+      const offerDiscountAmount = (variant.price - currentPrice) * item.quantity;
+      totalOfferDiscount += offerDiscountAmount;
 
       subtotal += currentPrice * item.quantity;
 
@@ -245,6 +249,7 @@ const placeOrder = async (req, res) => {
       subtotal,
       gstAmount,
       discountAmount,
+      totalOfferDiscount,
       totalAmount
     });
 

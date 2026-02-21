@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Report | SHOEZO Admin</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #2d3436;
+            --accent: #0984e3;
+            --success: #00b894;
+            --warning: #fd7e14;
+            --danger: #d63031;
+            --bg: #f8f9fa;
+        }
+
+        body {
+            background: var(--bg);
+            font-family: 'Inter', sans-serif;
+            color: #2d3436;
+        }
+
+        .content-area {
+            margin-left: 260px;
+            margin-top: 80px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            min-height: calc(100vh - 80px);
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: #fff;
+            padding: 1.5rem 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-card {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            height: 100%;
+            border-left: 4px solid var(--primary);
+            transition: transform 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card.sales {
+            border-left-color: var(--accent);
+        }
+
+        .stat-card.orders {
+            border-left-color: var(--success);
+        }
+
+        .stat-card.discount {
+            border-left-color: var(--danger);
+        }
+
+        .stat-card.offer {
+            border-left-color: var(--warning);
+        }
+
+        .stat-title {
+            color: #636e72;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .filter-section {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .custom-table-card {
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .table thead th {
+            background: #f8f9fa;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 1rem;
+            border-bottom: 2px solid #edf2f7;
+        }
+
+        .table tbody td {
+            padding: 1rem;
+            border-bottom: 1px solid #edf2f7;
+            font-size: 0.9rem;
+        }
+
+        .btn-download {
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-pdf {
+            background: #fee2e2;
+            color: #991b1b;
+            border: none;
+        }
+
+        .btn-pdf:hover {
+            background: #fecaca;
+        }
+
+        .btn-excel {
+            background: #dcfce7;
+            color: #166534;
+            border: none;
+        }
+
+        .btn-excel:hover {
+            background: #bbf7d0;
+        }
+
+        .badge-delivered {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+
+    <%- include('../partials/admin/navbar.ejs') %>
+        <%- include('../partials/admin/sidebar.ejs') %>
+
+            <main class="content-area">
+                <div class="report-header">
+                    <div>
+                        <h3 class="fw-bold mb-1">Sales Report</h3>
+                        <p class="text-muted small mb-0">Monitor your business performance and sales trends</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-download btn-pdf" onclick="downloadReport('pdf')">
+                            <i class="fas fa-file-pdf me-2"></i> PDF Report
+                        </button>
+                        <button class="btn btn-download btn-excel" onclick="downloadReport('excel')">
+                            <i class="fas fa-file-excel me-2"></i> Excel Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STATS -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3">
+                        <div class="stat-card sales">
+                            <div class="stat-title">Total Revenue</div>
+                            <div class="stat-value">₹<%= totalSalesAmount.toLocaleString() %>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card orders">
+                            <div class="stat-title">Orders Count</div>
+                            <div class="stat-value">
+                                <%= totalOrders %>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card offer">
+                            <div class="stat-title">Offer Discounts</div>
+                            <div class="stat-value">₹<%= totalOfferDiscount.toLocaleString() %>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card discount">
+                            <div class="stat-title">Coupon Deductions</div>
+                            <div class="stat-value">₹<%= totalCouponDiscount.toLocaleString() %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FILTERS -->
+                <div class="filter-section">
+                    <form action="/admin/sales-report" method="GET" id="reportFilterForm">
+                        <div class="row align-items-end g-3">
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Quick Filter</label>
+                                <select name="reportType" class="form-select" onchange="handleReportType(this.value)">
+                                    <option value="all" <%=reportType==='all' ? 'selected' : '' %>>All Time</option>
+                                    <option value="daily" <%=reportType==='daily' ? 'selected' : '' %>>Daily</option>
+                                    <option value="weekly" <%=reportType==='weekly' ? 'selected' : '' %>>Weekly</option>
+                                    <option value="monthly" <%=reportType==='monthly' ? 'selected' : '' %>>Monthly
+                                    </option>
+                                    <option value="yearly" <%=reportType==='yearly' ? 'selected' : '' %>>Yearly</option>
+                                    <option value="custom" <%=reportType==='custom' ? 'selected' : '' %>>Custom Range
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3 date-range <%= reportType === 'custom' ? '' : 'd-none' %>">
+                                <label class="form-label small fw-bold">From</label>
+                                <input type="date" name="fromDate" value="<%= fromDate %>" class="form-control">
+                            </div>
+
+                            <div class="col-md-3 date-range <%= reportType === 'custom' ? '' : 'd-none' %>">
+                                <label class="form-label small fw-bold">To</label>
+                                <input type="date" name="toDate" value="<%= toDate %>" class="form-control">
+                            </div>
+
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-dark w-100">
+                                    <i class="fas fa-filter me-2"></i> Apply
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- DATA TABLE -->
+                <div class="custom-table-card">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Date</th>
+                                    <th>Items</th>
+                                    <th>Status</th>
+                                    <th>Offer Discount</th>
+                                    <th>Coupon Deduction</th>
+                                    <th class="text-end">Final Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (orders && orders.length> 0) { %>
+                                    <% orders.forEach(order=> { %>
+                                        <tr>
+                                            <td class="fw-bold text-muted small">#<%= order.orderId %>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-sm me-2 bg-light rounded-circle d-flex align-items-center justify-content-center"
+                                                        style="width: 32px; height: 32px; font-size: 0.8rem; color: var(--primary); font-weight: 700;">
+                                                        <%= order.userId ? order.userId.name.charAt(0).toUpperCase()
+                                                            : 'G' %>
+                                                    </div>
+                                                    <span>
+                                                        <%= order.userId ? order.userId.name : 'Unknown User' %>
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="text-muted small">
+                                                <%= new Date(order.createdAt).toLocaleDateString('en-IN', {
+                                                    day: 'numeric' , month: 'short' , year: 'numeric' }) %>
+                                            </td>
+                                            <td>
+                                                <%= order.items.length %> items
+                                            </td>
+                                            <td><span class="badge-delivered">Delivered</span></td>
+                                            <td class="text-warning">₹<%= (order.totalOfferDiscount ||
+                                                    0).toLocaleString() %>
+                                            </td>
+                                            <td class="text-danger">₹<%= (order.discountAmount || 0).toLocaleString() %>
+                                            </td>
+                                            <td class="text-end fw-bold">₹<%= (order.totalAmount || 0).toLocaleString()
+                                                    %>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                            <% } else { %>
+                                                <tr>
+                                                    <td colspan="8" class="text-center py-5 text-muted">
+                                                        <i class="fas fa-box-open d-block mb-3 fs-1 opacity-25"></i>
+                                                        No orders found for the selected period
+                                                    </td>
+                                                </tr>
+                                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            <script>
+                function handleReportType(val) {
+                    const dateRanges = document.querySelectorAll('.date-range');
+                    if (val === 'custom') {
+                        dateRanges.forEach(el => el.classList.remove('d-none'));
+                    } else {
+                        dateRanges.forEach(el => el.classList.add('d-none'));
+                    }
+                }
+
+                async function downloadReport(format) {
+                    const form = document.getElementById('reportFilterForm');
+                    const params = new URLSearchParams(new FormData(form)).toString();
+                    window.location.href = `/admin/sales-report/download/${format}?${params}`;
+                }
+            </script>
+</body>
+
+</html>

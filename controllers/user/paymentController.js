@@ -43,6 +43,7 @@ const createOrder = async (req, res) => {
     const today = new Date();
     let subtotal = 0;
     let orderItems = [];
+    let totalOfferDiscount = 0;
 
     for (const item of cart.items) {
       const product = item.productId;
@@ -53,7 +54,7 @@ const createOrder = async (req, res) => {
       if (!variant) continue;
 
       let appliedDiscount = 0;
-      
+
       if (product.productOffer &&
         product.productOffer.isActive &&
         product.productOffer.startDate <= today &&
@@ -74,6 +75,9 @@ const createOrder = async (req, res) => {
         ? Math.floor(variant.price * (1 - appliedDiscount / 100))
         : variant.price;
 
+      const offerDiscountAmount = (variant.price - currentPrice) * item.quantity;
+      totalOfferDiscount += offerDiscountAmount;
+
       subtotal += currentPrice * item.quantity;
 
       orderItems.push({
@@ -85,7 +89,7 @@ const createOrder = async (req, res) => {
     }
 
     const gstAmount = Math.round(subtotal * 0.18);
-    
+
     const discountAmount = req.session.discountAmount || 0;
     const totalAmount = subtotal + gstAmount - discountAmount;
 
@@ -116,6 +120,7 @@ const createOrder = async (req, res) => {
       subtotal,
       gstAmount,
       discountAmount,
+      totalOfferDiscount,
       status: "Placed"
     });
 
