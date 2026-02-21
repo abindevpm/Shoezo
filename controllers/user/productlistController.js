@@ -79,12 +79,80 @@ const loadShopPage = async (req, res) => {
     const skip = (page - 1) * limit;
 
 
+    const today = new Date();
     const nameSort = req.query.nameSort;
     const selectedSort = req.query.sort || "latest";
 
     let pipeline = [
       { $match: filter },
-
+      // Lookup product offer
+      {
+        $lookup: {
+          from: "offers",
+          localField: "productOffer",
+          foreignField: "_id",
+          as: "prodOfferInfo"
+        }
+      },
+      { $unwind: { path: "$prodOfferInfo", preserveNullAndEmptyArrays: true } },
+      // Lookup category info
+      {
+        $lookup: {
+          from: "categories",
+          localField: "category",
+          foreignField: "_id",
+          as: "catInfo"
+        }
+      },
+      { $unwind: { path: "$catInfo", preserveNullAndEmptyArrays: true } },
+      // Lookup category offer
+      {
+        $lookup: {
+          from: "offers",
+          localField: "catInfo.categoryOffer",
+          foreignField: "_id",
+          as: "catOfferInfo"
+        }
+      },
+      { $unwind: { path: "$catOfferInfo", preserveNullAndEmptyArrays: true } },
+      // Add dynamic fields for sorting
+      {
+        $addFields: {
+          validProdDisc: {
+            $cond: [
+              {
+                $and: [
+                  { $ifNull: ["$prodOfferInfo", false] },
+                  { $eq: ["$prodOfferInfo.isActive", true] },
+                  { $lte: ["$prodOfferInfo.startDate", today] },
+                  { $gte: ["$prodOfferInfo.endDate", today] }
+                ]
+              },
+              { $toDouble: "$prodOfferInfo.discountValue" },
+              0
+            ]
+          },
+          validCatDisc: {
+            $cond: [
+              {
+                $and: [
+                  { $ifNull: ["$catOfferInfo", false] },
+                  { $eq: ["$catOfferInfo.isActive", true] },
+                  { $lte: ["$catOfferInfo.startDate", today] },
+                  { $gte: ["$catOfferInfo.endDate", today] }
+                ]
+              },
+              { $toDouble: "$catOfferInfo.discountValue" },
+              0
+            ]
+          }
+        }
+      },
+      {
+        $addFields: {
+          highestDiscount: { $max: ["$validProdDisc", "$validCatDisc"] }
+        }
+      },
       {
         $addFields: {
           effectivePrice: {
@@ -93,43 +161,33 @@ const loadShopPage = async (req, res) => {
                 input: { $ifNull: ["$variants", []] },
                 as: "v",
                 in: {
-                  $cond: [
-                    { $ifNull: ["$$v.offerPrice", false] },
-                    "$$v.offerPrice",
-                    "$$v.price"
-                  ]
+                  $floor: {
+                    $multiply: [
+                      "$$v.price",
+                      { $subtract: [1, { $divide: ["$highestDiscount", 100] }] }
+                    ]
+                  }
                 }
               }
             }
           }
         }
-      },
-
+      }
     ];
-
 
     if (nameSort === "name_asc") {
       pipeline.push({ $sort: { name: 1 } });
-    }
-    else if (nameSort === "name_desc") {
+    } else if (nameSort === "name_desc") {
       pipeline.push({ $sort: { name: -1 } });
-    }
-    else if (selectedSort === "low_to_high") {
+    } else if (selectedSort === "low_to_high") {
       pipeline.push({ $sort: { effectivePrice: 1 } });
-    }
-    else if (selectedSort === "high_to_low") {
+    } else if (selectedSort === "high_to_low") {
       pipeline.push({ $sort: { effectivePrice: -1 } });
-    }
-    else {
+    } else {
       pipeline.push({ $sort: { createdAt: -1 } });
     }
 
-
-
-    pipeline.push(
-      { $skip: skip },
-      { $limit: limit }
-    );
+    pipeline.push({ $skip: skip }, { $limit: limit });
 
 
 
@@ -140,8 +198,6 @@ const loadShopPage = async (req, res) => {
       { path: "brand" },
       { path: "productOffer" }
     ]);
-
-    const today = new Date();
 
     // Calculate finalPrice and appliedDiscount for the frontend
     products.forEach(p => {

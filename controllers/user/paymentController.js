@@ -34,6 +34,12 @@ const createOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: "Cart is empty" });
     }
 
+    const user = await User.findById(userId);
+    const selectedAddress = user.addresses.id(addressId);
+    if (!selectedAddress) {
+      return res.status(400).json({ success: false, message: "Address not found" });
+    }
+
     const today = new Date();
     let subtotal = 0;
     let orderItems = [];
@@ -47,7 +53,7 @@ const createOrder = async (req, res) => {
       if (!variant) continue;
 
       let appliedDiscount = 0;
-      // Check Product Offer
+      
       if (product.productOffer &&
         product.productOffer.isActive &&
         product.productOffer.startDate <= today &&
@@ -55,7 +61,7 @@ const createOrder = async (req, res) => {
         appliedDiscount = Math.max(appliedDiscount, Number(product.productOffer.discountValue) || 0);
       }
 
-      // Check Category Offer
+
       if (product.category &&
         product.category.categoryOffer &&
         product.category.categoryOffer.isActive &&
@@ -79,7 +85,7 @@ const createOrder = async (req, res) => {
     }
 
     const gstAmount = Math.round(subtotal * 0.18);
-    // Note: Removed the hardcoded 30% discount to rely on dynamic offers + potentially coupons
+    
     const discountAmount = req.session.discountAmount || 0;
     const totalAmount = subtotal + gstAmount - discountAmount;
 

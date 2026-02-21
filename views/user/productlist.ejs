@@ -335,28 +335,30 @@
       </section>
 
       <div class="flex justify-center mt-10 space-x-3">
+        <% const currentParams=`&search=${search}&sort=${selectedSort || '' }&nameSort=${selectedNameSort || '' }` +
+          selectedCategory.map(c=> `&category=${c}`).join('') +
+          selectedBrand.map(b => `&brand=${b}`).join('');
+          %>
 
-        <% if (page> 1) { %>
-          <a href="?page=<%= page - 1 %><%= search ? `&search=${search}` : '' %>"
-            class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
-            Prev
-          </a>
-          <% } %>
+          <% if (page> 1) { %>
+            <a href="?page=<%= page - 1 %><%= currentParams %>" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
+              Prev
+            </a>
+            <% } %>
 
-            <% for (let i=1; i <=totalPages; i++) { %>
-              <a href="?page=<%= i %><%= search ? `&search=${search}` : '' %>" class="px-4 py-2 rounded 
-                    <%= page === i ? 'bg-black text-white' : 'bg-gray-200 hover:bg-gray-300' %>">
-                <%= i %>
-              </a>
-              <% } %>
+              <% for (let i=1; i <=totalPages; i++) { %>
+                <a href="?page=<%= i %><%= currentParams %>" class="px-4 py-2 rounded 
+                <%= page === i ? 'bg-black text-white' : 'bg-gray-200 hover:bg-gray-300' %>">
+                  <%= i %>
+                </a>
+                <% } %>
 
-                <% if (page < totalPages) { %>
-                  <a href="?page=<%= page + 1 %><%= search ? `&search=${search}` : '' %>"
-                    class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
-                    Next
-                  </a>
-                  <% } %>
-
+                  <% if (page < totalPages) { %>
+                    <a href="?page=<%= page + 1 %><%= currentParams %>"
+                      class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
+                      Next
+                    </a>
+                    <% } %>
       </div>
 
 

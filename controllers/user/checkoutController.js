@@ -37,7 +37,7 @@ const loadCheckout = async (req, res) => {
       if (!variant) return;
 
       let appliedDiscount = 0;
-      // Check Product Offer
+    
       if (product.productOffer &&
         product.productOffer.isActive &&
         product.productOffer.startDate <= today &&
@@ -45,7 +45,7 @@ const loadCheckout = async (req, res) => {
         appliedDiscount = Math.max(appliedDiscount, Number(product.productOffer.discountValue) || 0);
       }
 
-      // Check Category Offer
+  
       if (product.category &&
         product.category.categoryOffer &&
         product.category.categoryOffer.isActive &&
@@ -64,12 +64,9 @@ const loadCheckout = async (req, res) => {
     });
 
 
-    const gstAmount = Math.round(subtotal * 0.05);
-
-    const discountAmount = Math.round(subtotal * 0.30);
-
+    const gstAmount = Math.round(subtotal * 0.18);
+    const discountAmount = req.session.discountAmount || 0;
     const deliveryCharge = 0;
-
     const totalPrice = subtotal + gstAmount - discountAmount;
     req.session.subtotal = subtotal;
     req.session.totalPrice = totalPrice;
@@ -110,6 +107,7 @@ const placeOrder = async (req, res) => {
   try {
     const userId = req.session.user._id || req.session.user;
     const { addressId, paymentMethod } = req.body;
+    const user = await User.findById(userId);
 
     if (!userId) {
       console.log("Order placement failed: No user ID in session");
@@ -144,7 +142,7 @@ const placeOrder = async (req, res) => {
       }
 
       let appliedDiscount = 0;
-      // Check Product Offer
+  
       if (product.productOffer &&
         product.productOffer.isActive &&
         product.productOffer.startDate <= today &&
@@ -152,7 +150,7 @@ const placeOrder = async (req, res) => {
         appliedDiscount = Math.max(appliedDiscount, Number(product.productOffer.discountValue) || 0);
       }
 
-      // Check Category Offer
+    
       if (product.category &&
         product.category.categoryOffer &&
         product.category.categoryOffer.isActive &&
@@ -175,7 +173,7 @@ const placeOrder = async (req, res) => {
       });
     }
 
-    const gstAmount = Math.round(subtotal * 0.05);
+    const gstAmount = Math.round(subtotal * 0.18);
     const discountAmount = req.session.discountAmount || 0;
     const totalAmount = subtotal + gstAmount - discountAmount;
 
