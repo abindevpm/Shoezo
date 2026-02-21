@@ -13,11 +13,50 @@ const getWishlist = async (req, res) => {
     const userId = sessionUser._id || sessionUser;
 
     const wishlist = await Wishlist.findOne({ userId })
-      .populate("products");
+      .populate({
+        path: "products",
+        populate: [
+          { path: "productOffer" },
+          { path: "category", populate: { path: "categoryOffer" } }
+        ]
+      });
+
+    const today = new Date();
+    const processedProducts = (wishlist ? wishlist.products : []).map(p => {
+      const productObj = p.toObject();
+      const v = productObj.variants && productObj.variants.length > 0 ? productObj.variants[0] : null;
+
+      if (v) {
+        let appliedDiscount = 0;
+        // Check Product Offer
+        if (productObj.productOffer &&
+          productObj.productOffer.isActive &&
+          productObj.productOffer.startDate <= today &&
+          productObj.productOffer.endDate >= today) {
+          appliedDiscount = Math.max(appliedDiscount, Number(productObj.productOffer.discountValue) || 0);
+        }
+
+        // Check Category Offer
+        if (productObj.category &&
+          productObj.category.categoryOffer &&
+          productObj.category.categoryOffer.isActive &&
+          productObj.category.categoryOffer.startDate <= today &&
+          productObj.category.categoryOffer.endDate >= today) {
+          appliedDiscount = Math.max(appliedDiscount, Number(productObj.category.categoryOffer.discountValue) || 0);
+        }
+
+        productObj.displayPrice = appliedDiscount > 0
+          ? Math.floor(v.price * (1 - appliedDiscount / 100))
+          : v.price;
+      } else {
+        productObj.displayPrice = 0;
+      }
+      return productObj;
+    });
 
     res.render("wishlist", {
-      wishlistItems: wishlist ? wishlist.products : []
-    })
+      wishlistItems: processedProducts
+    });
 
   } catch (error) {
     console.log("Wishlist Error", error)

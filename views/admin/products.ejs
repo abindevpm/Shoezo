@@ -101,6 +101,7 @@
                   <th>Category</th>
                   <th>Description</th>
                   <th>Price</th>
+                  <th>Offer</th>
                   <th>Stock</th>
                   <th>Image</th>
                   <th>Update</th>
@@ -145,6 +146,21 @@
                                     <% } %>
                         </td>
 
+                        <td>
+                          <% if (product.productOffer && product.productOffer.isActive) { %>
+                            <span class="badge bg-success">
+                              <%= product.productOffer.discountValue %>%
+                            </span>
+                            <% } else { %>
+                              <span class="badge bg-secondary">
+                                No Offer
+                              </span>
+                              <% } %>
+                        </td>
+
+
+
+
 
                         <td>
                           <%= product.variants ? product.variants.reduce((sum, v)=> sum + (v.stock || 0), 0) : 0 %>
@@ -166,13 +182,30 @@
                               <i class="fas fa-pencil-alt"></i>
                             </a>
 
-                            <!-- LIST / UNLIST TOGGLE -->
-                            <div class="form-check form-switch">
-                              <input class="form-check-input toggle-delete" type="checkbox" role="switch"
-                                data-id="<%= product._id %>" <%=product.isListed ? "checked" : "" %>
 
-                              >
-                            </div>
+
+                            <% if (product.productOffer && product.productOffer.isActive) { %>
+                              <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#productOfferModal" data-id="<%= product._id %>"
+                                data-discount="<%= product.productOffer.discountValue %>"
+                                data-start="<%= product.productOffer.startDate ? product.productOffer.startDate.toISOString().split('T')[0] : '' %>"
+                                data-end="<%= product.productOffer.endDate ? product.productOffer.endDate.toISOString().split('T')[0] : '' %>"
+                                onclick="prepareOfferModal(this)">
+                                <i class="fa fa-percent"></i>
+                              </button>
+                              <% } else { %>
+                                <button class="btn btn-dark btn-sm" data-bs-toggle="modal"
+                                  data-bs-target="#productOfferModal" data-id="<%= product._id %>" data-discount=""
+                                  data-start="" data-end="" onclick="prepareOfferModal(this)">
+                                  <i class="fa fa-plus"></i>
+                                </button>
+                                <% } %>
+
+                                  <!-- LIST / UNLIST TOGGLE -->
+                                  <div class="form-check form-switch">
+                                    <input class="form-check-input toggle-delete" type="checkbox" role="switch"
+                                      data-id="<%= product._id %>" <%=product.isListed ? "checked" : "" %>>
+                                  </div>
 
                           </div>
                         </td>
@@ -182,7 +215,7 @@
                     <% }) %>
                       <% } else { %>
                         <tr>
-                          <td colspan="8" class="py-5 text-muted">No products found.</td>
+                          <td colspan="9" class="py-5 text-muted">No products found.</td>
                         </tr>
                         <% } %>
               </tbody>
@@ -193,7 +226,7 @@
 
 
         <!-- PAGINATION (BOTTOM ONLY) -->
-        <div class="pagination-wrapper d-flex justify-content-center">
+        <div class="pagination-wrapper d-flex justify-content-center mt-4">
           <nav>
             <ul class="pagination gap-2">
               <li class="page-item <%= currentPage == 1 ? 'disabled' : '' %>">
@@ -220,6 +253,52 @@
         </div>
 
 
+        <div class="modal fade" id="productOfferModal">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="fw-bold">Product Offer</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+
+              <div class="modal-body">
+                <form id="productOfferForm" action="/admin/manage-product-offer" method="POST">
+
+                  <input type="hidden" name="productId" id="productId">
+
+                  <div class="mb-3">
+                    <label>Discount (%)</label>
+                    <input type="number" name="discountValue" id="productOfferDiscount" class="form-control" min="1"
+                      max="100" required>
+                  </div>
+
+                  <div class="mb-3">
+                    <label>Start Date</label>
+                    <input type="date" name="startDate" id="productOfferStartDate" class="form-control" required>
+                  </div>
+
+                  <div class="mb-3">
+                    <label>End Date</label>
+                    <input type="date" name="endDate" id="productOfferEndDate" class="form-control" required>
+                  </div>
+
+                  <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success flex-grow-1">Save Offer</button>
+                    <button type="button" id="removeOfferBtn" class="btn btn-danger" onclick="removeProductOffer()"
+                      style="display: none;">
+                      Remove
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
 
 
 
@@ -227,113 +306,178 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+      // ── List / Unlist Toggle ──
+      document.querySelectorAll(".toggle-delete").forEach(toggle => {
+        toggle.addEventListener("change", async () => {
+          const productId = toggle.dataset.id;
+          try {
+            const res = await fetch(`/admin/toggle-product/${productId}`, {
+              method: "PATCH"
+            });
+            const data = await res.json();
+
+            if (!data.success) {
+              Swal.fire("Error", "Something went wrong", "error");
+              toggle.checked = !toggle.checked;
+              return;
+            }
+
+            Swal.fire({
+              icon: "success",
+              title: data.isListed ? "Product Listed" : "Product Unlisted",
+              text: data.isListed ? "Product is now visible" : "Product is now hidden",
+              timer: 1500,
+              showConfirmButton: false
+            });
+          } catch (err) {
+            console.error(err);
+            Swal.fire("Error", "Network error occurred", "error");
+          }
+        });
+      });
+
+      // ── Search Logic ──
+      const searchInput = document.getElementById("productSearch");
+      if (searchInput) {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("search")) {
+          searchInput.value = params.get("search");
+        }
+        searchInput.addEventListener("keyup", (e) => {
+          if (e.key === "Enter") {
+            window.location.href = `?search=${encodeURIComponent(searchInput.value.trim())}`;
+          }
+        });
+      }
+
+      // ── Category Filter Logic (Defensive) ──
+      const categorySelect = document.getElementById("filterCategory");
+      if (categorySelect) {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("category")) {
+          categorySelect.value = params.get("category");
+        }
+        categorySelect.addEventListener("change", () => {
+          const category = categorySelect.value;
+          const search = params.get("search") || "";
+          let url = `?`;
+          if (search) url += `search=${encodeURIComponent(search)}&`;
+          if (category) url += `category=${category}`;
+          window.location.href = url;
+        });
+      }
+
+      // ── Price Filter ──
+      function applyPriceFilter() {
+        const min = document.getElementById("minPrice")?.value;
+        const max = document.getElementById("maxPrice")?.value;
+        let url = `/admin/products?`;
+        if (min) url += `minPrice=${min}&`;
+        if (max) url += `maxPrice=${max}&`;
+        window.location.href = url;
+      }
+
+      // ── Modal Handling ──
+      function prepareOfferModal(btn) {
+        const id = btn.getAttribute("data-id");
+        const discount = btn.getAttribute("data-discount");
+        const start = btn.getAttribute("data-start");
+        const end = btn.getAttribute("data-end");
+
+        document.getElementById("productId").value = id;
+        document.getElementById("productOfferDiscount").value = discount;
+        document.getElementById("productOfferStartDate").value = start;
+        document.getElementById("productOfferEndDate").value = end;
+
+        const removeBtn = document.getElementById("removeOfferBtn");
+        if (discount) {
+          removeBtn.style.display = "block";
+        } else {
+          removeBtn.style.display = "none";
+        }
+      }
+
+      async function removeProductOffer() {
+        const productId = document.getElementById("productId").value;
+        const confirmResult = await Swal.fire({
+          title: "Are you sure?",
+          text: "This will remove the offer from this product.",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Yes, remove it!",
+          cancelButtonText: "Cancel"
+        });
+
+        if (!confirmResult.isConfirmed) return;
+
+        try {
+          const res = await fetch("/admin/remove-product-offer", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ productId })
+          });
+
+          const result = await res.json();
+          if (result.success) {
+            Swal.fire({
+              icon: "success",
+              title: "Removed",
+              text: result.message,
+              timer: 1500,
+              showConfirmButton: false
+            });
+            setTimeout(() => location.reload(), 1500);
+          } else {
+            Swal.fire({ icon: "error", title: "Error", text: result.message });
+          }
+        } catch (err) {
+          console.error(err);
+          Swal.fire({ icon: "error", title: "Error", text: "Failed to connect to server" });
+        }
+      }
+
+      // ── Manage Product Offer (AJAX) ──
+      const productOfferForm = document.getElementById("productOfferForm");
+      if (productOfferForm) {
+        productOfferForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const formData = new FormData(productOfferForm);
+          const data = Object.fromEntries(formData.entries());
+
+          try {
+            const res = await fetch("/admin/manage-product-offer", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(data)
+            });
+
+            const result = await res.json();
+            if (result.success) {
+              Swal.fire({
+                icon: "success",
+                title: "Updated",
+                text: result.message,
+                timer: 1500,
+                showConfirmButton: false
+              });
+              setTimeout(() => location.reload(), 1500);
+            } else {
+              Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: result.message
+              });
+            }
+          } catch (err) {
+            console.error(err);
+            Swal.fire({ icon: "error", title: "Error", text: "Failed to connect to server" });
+          }
+        });
+      }
+    </script>
 </body>
 
 </html>
-
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-
-
-
-
-
-
-<script>
-
-  document.querySelectorAll(".toggle-delete").forEach(toggle => {
-    toggle.addEventListener("change", async () => {
-
-      const productId = toggle.dataset.id;
-
-      const res = await fetch(`/admin/toggle-product/${productId}`, {
-        method: "PATCH"
-      });
-
-      const data = await res.json();
-
-      if (!data.success) {
-        Swal.fire("Error", "Something went wrong", "error");
-        toggle.checked = !toggle.checked; // revert
-        return;
-      }
-
-      Swal.fire({
-        icon: "success",
-        title: data.isListed ? "Product Listed" : "Product Unlisted",
-        text: data.isListed
-          ? "This product is now visible to users"
-          : "This product is now hidden from users",
-        confirmButtonColor: "#3085d6"
-      });
-    });
-  });
-
-
-
-
-  // searching
-
-
-  const searchInput = document.getElementById("productSearch");
-
-  // set existing search value (important)
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("search")) {
-    searchInput.value = params.get("search");
-  }
-
-  // search on Enter key
-  searchInput.addEventListener("keyup", (e) => {
-    if (e.key === "Enter") {
-      const value = searchInput.value.trim();
-      window.location.href = `?search=${encodeURIComponent(value)}`;
-    }
-  });
-
-
-
-
-
-
-  function applyPriceFilter() {
-
-    const min = document.getElementById("minPrice").value;
-    const max = document.getElementById("maxPrice").value;
-
-    let url = `/admin/products?`;
-
-    if (min) url += `minPrice=${min}&`;
-    if (max) url += `maxPrice=${max}&`;
-
-    window.location.href = url;
-  }
-
-
-
-  const categorySelect = document.getElementById("filterCategory");
-
-
-  if (params.get("category")) {
-    categorySelect.value = params.get("category");
-  }
-
-
-  categorySelect.addEventListener("change", () => {
-    const category = categorySelect.value;
-    const search = params.get("search") || "";
-
-    let url = `?`;
-
-    if (search) url += `search=${encodeURIComponent(search)}&`;
-    if (category) url += `category=${category}`;
-
-    window.location.href = url;
-  });
-
-
-
-
-
-</script>

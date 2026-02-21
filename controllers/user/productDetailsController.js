@@ -11,11 +11,46 @@ const loadProductDetails = async (req, res) => {
       isListed: true
     })
       .populate("category")
-      .populate("brand");
+      .populate("brand")
+      .populate("productOffer")
+      .populate({ path: "category", populate: { path: "categoryOffer" } });
 
-    
     if (!product) {
       return res.redirect("/productlist");
+    }
+
+    const today = new Date();
+    let appliedDiscount = 0;
+
+    // Check Product Offer
+    if (product.productOffer &&
+      product.productOffer.isActive &&
+      product.productOffer.startDate <= today &&
+      product.productOffer.endDate >= today) {
+      appliedDiscount = Math.max(appliedDiscount, Number(product.productOffer.discountValue) || 0);
+    }
+
+    // Check Category Offer
+    if (product.category &&
+      product.category.categoryOffer &&
+      product.category.categoryOffer.isActive &&
+      product.category.categoryOffer.startDate <= today &&
+      product.category.categoryOffer.endDate >= today) {
+      appliedDiscount = Math.max(appliedDiscount, Number(product.category.categoryOffer.discountValue) || 0);
+    }
+
+    product.discount = appliedDiscount;
+
+    // Optionally update offerPrice for consistency in view if needed, 
+    // but the template usually uses product.discount to show the badge.
+    if (product.variants && product.variants.length > 0) {
+      product.variants.forEach(v => {
+        if (appliedDiscount > 0) {
+          v.offerPrice = Math.floor(v.price * (1 - appliedDiscount / 100));
+        } else {
+          v.offerPrice = v.price;
+        }
+      });
     }
 
     res.render("productDetails", {

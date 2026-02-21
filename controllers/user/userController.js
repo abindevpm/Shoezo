@@ -3,6 +3,7 @@ const User = require("../../models/userSchema")
 const Product = require("../../models/productSchema");
 const Order = require("../../models/orderSchema");
 const Coupon = require("../../models/couponSchema")
+const Category = require("../../models/categorySchema")
 
 
 const env = require("dotenv").config()
@@ -28,9 +29,51 @@ const loadHomepage = async (req, res) => {
 
 
 
-    const featuredProducts = await Product.find({ isDeleted: true, isListed: true })
+    const featuredProductsRaw = await Product.find({ isDeleted: false, isListed: true })
+      .populate("category")
+      .populate("brand")
+      .populate("productOffer")
+      .populate({ path: "category", populate: { path: "categoryOffer" } })
       .sort({ createdAt: -1 })
-      .limit(3);
+      .limit(6);
+
+    const today = new Date();
+    const featuredProducts = featuredProductsRaw.map(p => {
+      const productObj = p.toObject();
+      const v = productObj.variants && productObj.variants.length > 0 ? productObj.variants[0] : null;
+
+      if (v) {
+        let appliedDiscount = 0;
+
+        // Check Product Offer
+        if (productObj.productOffer &&
+          productObj.productOffer.isActive &&
+          productObj.productOffer.startDate <= today &&
+          productObj.productOffer.endDate >= today) {
+          appliedDiscount = Math.max(appliedDiscount, Number(productObj.productOffer.discountValue) || 0);
+        }
+
+        // Check Category Offer
+        if (productObj.category &&
+          productObj.category.categoryOffer &&
+          productObj.category.categoryOffer.isActive &&
+          productObj.category.categoryOffer.startDate <= today &&
+          productObj.category.categoryOffer.endDate >= today) {
+          appliedDiscount = Math.max(appliedDiscount, Number(productObj.category.categoryOffer.discountValue) || 0);
+        }
+
+        productObj.price = v.price;
+        if (appliedDiscount > 0) {
+          productObj.offerPrice = Math.floor(v.price * (1 - appliedDiscount / 100));
+        } else {
+          productObj.offerPrice = 0;
+        }
+      } else {
+        productObj.price = 0;
+        productObj.offerPrice = 0;
+      }
+      return productObj;
+    });
 
     return res.render("home", {
       user: userData,
@@ -414,7 +457,66 @@ const logout = async (req, res) => {
 
 const productlist = async (req, res) => {
 
-  return res.render("productlist")
+
+  try {
+    const products = await Product.find({
+      isListed: true,
+      isDeleted: false
+    }).populate("category")
+
+    const today = new Date();
+
+    const updatedProducts = products.map(product => {
+      const variant = product.variants?.[0];
+
+      if (!variant) return product
+
+      const basePrice = variant.price;
+
+      let productDiscount = 0;
+      let categoryDiscount = 0;
+
+      if (
+        product.productOffer &&
+        product.productOffer.isActive &&
+        product.productOffer.startDate <= today &&
+        product.productOffer.endDate >= today
+      ) {
+        productDiscount = product.productOffer.discountValue
+      }
+
+      if (
+        product.category &&
+        product.category.categoryOffer &&
+        product.category.categoryOffer.isActive &&
+        product.category.categoryOffer.startDate <= today &&
+        product.category.categoryOffer.endDate >= today
+      ) {
+        categoryDiscount = product.category.categoryOffer.discountValue;
+      }
+
+      const finalDiscount = Math.max(productDiscount, categoryDiscount);
+
+      const finalPrice = Math.round(
+        basePrice - (basePrice * finalDiscount) / 100
+      );
+
+      return {
+        ...product.toObject(),
+        finalPrice,
+        appliedDiscount: finalDiscount
+      }
+    })
+    res.render("productlist", {
+      products: updatedProducts
+    })
+
+
+  } catch (error) {
+    console.log("Product List page error", error)
+    res.redirect("/pageNotFound")
+
+  }
 }
 
 

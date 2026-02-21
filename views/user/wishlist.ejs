@@ -41,22 +41,17 @@
                 <button class="remove-btn text-red-500 underline" data-id="<%= item._id %>">
                   Remove Item
                 </button>
-              
+
               </div>
 
               <div class="product-action">
-                <% const firstVariant=item.variants && item.variants.length> 0
-                  ? item.variants[0]
-                  : null;
-                  const displayPrice = firstVariant ? firstVariant.offerPrice || firstVariant.price : 0;
-                  %>
-                  <span class="price">
-                    ₹ <%= displayPrice.toLocaleString() %>
-                  </span>
+                <span class="price">
+                  ₹ <%= (item.displayPrice || 0).toLocaleString() %>
+                </span>
 
-                  <button class="add-to-cart-btn" onclick="moveToCart('<%= item._id %>')">
-                    Add to Cart
-                  </button>
+                <button class="add-to-cart-btn" onclick="moveToCart('<%= item._id %>')">
+                  Add to Cart
+                </button>
 
 
 
@@ -308,7 +303,7 @@
           showConfirmButton: false
         });
 
-    
+
         setTimeout(() => {
           window.location.href = "/cart";
         }, 1000);

@@ -10,7 +10,13 @@ const loadCart = async (req, res) => {
     }
 
     const cart = await Cart.findOne({ userId })
-      .populate("items.productId");
+      .populate({
+        path: "items.productId",
+        populate: [
+          { path: "productOffer" },
+          { path: "category", populate: { path: "categoryOffer" } }
+        ]
+      });
 
     if (!cart || cart.items.length === 0) {
       return res.render("cart", {
@@ -19,33 +25,47 @@ const loadCart = async (req, res) => {
       });
     }
 
-
-    const validItems = cart.items.filter(item =>
-      item.productId && item.productId.isListed === true
-    );
-
-
-    if (validItems.length !== cart.items.length) {
-      cart.items = validItems;
-      await cart.save();
-    }
-
-
+    const today = new Date();
     const cartItems = cart.items.map(item => {
-      const variant = item.productId.variants.find(
+      const product = item.productId;
+      const variant = product.variants.find(
         v => String(v.size) === String(item.size)
       );
-      const price = variant ? Number(variant.offerPrice || variant.price) : item.price;
+
+      if (!variant) return null;
+
+      let appliedDiscount = 0;
+
+      // Check Product Offer
+      if (product.productOffer &&
+        product.productOffer.isActive &&
+        product.productOffer.startDate <= today &&
+        product.productOffer.endDate >= today) {
+        appliedDiscount = Math.max(appliedDiscount, Number(product.productOffer.discountValue) || 0);
+      }
+
+      // Check Category Offer
+      if (product.category &&
+        product.category.categoryOffer &&
+        product.category.categoryOffer.isActive &&
+        product.category.categoryOffer.startDate <= today &&
+        product.category.categoryOffer.endDate >= today) {
+        appliedDiscount = Math.max(appliedDiscount, Number(product.category.categoryOffer.discountValue) || 0);
+      }
+
+      const currentPrice = appliedDiscount > 0
+        ? Math.floor(variant.price * (1 - appliedDiscount / 100))
+        : variant.price;
 
       return {
         _id: item._id,
-        product: item.productId,
+        product: product,
         size: item.size,
         quantity: item.quantity,
-        price: price,
-        total: item.quantity * price
+        price: currentPrice,
+        total: item.quantity * currentPrice
       };
-    });
+    }).filter(Boolean);
 
     const subtotal = cartItems.reduce(
       (sum, item) => sum + item.total,

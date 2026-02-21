@@ -1,105 +1,117 @@
 <%- include("../partials/userpartial/header.ejs") %>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHOEZO - Comfort & Style</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+    <!DOCTYPE html>
+    <html lang="en">
 
-        
-    </style>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>SHOEZO - Comfort & Style</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        </style>
 
-<body>
+    <body>
 
-    <!-- Header -->
-    
+        <!-- Header -->
 
-    <main class="max-w-8xl mx-auto">
 
-        <!-- HERO BANNER 1 -->
-        <section class="relative h-[650px] overflow-hidden rounded-b-lg mb-12">
-            <img src="/images/ADIDAS.jpg"
-                class="absolute inset-0 w-full h-full object-cover">
+        <main class="max-w-8xl mx-auto">
 
-            <div class="relative z-10 h-full flex items-start p-10 md:p-20">
-                <div class="max-w-md">
-                    <p class="text-xl font-medium text-gray-200 mb-2 tracking-widest">FOCUS ON COMFORT & STYLE</p>
+            <!-- HERO BANNER 1 -->
+            <section class="relative h-[650px] overflow-hidden rounded-b-lg mb-12">
+                <img src="/images/ADIDAS.jpg" class="absolute inset-0 w-full h-full object-cover">
 
-                    <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-6 leading-tight">
-                        Your Next Level Footwear
-                    </h1>
+                <div class="relative z-10 h-full flex items-start p-10 md:p-20">
+                    <div class="max-w-md">
+                        <p class="text-xl font-medium text-gray-200 mb-2 tracking-widest">FOCUS ON COMFORT & STYLE</p>
 
-                    <p class="text-gray-300 mb-8">
-                        Experience the perfect blend of innovation, quality, and trend-setting design.
-                    </p>
+                        <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-6 leading-tight">
+                            Your Next Level Footwear
+                        </h1>
 
-                    <a href="/productlist" class="inline-block bg-black text-white font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition text-lg uppercase tracking-wider">
-                        Shop Collection
+                        <p class="text-gray-300 mb-8">
+                            Experience the perfect blend of innovation, quality, and trend-setting design.
+                        </p>
+
+                        <a href="/productlist"
+                            class="inline-block bg-black text-white font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition text-lg uppercase tracking-wider">
+                            Shop Collection
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- REMOVED: MEN / WOMEN / KIDS BUBBLES -->
+
+
+            <!-- HERO BANNER 2 -->
+            <section class="h-[700px] overflow-hidden rounded-lg mb-12 relative">
+                <img src="/images/pexels-jddaniel-2385477.jpg" class="w-full h-full object-cover absolute inset-0">
+
+                <div class="relative z-10 w-full h-full flex flex-col items-center justify-center text-center p-8">
+                    <div class="max-w-xl">
+                        <h3 class="text-5xl font-extrabold text-white mb-2">LIMITED TIME COLLECTION</h3>
+                        <p class="text-xl text-white">Find exclusive colorways and performance gear.</p>
+
+                        <a href="/productlist"
+                            class="mt-6 inline-block px-8 py-3 bg-white text-black rounded-full font-semibold hover:bg-gray-200 transition">
+                            Explore Collection
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- REMOVED: DUMMY PRODUCTS -->
+            <!-- <h2 class="text-3xl font-extrabold mb-8 px-4 text-gray-900 tracking-tight">Top Picks</h2> -->
+
+            <section class="grid grid-cols-2 md:grid-cols-3 gap-8 px-4 mb-20">
+
+                <% featuredProducts.forEach(fp=> { %>
+
+                    <a href="/productdetails/<%= fp._id %>"
+                        class="group block bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition duration-300 ease-in-out transform hover:-translate-y-1">
+
+                        <div class="relative overflow-hidden aspect-square">
+                            <% if (fp.appliedDiscount> 0) { %>
+                                <div class="absolute top-2 left-2 z-10">
+                                    <span
+                                        class="bg-green-600 text-white text-[10px] font-bold tracking-wider px-2 py-1 uppercase rounded-sm shadow-md">
+                                        <%= fp.appliedDiscount %>% OFF
+                                    </span>
+                                </div>
+                                <% } %>
+                                    <img src="/uploads/product-images/<%= fp.images[0] %>"
+                                        onerror="this.src='https://placehold.co/400x400/eeeeee/333333?text=Image+Missing'"
+                                        class="w-full h-full object-cover transition group-hover:scale-105">
+                        </div>
+
+                        <div class="p-4">
+                            <h3 class="font-bold text-lg mb-1 text-gray-900 truncate">
+                                <%= fp.name %>
+                            </h3>
+                            <p class="text-xs text-gray-500 uppercase tracking-wider mb-3">
+                                <%= fp.category?.name %>
+                            </p>
+
+                            <div class="flex justify-between items-center pt-2 border-t border-gray-100">
+                                <p class="text-xl font-extrabold">₹<%= fp.offerPrice> 0 ? fp.offerPrice : fp.price %>
+                                </p>
+
+                                <% if(fp.offerPrice> 0){ %>
+                                    <p class="line-through text-sm text-gray-400">₹<%= fp.price %>
+                                    </p>
+                                    <% } %>
+                            </div>
+                        </div>
+
                     </a>
-                </div>
-            </div>
-        </section>
 
+                    <% }) %>
 
-        <!-- REMOVED: MEN / WOMEN / KIDS BUBBLES -->
-
-
-        <!-- HERO BANNER 2 -->
-        <section class="h-[700px] overflow-hidden rounded-lg mb-12 relative">
-            <img src="/images/pexels-jddaniel-2385477.jpg"
-                class="w-full h-full object-cover absolute inset-0">
-
-            <div class="relative z-10 w-full h-full flex flex-col items-center justify-center text-center p-8">
-                <div class="max-w-xl">
-                    <h3 class="text-5xl font-extrabold text-white mb-2">LIMITED TIME COLLECTION</h3>
-                    <p class="text-xl text-white">Find exclusive colorways and performance gear.</p>
-
-                    <a href="/productlist" class="mt-6 inline-block px-8 py-3 bg-white text-black rounded-full font-semibold hover:bg-gray-200 transition">
-                        Explore Collection
-                    </a>
-                </div>
-            </div>
-        </section>
-
-
-        <!-- REMOVED: DUMMY PRODUCTS -->
-    <!-- <h2 class="text-3xl font-extrabold mb-8 px-4 text-gray-900 tracking-tight">Top Picks</h2> -->
-
-<section class="grid grid-cols-2 md:grid-cols-3 gap-8 px-4 mb-20">
-
-    <% featuredProducts.forEach(fp => { %>
-
-        <a href="/productdetails/<%= fp._id %>" 
-           class="group block bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition duration-300 ease-in-out transform hover:-translate-y-1">
-
-            <div class="relative overflow-hidden aspect-square">
-                <img 
-                    src="/uploads/product-images/<%= fp.images[0] %>"
-                    onerror="this.src='https://placehold.co/400x400/eeeeee/333333?text=Image+Missing'"
-                    class="w-full h-full object-cover transition group-hover:scale-105">
-            </div>
-
-            <div class="p-4">
-                <h3 class="font-bold text-lg mb-1 text-gray-900 truncate"><%= fp.name %></h3>
-                <p class="text-xs text-gray-500 uppercase tracking-wider mb-3"><%= fp.category?.name %></p>
-
-                <div class="flex justify-between items-center pt-2 border-t border-gray-100">
-                    <p class="text-xl font-extrabold">₹<%= fp.offerPrice > 0 ? fp.offerPrice : fp.price %></p>
-
-                    <% if(fp.offerPrice > 0){ %>
-                        <p class="line-through text-sm text-gray-400">₹<%= fp.price %></p>
-                    <% } %>
-                </div>
-            </div>
-
-        </a>
-
-    <% }) %>
-
-</section>
+            </section>
 
 
 
@@ -107,19 +119,17 @@
 
 
 
-    </main>
+        </main>
 
 
 
-    <!-- Footer -->
-    <%- include("../partials/userpartial/footer.ejs") %>
+        <!-- Footer -->
+        <%- include("../partials/userpartial/footer.ejs") %>
 
 
 
 
 
-    
-
-</body>
 
 
+    </body>

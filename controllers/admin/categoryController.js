@@ -1,48 +1,48 @@
 const Category = require("../../models/categorySchema");
+const Product = require("../../models/productSchema");
+const Offer = require("../../models/offers")
 
- const categoryInfo = async(req,res)=>{
-    try{
-        let search = req.query.search || "";
-        let page = parseInt(req.query.page) || 1;
-         let limit = 3;
+const categoryInfo = async (req, res) => {
+  try {
+    let search = req.query.search || "";
+    let page = parseInt(req.query.page) || 1;
+    let limit = 3;
 
-         const query = {
-            isDeleted:false,
-            name:{$regex:search,$options:"i"}
-         }
-
-         const total = await Category.countDocuments(query);
-         const categories = await Category.find(query)
-         .sort({createdAt:-1})
-         .skip((page-1)*limit)
-          .limit(limit);
-
-          res.render("category",{
-            categories,
-            totalPages:Math.ceil(total/limit),
-            currentPage:page,
-            search
-          })
-
-
-
-    }catch(error){
-        console.log("Category Info error",err)
-
+    const query = {
+      isDeleted: false,
+      name: { $regex: search, $options: "i" }
     }
- }
+
+    const total = await Category.countDocuments(query);
+    const categories = await Category.find(query)
+      .populate("categoryOffer")
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    res.render("category", {
+      categories,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      search
+    })
 
 
- const addCategory = async (req, res) => {
+
+  } catch (error) {
+    console.log("Category Info error", error)
+
+  }
+}
+
+
+const addCategory = async (req, res) => {
   try {
 
+    let { name, description } = req.body;
 
-    let { name, description, categoryOffer } = req.body;
-
-       name = name ? name.trim() : "";
-    description = description ? description.trim() : "";
-    categoryOffer = categoryOffer ? categoryOffer.trim() : "";
-
+    name = name?.trim();
+    description = description?.trim();
 
     if (!name || !description) {
       return res.json({
@@ -50,8 +50,6 @@ const Category = require("../../models/categorySchema");
         message: "All fields are required"
       });
     }
-
-    name = name.trim();
 
     const exists = await Category.findOne({
       name: { $regex: `^${name}$`, $options: "i" }
@@ -67,7 +65,6 @@ const Category = require("../../models/categorySchema");
     await Category.create({
       name,
       description,
-      categoryOffer,
       isListed: true,
       isDeleted: false
     });
@@ -78,24 +75,10 @@ const Category = require("../../models/categorySchema");
     });
 
   } catch (error) {
-    console.error("Add category error:", error);
-
-    
-    if (error.code === 11000) {
-      return res.json({
-        success: false,
-        message: "Category already exists"
-      });
-    }
-
-    return res.status(500).json({
-      success: false,
-      message: "Server error"
-    });
+    console.log(error);
+    return res.status(500).json({ success: false });
   }
 };
-
-
 
 
 
@@ -124,53 +107,146 @@ const toggleCategory = async (req, res) => {
 };
 
 
-
 const editCategory = async (req, res) => {
-    try {
-        const id = req.params.id;
-        let { name, description, categoryOffer } = req.body;
+  try {
 
-      
-        name = name?.trim();
-    
-        description = description?.trim();
+    const id = req.params.id;
+    let { name, description } = req.body;
 
-        
-        if (!name ||!description || categoryOffer === "") {
-            return res.json({
-                success: false,
-                message: "All fields are required"
-            });
-        }
+    name = name?.trim();
+    description = description?.trim();
 
-        
-        await Category.findByIdAndUpdate(id, {
-            name,
-            description,
-            categoryOffer
-        });
-
-        return res.json({
-            success: true,
-            message: "Category updated successfully"
-        });
-
-    } catch (error) {
-        console.log("Error in updateCategory:", error);
-        return res.json({
-            success: false,
-            message: "Internal Server Error"
-        });
+    if (!name || !description) {
+      return res.json({
+        success: false,
+        message: "All fields are required"
+      });
     }
+
+    await Category.findByIdAndUpdate(id, {
+      name,
+      description
+    });
+
+    return res.json({
+      success: true,
+      message: "Category updated successfully"
+    });
+
+  } catch (error) {
+    console.log(error);
+    return res.json({
+      success: false,
+      message: "Internal Server Error"
+    });
+  }
 };
 
 
+const manageCategoryOffer = async (req, res) => {
+  try {
+    const { categoryId, discountValue, startDate, endDate } = req.body;
+    const discount = Number(discountValue);
+
+    const category = await Category.findById(categoryId).populate("categoryOffer");
+
+    if (!category) {
+      return res.json({ success: false, message: "Category not found" });
+    }
+
+    if (category.categoryOffer) {
+      await Offer.findByIdAndUpdate(category.categoryOffer._id, {
+        discountValue: discount,
+        startDate,
+        endDate,
+        isActive: true
+      });
+    } else {
+      const newOffer = await Offer.create({
+        offerType: "category",
+        discountType: "percentage",
+        discountValue: discount,
+        category: categoryId,
+        startDate,
+        endDate,
+        isActive: true
+      });
+      category.categoryOffer = newOffer._id;
+      await category.save();
+    }
+
+    const products = await Product.find({ category: categoryId }).populate("productOffer");
+
+    for (const product of products) {
+      if (product.variants && product.variants.length > 0) {
+        let productDiscount = 0;
+        if (product.productOffer && product.productOffer.isActive) {
+          productDiscount = Number(product.productOffer.discountValue) || 0;
+        }
+
+        const finalDiscount = Math.max(discount, productDiscount);
+
+        product.variants.forEach(variant => {
+          variant.offerPrice = Math.floor(variant.price * (1 - finalDiscount / 100));
+        });
+        product.markModified('variants');
+        await product.save();
+      }
+    }
+
+    return res.json({ success: true, message: "Category offer updated successfully" });
+
+  } catch (error) {
+    console.log(error, "Manage Category error")
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+}
 
 
-module.exports = { 
-    categoryInfo,
-    addCategory,
-    toggleCategory,
-    editCategory
+const removeCategoryOffer = async (req, res) => {
+  try {
+    const { categoryId } = req.body;
+    const category = await Category.findById(categoryId);
 
- };
+    if (!category) {
+      return res.json({ success: false, message: "Category not found" });
+    }
+
+    category.categoryOffer = null;
+    await category.save();
+
+    const products = await Product.find({ category: categoryId }).populate("productOffer");
+
+    for (const product of products) {
+      if (product.variants && product.variants.length > 0) {
+        let productDiscount = 0;
+        if (product.productOffer && product.productOffer.isActive) {
+          productDiscount = Number(product.productOffer.discountValue) || 0;
+        }
+
+        product.variants.forEach(variant => {
+          variant.offerPrice = Math.floor(variant.price * (1 - productDiscount / 100));
+        });
+        product.markModified('variants');
+        await product.save();
+      }
+    }
+
+    return res.json({ success: true, message: "Category offer removed successfully" });
+
+  } catch (error) {
+    console.error("Remove Category Offer Error:", error);
+    return res.status(500).json({ success: false, message: "Server error occurred" });
+  }
+}
+
+
+module.exports = {
+  categoryInfo,
+  addCategory,
+  toggleCategory,
+  editCategory,
+  manageCategoryOffer,
+  removeCategoryOffer
+
+};

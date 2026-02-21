@@ -237,38 +237,41 @@
 
 
                 <!-- WISHLIST BUTTON -->
-<div class="absolute top-2 right-2 z-20">
-<button 
-  class="wishlist-btn bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition"
-  data-id="<%= p._id %>"
-  onclick="event.preventDefault();">
+                <div class="absolute top-2 right-2 z-20">
+                  <button class="wishlist-btn bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition"
+                    data-id="<%= p._id %>" onclick="event.preventDefault();">
 
-  <svg xmlns="http://www.w3.org/2000/svg" 
-       class="w-5 h-5 text-gray-600 hover:text-red-500 transition" 
-       fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-      d="M4.318 6.318C5.8 4.836 8.2 4.836 9.682 6.318L12 8.636l2.318-2.318c1.482-1.482 
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600 hover:text-red-500 transition"
+                      fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318C5.8 4.836 8.2 4.836 9.682 6.318L12 8.636l2.318-2.318c1.482-1.482 
       3.882-1.482 5.364 0 1.482 1.482 1.482 3.882 0 5.364L12 
       20.364 4.318 11.682c-1.482-1.482-1.482-3.882 0-5.364z" />
-  </svg>
+                    </svg>
 
-</button>
+                  </button>
 
-</div>
+                </div>
 
                 <% const totalStock=p.variants ? p.variants.reduce((acc, v)=> acc + (v.stock || 0), 0) : 0;
                   %>
-                  <% if (totalStock===0) { %>
+                  <% if (p.appliedDiscount> 0) { %>
                     <div class="absolute top-2 left-2 z-10">
                       <span
-                        class="bg-red-600 text-white text-[9px] font-bold tracking-wider px-2 py-0.5 uppercase rounded-sm shadow-sm">
-                        Out of Stock
+                        class="bg-green-600 text-white text-[10px] font-bold tracking-wider px-2 py-1 uppercase rounded-sm shadow-md">
+                        <%= p.appliedDiscount %>% OFF
                       </span>
                     </div>
-                    <% } %>
-                      <img src="/uploads/product-images/<%= p.images[0] %>"
-                        onerror="this.src='https://placehold.co/400x400/eeeeee/333333?text=Image+Missing'"
-                        class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
+                    <% } else if (totalStock===0) { %>
+                      <div class="absolute top-2 left-2 z-10">
+                        <span
+                          class="bg-red-600 text-white text-[9px] font-bold tracking-wider px-2 py-0.5 uppercase rounded-sm shadow-sm">
+                          Out of Stock
+                        </span>
+                      </div>
+                      <% } %>
+                        <img src="/uploads/product-images/<%= p.images[0] %>"
+                          onerror="this.src='https://placehold.co/400x400/eeeeee/333333?text=Image+Missing'"
+                          class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
               </div>
 
               <div class="p-4">
@@ -279,25 +282,41 @@
                   <%= p.category?.name %>
                 </p>
 
+
                 <% const firstVariant=p.variants && p.variants.length> 0
                   ? p.variants[0]
                   : null;
 
-                  const displayPrice = firstVariant ? firstVariant.offerPrice : 0;
                   const originalPrice = firstVariant ? firstVariant.price : 0;
+                  const finalPrice = p.finalPrice || originalPrice;
+                  const discount = p.appliedDiscount || 0;
                   %>
 
                   <div class="flex justify-between items-center pt-2 border-t border-gray-100">
-                    <p class="text-xl font-extrabold">
-                      ₹<%= (displayPrice || 0).toLocaleString() %>
-                    </p>
 
-                    <% if ((displayPrice || 0) < (originalPrice || 0)) { %>
-                      <p class="line-through text-sm text-gray-400">
-                        ₹<%= (originalPrice || 0).toLocaleString() %>
+                    <div>
+                      <p class="text-xl font-extrabold text-black">
+                        ₹<%= finalPrice.toLocaleString() %>
                       </p>
+
+                      <% if (discount> 0) { %>
+                        <p class="line-through text-sm text-gray-400">
+                          ₹<%= originalPrice.toLocaleString() %>
+                        </p>
+                        <% } %>
+                    </div>
+
+                    <% if (discount> 0) { %>
+                      <span class="bg-green-600 text-white text-xs font-bold px-2 py-1 rounded">
+                        <%= discount %>% OFF
+                      </span>
                       <% } %>
+
                   </div>
+
+
+
+
 
               </div>
 
@@ -366,26 +385,26 @@
         });
 
 
-        document.querySelectorAll(".wishlist-btn").forEach(button=>{
-          button.addEventListener("click",async function () {
+        document.querySelectorAll(".wishlist-btn").forEach(button => {
+          button.addEventListener("click", async function () {
 
             const productId = this.dataset.id;
 
-             const response = await fetch("/wishlist/add",{
-              method:"POST",
-              headers:{"Content-Type":"application/json"},
-              credentials:"include",
-              body:JSON.stringify({productId})
-             })
+            const response = await fetch("/wishlist/add", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({ productId })
+            })
 
-             const data = await response.json();
-   
-                 if (data.success) {
-      window.location.href = "/wishlist";  
-    }
+            const data = await response.json();
+
+            if (data.success) {
+              window.location.href = "/wishlist";
+            }
 
 
-            
+
           })
         })
 

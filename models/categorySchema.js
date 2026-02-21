@@ -20,10 +20,11 @@ const categorySchema = new mongoose.Schema({
         type:Boolean,
         default:false
     },
-    categoryOffer: {
-        type: Number,
-        default: 0
-    }
+   categoryOffer: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Offer",
+  default: null
+}
 }, { timestamps: true })
 
 module.exports = mongoose.model("Category", categorySchema)

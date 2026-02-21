@@ -12,26 +12,54 @@ const loadCheckout = async (req, res) => {
     }
 
     const user = await User.findById(userId);
-    const cart = await Cart.findOne({ userId }).populate("items.productId");
+    const cart = await Cart.findOne({ userId }).populate({
+      path: "items.productId",
+      populate: [
+        { path: "productOffer" },
+        { path: "category", populate: { path: "categoryOffer" } }
+      ]
+    });
 
     if (!cart || cart.items.length === 0) {
       return res.redirect("/cart");
     }
 
+    const today = new Date();
     let subtotal = 0;
     let totalItems = 0;
 
     cart.items.forEach(item => {
-      const variant = item.productId.variants.find(
+      const product = item.productId;
+      const variant = product.variants.find(
         v => Number(v.size) === Number(item.size)
       );
 
       if (!variant) return;
 
-      const price = Number(variant.offerPrice || variant.price);
-      const quantity = Number(item.quantity);
+      let appliedDiscount = 0;
+      // Check Product Offer
+      if (product.productOffer &&
+        product.productOffer.isActive &&
+        product.productOffer.startDate <= today &&
+        product.productOffer.endDate >= today) {
+        appliedDiscount = Math.max(appliedDiscount, Number(product.productOffer.discountValue) || 0);
+      }
 
-      subtotal += price * quantity;
+      // Check Category Offer
+      if (product.category &&
+        product.category.categoryOffer &&
+        product.category.categoryOffer.isActive &&
+        product.category.categoryOffer.startDate <= today &&
+        product.category.categoryOffer.endDate >= today) {
+        appliedDiscount = Math.max(appliedDiscount, Number(product.category.categoryOffer.discountValue) || 0);
+      }
+
+      const currentPrice = appliedDiscount > 0
+        ? Math.floor(variant.price * (1 - appliedDiscount / 100))
+        : variant.price;
+
+      const quantity = Number(item.quantity);
+      subtotal += currentPrice * quantity;
       totalItems += quantity;
     });
 
@@ -88,35 +116,62 @@ const placeOrder = async (req, res) => {
       return res.redirect("/login");
     }
 
-    const user = await User.findById(userId);
-    const cart = await Cart.findOne({ userId }).populate("items.productId");
+    const cart = await Cart.findOne({ userId }).populate({
+      path: "items.productId",
+      populate: [
+        { path: "productOffer" },
+        { path: "category", populate: { path: "categoryOffer" } }
+      ]
+    });
 
     if (!cart || cart.items.length === 0) {
       console.log("Order placement failed: Empty cart for user", userId);
       return res.redirect("/cart");
     }
 
+    const today = new Date();
     let subtotal = 0;
     let orderItems = [];
 
-
     for (const item of cart.items) {
-      const variant = item.productId.variants.find(
+      const product = item.productId;
+      const variant = product.variants.find(
         v => Number(v.size) === Number(item.size)
       );
       if (!variant) {
-        console.log("Variant not found for product", item.productId._id, "size", item.size);
+        console.log("Variant not found for product", product._id, "size", item.size);
         continue;
       }
 
-      const price = Number(variant.offerPrice || variant.price);
-      subtotal += price * item.quantity;
+      let appliedDiscount = 0;
+      // Check Product Offer
+      if (product.productOffer &&
+        product.productOffer.isActive &&
+        product.productOffer.startDate <= today &&
+        product.productOffer.endDate >= today) {
+        appliedDiscount = Math.max(appliedDiscount, Number(product.productOffer.discountValue) || 0);
+      }
+
+      // Check Category Offer
+      if (product.category &&
+        product.category.categoryOffer &&
+        product.category.categoryOffer.isActive &&
+        product.category.categoryOffer.startDate <= today &&
+        product.category.categoryOffer.endDate >= today) {
+        appliedDiscount = Math.max(appliedDiscount, Number(product.category.categoryOffer.discountValue) || 0);
+      }
+
+      const currentPrice = appliedDiscount > 0
+        ? Math.floor(variant.price * (1 - appliedDiscount / 100))
+        : variant.price;
+
+      subtotal += currentPrice * item.quantity;
 
       orderItems.push({
-        productId: item.productId._id,
+        productId: product._id,
         size: item.size,
         quantity: item.quantity,
-        price
+        price: currentPrice
       });
     }
 

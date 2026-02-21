@@ -22,37 +22,65 @@ const createOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: "Address is required" });
     }
 
-    const cart = await Cart.findOne({ userId }).populate("items.productId");
+    const cart = await Cart.findOne({ userId }).populate({
+      path: "items.productId",
+      populate: [
+        { path: "productOffer" },
+        { path: "category", populate: { path: "categoryOffer" } }
+      ]
+    });
+
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ success: false, message: "Cart is empty" });
     }
 
-    const user = await User.findById(userId);
-    const selectedAddress = user.addresses.id(addressId);
-    if (!selectedAddress) {
-      return res.status(400).json({ success: false, message: "Address not found" });
-    }
-
+    const today = new Date();
     let subtotal = 0;
     let orderItems = [];
+
     for (const item of cart.items) {
-      const variant = item.productId.variants.find(
+      const product = item.productId;
+      const variant = product.variants.find(
         v => Number(v.size) === Number(item.size)
       );
+
       if (!variant) continue;
-      const price = Number(variant.offerPrice || variant.price);
-      subtotal += price * item.quantity;
+
+      let appliedDiscount = 0;
+      // Check Product Offer
+      if (product.productOffer &&
+        product.productOffer.isActive &&
+        product.productOffer.startDate <= today &&
+        product.productOffer.endDate >= today) {
+        appliedDiscount = Math.max(appliedDiscount, Number(product.productOffer.discountValue) || 0);
+      }
+
+      // Check Category Offer
+      if (product.category &&
+        product.category.categoryOffer &&
+        product.category.categoryOffer.isActive &&
+        product.category.categoryOffer.startDate <= today &&
+        product.category.categoryOffer.endDate >= today) {
+        appliedDiscount = Math.max(appliedDiscount, Number(product.category.categoryOffer.discountValue) || 0);
+      }
+
+      const currentPrice = appliedDiscount > 0
+        ? Math.floor(variant.price * (1 - appliedDiscount / 100))
+        : variant.price;
+
+      subtotal += currentPrice * item.quantity;
 
       orderItems.push({
-        productId: item.productId._id,
+        productId: product._id,
         size: item.size,
         quantity: item.quantity,
-        price
+        price: currentPrice
       });
     }
 
     const gstAmount = Math.round(subtotal * 0.18);
-    const discountAmount = Math.round(subtotal * 0.30);
+    // Note: Removed the hardcoded 30% discount to rely on dynamic offers + potentially coupons
+    const discountAmount = req.session.discountAmount || 0;
     const totalAmount = subtotal + gstAmount - discountAmount;
 
     const options = {
@@ -63,7 +91,7 @@ const createOrder = async (req, res) => {
 
     const razorpayOrder = await razorpay.orders.create(options);
 
-    
+
     const newOrder = new Order({
       orderId: razorpayOrder.id,
       userId: userId,
@@ -128,7 +156,7 @@ const verifyPayment = async (req, res) => {
       return res.status(401).json({ success: false, message: "User not authenticated" });
     }
 
-  
+
     const updatedOrder = await Order.findOneAndUpdate(
       { orderId: razorpay_order_id },
       { paymentStatus: "Paid" },
@@ -139,7 +167,7 @@ const verifyPayment = async (req, res) => {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
 
-  
+
     for (const item of updatedOrder.items) {
       await Product.updateOne(
         { _id: item.productId, "variants.size": item.size },

@@ -23,10 +23,15 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-
+  
+productOffer: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Offer",
+  default: null
+},
 
   images: {
-    type: [String],
+      type: [String],
     required: true
   },
 

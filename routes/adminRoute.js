@@ -34,6 +34,8 @@ router.get("/category", adminAuth, categoryController.categoryInfo)
 router.post("/addCategory", adminAuth, categoryController.addCategory)
 router.post("/edit-category/:id", adminAuth, categoryController.editCategory)
 router.patch("/toggle-category/:id", adminAuth, categoryController.toggleCategory)
+router.post("/manage-category-offer", adminAuth, categoryController.manageCategoryOffer)
+router.post("/remove-category-offer", adminAuth, categoryController.removeCategoryOffer);
 
 // brand management
 
@@ -56,6 +58,9 @@ router.post("/edit-product/:id", adminAuth, uploadProduct.array("images", 3), pr
 router.patch("/delete-product/:id", adminAuth, productController.deleteProduct)
 router.delete("/delete-product-image/:productId/:imgName", adminAuth, productController.deleteProductImage);
 router.patch("/toggle-product/:id", adminAuth, productController.toggleProduct);
+router.post("/manage-product-offer", adminAuth, productController.manageProductOffer);
+router.post("/remove-product-offer", adminAuth, productController.removeProductOffer);
+
 
 // order management
 router.get("/orders", adminAuth, adminOrderController.loadOrders);
@@ -76,7 +81,8 @@ router.post("/orders/update-item-status", adminAuth, adminOrderController.update
 router.post("/orders/restock-item/:orderId/:itemId", adminAuth, adminOrderController.restockItem);
 
 
-router.get("/coupons", couponController.loadCouponPage)
+// coupon management
+router.get("/coupons", adminAuth, couponController.loadCouponPage)
 router.post("/createCoupon", adminAuth, couponController.createCoupon)
 router.patch("/toggleCoupon/:id", adminAuth, couponController.toggleCouponStatus)
 router.patch("/updateCoupon/:id", adminAuth, couponController.updateCoupon)
