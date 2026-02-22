@@ -22,7 +22,7 @@ const loadProductDetails = async (req, res) => {
     const today = new Date();
     let appliedDiscount = 0;
 
-  
+
     if (product.productOffer &&
       product.productOffer.isActive &&
       product.productOffer.startDate <= today &&
@@ -43,11 +43,11 @@ const loadProductDetails = async (req, res) => {
 
     if (product.variants && product.variants.length > 0) {
       product.variants.forEach(v => {
-        const base = Number(v.salePrice || v.price);
+        const basePrice = Number(v.salePrice || v.price);
         if (appliedDiscount > 0) {
-          v.offerPrice = Math.floor(base * (1 - appliedDiscount / 100));
+          v.offerPrice = Math.floor(basePrice * (1 - appliedDiscount / 100));
         } else {
-          v.offerPrice = base;
+          v.offerPrice = basePrice;
         }
       });
     }

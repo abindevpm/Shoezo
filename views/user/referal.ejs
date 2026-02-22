@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SHOEZOO - Refer & Earn</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: #fcfcfc;
+      color: #333;
+    }
+
+    /* DASHBOARD LAYOUT */
+    .container {
+      display: flex;
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding-left: 40px;
+      min-height: 80vh;
+    }
+
+    main {
+      flex: 1;
+      padding: 40px 60px;
+    }
+
+    /* PREMIUM REFERRAL STYLES */
+    .referral-hero {
+      background: linear-gradient(135deg, #000 0%, #333 100%);
+      border-radius: 20px;
+      padding: 60px;
+      color: #fff;
+      text-align: center;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .referral-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+      animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .referral-hero h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 15px;
+      position: relative;
+    }
+
+    .referral-hero p {
+      font-size: 16px;
+      color: #ccc;
+      max-width: 600px;
+      margin: 0 auto 30px;
+      position: relative;
+    }
+
+    .code-container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: inline-flex;
+      align-items: center;
+      padding: 15px 30px;
+      border-radius: 50px;
+      gap: 20px;
+      position: relative;
+    }
+
+    .referral-code {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 4px;
+      color: #fff;
+    }
+
+    .copy-btn {
+      background: #fff;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .copy-btn:hover {
+      background: #eee;
+      transform: translateY(-2px);
+    }
+
+    /* HOW IT WORKS */
+    .steps-section {
+      margin-top: 60px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+    }
+
+    .step-card {
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      border: 1px solid #eee;
+      transition: all 0.3s ease;
+    }
+
+    .step-card:hover {
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+      border-color: #ddd;
+    }
+
+    .step-icon {
+      width: 60px;
+      height: 60px;
+      background: #f8f9fa;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin: 0 auto 20px;
+      color: #000;
+    }
+
+    .step-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .step-card p {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 992px) {
+      .container {
+        flex-direction: column;
+        padding-left: 0;
+      }
+
+      aside {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #eee;
+      }
+
+      .steps-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <%- include('../partials/userpartial/header.ejs') %>
+
+    <div class="container">
+      <%- include("../partials/userpartial/userprofile-sidebar.ejs", { user: user, activePage: "referal" }) %>
+
+        <main>
+          <div class="referral-hero">
+            <h1>Invite Friends, Get Rewards</h1>
+            <p>Share your unique referral code and earn amazing discounts on your next purchase when your friends sign
+              up and shop!</p>
+
+            <div class="code-container">
+              <span class="referral-code" id="referralCode">
+                <%= user.referalCode || 'GEN-CODE' %>
+              </span>
+              <button class="copy-btn" onclick="copyReferralCode()">
+                <i class="far fa-copy"></i> Copy
+              </button>
+            </div>
+          </div>
+
+          <div class="steps-section">
+            <h2 class="section-title">How It Works</h2>
+            <div class="steps-grid">
+              <div class="step-card">
+                <div class="step-icon">
+                  <i class="fas fa-share-alt"></i>
+                </div>
+                <h3>Share Your Code</h3>
+                <p>Send your referral code to your friends and family.</p>
+              </div>
+
+              <div class="step-card">
+                <div class="step-icon">
+                  <i class="fas fa-user-plus"></i>
+                </div>
+                <h3>Friend Joins</h3>
+                <p>Your friend signs up using your code and gets a welcome bonus.</p>
+              </div>
+
+              <div class="step-card">
+                <div class="step-icon">
+                  <i class="fas fa-gift"></i>
+                </div>
+                <h3>You Get Reward</h3>
+                <p>Earn credit in your wallet once they complete their first purchase!</p>
+              </div>
+            </div>
+          </div>
+        </main>
+    </div>
+
+    <%- include('../partials/userpartial/footer.ejs') %>
+
+      <script>
+        function copyReferralCode() {
+          const code = document.getElementById('referralCode').innerText;
+          navigator.clipboard.writeText(code).then(() => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Copied!',
+              text: 'Referral code copied to clipboard.',
+              timer: 2000,
+              showConfirmButton: false,
+              toast: true,
+              position: 'top-end'
+            });
+          }).catch(err => {
+            console.error('Failed to copy: ', err);
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Failed to copy code. Please try again.',
+            });
+          });
+        }
+      </script>
+</body>
+
+</html>

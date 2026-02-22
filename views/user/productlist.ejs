@@ -299,7 +299,7 @@
                         ₹<%= finalPrice.toLocaleString() %>
                       </p>
 
-                      <% if (discount> 0) { %>
+                      <% if (finalPrice < originalPrice) { %>
                         <p class="line-through text-sm text-gray-400">
                           ₹<%= originalPrice.toLocaleString() %>
                         </p>

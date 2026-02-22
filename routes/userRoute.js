@@ -151,6 +151,8 @@ router.post("/wishlist/add", userAuth, WishlistController.addToWishlist)
 router.post("/wishlist/remove", userAuth, WishlistController.removeFromWishlist)
 router.post("/wishlist/move-to-cart", userAuth, WishlistController.moveToCart);
 
+// referal page
+router.get("/referal",userController.loadReferralPage)
 
 // wallet 
 

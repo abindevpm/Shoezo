@@ -1,5 +1,4 @@
 <style>
-  /* DASHBOARD LAYOUT & SIDEBAR STYLES */
   aside {
     width: 280px;
     border-right: 1px solid #eee;
@@ -62,8 +61,9 @@
       class="fas fa-address-book"></i> Manage Addresses</a>
   <a href="/wallet" class="menu-item <%= activePage === 'wallet' ? 'active' : '' %>"><i class="fas fa-wallet"></i>
     Wallet</a>
-  <a href="#" class="menu-item"><i class="fas fa-ticket-alt"></i> coupons</a>
-  <a href="#" class="menu-item"><i class="fas fa-users"></i> Refer & Earn</a>
+  <!-- <a href="#" class="menu-item"><i class="fas fa-ticket-alt"></i> coupons</a> -->
+  <a href="/referal" class="menu-item <%= activePage === 'referal' ? 'active' : '' %>"><i class="fas fa-users"></i>
+    Refer & Earn</a>
   <a href="/logout" class="menu-item" style="margin-top: 60px; border-bottom: none;"><i class="fas fa-sign-out-alt"></i>
     logout</a>
 </aside>

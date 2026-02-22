@@ -827,6 +827,33 @@ const removeCoupon = (req, res) => {
 
 
 
+const loadReferralPage = async (req, res) => {
+  try {
+    const user = await User.findById(req.session.user);
+
+    res.render("referal", {
+      user
+    });
+  } catch (error) {
+    console.log(error,"Referal page error");
+    res.redirect("/profile");
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 module.exports = {
   loadHomepage,
   landingpage,
@@ -847,5 +874,6 @@ module.exports = {
   orderFailure,
   getAvailableCoupons,
   applyCoupon,
-  removeCoupon
+  removeCoupon,
+  loadReferralPage
 }

@@ -72,7 +72,7 @@ const loadShopPage = async (req, res) => {
 
 
 
-  
+
 
     const page = parseInt(req.query.page) || 1;
     const limit = 6;
@@ -95,7 +95,7 @@ const loadShopPage = async (req, res) => {
         }
       },
       { $unwind: { path: "$prodOfferInfo", preserveNullAndEmptyArrays: true } },
-    
+
       {
         $lookup: {
           from: "categories",
@@ -105,7 +105,7 @@ const loadShopPage = async (req, res) => {
         }
       },
       { $unwind: { path: "$catInfo", preserveNullAndEmptyArrays: true } },
-    
+
       {
         $lookup: {
           from: "offers",
@@ -115,7 +115,7 @@ const loadShopPage = async (req, res) => {
         }
       },
       { $unwind: { path: "$catOfferInfo", preserveNullAndEmptyArrays: true } },
-      
+
       {
         $addFields: {
           validProdDisc: {
@@ -163,7 +163,7 @@ const loadShopPage = async (req, res) => {
                 in: {
                   $floor: {
                     $multiply: [
-                      "$$v.price",
+                      { $ifNull: ["$$v.salePrice", "$$v.price"] },
                       { $subtract: [1, { $divide: ["$highestDiscount", 100] }] }
                     ]
                   }
@@ -199,14 +199,14 @@ const loadShopPage = async (req, res) => {
       { path: "productOffer" }
     ]);
 
-    
+
     products.forEach(p => {
       const v = p.variants && p.variants.length > 0 ? p.variants[0] : null;
 
       if (v) {
         let appliedDiscount = 0;
 
-        
+
         if (p.productOffer &&
           p.productOffer.isActive &&
           p.productOffer.startDate <= today &&
@@ -214,7 +214,7 @@ const loadShopPage = async (req, res) => {
           appliedDiscount = Math.max(appliedDiscount, Number(p.productOffer.discountValue) || 0);
         }
 
-      
+
         if (p.category &&
           p.category.categoryOffer &&
           p.category.categoryOffer.isActive &&
@@ -223,11 +223,12 @@ const loadShopPage = async (req, res) => {
           appliedDiscount = Math.max(appliedDiscount, Number(p.category.categoryOffer.discountValue) || 0);
         }
 
+        const basePrice = Number(v.salePrice || v.price);
         if (appliedDiscount > 0) {
-          p.finalPrice = Math.floor(v.price * (1 - appliedDiscount / 100));
+          p.finalPrice = Math.floor(basePrice * (1 - appliedDiscount / 100));
           p.appliedDiscount = appliedDiscount;
         } else {
-          p.finalPrice = v.price;
+          p.finalPrice = basePrice;
           p.appliedDiscount = 0;
         }
       } else {
