@@ -114,7 +114,7 @@ const updateOrderStatus = async (req, res) => {
         }
 
         if (status === "Returned" || status === "Cancelled") {
-        
+
             for (const item of order.items) {
                 if (!item.isRestocked && !["Cancelled", "Returned"].includes(item.itemStatus)) {
                     await Product.updateOne(
@@ -126,7 +126,7 @@ const updateOrderStatus = async (req, res) => {
                 item.itemStatus = status;
             }
 
-    
+
             if (order.paymentStatus === "Paid" && order.totalAmount > 0) {
                 const user = await User.findById(order.userId);
                 if (!user.wallet || typeof user.wallet !== 'object' || Array.isArray(user.wallet)) {
@@ -145,9 +145,9 @@ const updateOrderStatus = async (req, res) => {
                 order.paymentStatus = "Refunded";
                 await user.save({ validateBeforeSave: false });
             }
-            order.totalAmount = 0; 
+            order.totalAmount = 0;
         } else if (status === "Returned" && oldStatus === "Return Requested") {
-        
+
             for (const item of order.items) {
                 if (item.itemStatus === "Return Requested" || item.itemStatus === "Delivered") {
                     if (!item.isRestocked) {
@@ -172,7 +172,13 @@ const updateOrderStatus = async (req, res) => {
         if (status === "Delivered") order.paymentStatus = "Paid";
 
         await order.save();
-        res.json({ success: true, message: "Order status updated" });
+
+        let message = "Order status updated";
+        if (order.paymentStatus === "Refunded") {
+            message += ". Customer has been refunded to wallet.";
+        }
+
+        res.json({ success: true, message: message });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: "Internal server error" });
@@ -216,7 +222,7 @@ const approveItemReturn = async (req, res) => {
 
         item.itemStatus = "Returned";
 
-    
+
         const reductionAmount = Math.min(item.price * item.quantity, order.totalAmount);
         order.totalAmount -= reductionAmount;
 
@@ -250,7 +256,13 @@ const approveItemReturn = async (req, res) => {
 
 
         await order.save();
-        res.json({ success: true, message: "Item return approved and customer refunded" });
+        let message = "Item return approved";
+        if (reductionAmount > 0 && order.paymentStatus !== "Refunded") { // if not already fully refunded
+            message += ` and ₹${reductionAmount} credited to customer wallet.`;
+        } else if (order.paymentStatus === "Refunded") {
+            message += " and customer fully refunded to wallet.";
+        }
+        res.json({ success: true, message: message });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: "Internal server error" });
@@ -312,7 +324,7 @@ const cancelItemAdmin = async (req, res) => {
         const reductionAmount = Math.min(item.price * item.quantity, order.totalAmount);
         order.totalAmount -= reductionAmount;
 
-        
+
         if (order.paymentStatus === "Paid" && reductionAmount > 0) {
             const user = await User.findById(order.userId);
             if (!user.wallet || typeof user.wallet !== 'object' || Array.isArray(user.wallet)) {
@@ -342,7 +354,13 @@ const cancelItemAdmin = async (req, res) => {
         }
 
         await order.save();
-        res.json({ success: true, message: "Item cancelled and stock updated" });
+        let message = "Item cancelled successfully";
+        if (reductionAmount > 0 && order.paymentStatus !== "Refunded") {
+            message += ` and ₹${reductionAmount} credited to customer wallet.`;
+        } else if (order.paymentStatus === "Refunded") {
+            message += " and customer fully refunded to wallet.";
+        }
+        res.json({ success: true, message: message });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: "Internal server error" });

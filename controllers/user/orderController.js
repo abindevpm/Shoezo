@@ -17,7 +17,7 @@ const loadorders = async (req, res) => {
         {
           $or: [
             { paymentMethod: "COD" },
-            { paymentStatus: "Paid" }
+            { paymentStatus: { $in: ["Paid", "Refunded"] } }
           ]
         }
       ]
@@ -94,13 +94,15 @@ const cancelOrder = async (req, res) => {
     order.cancelReason = reason
     order.items.forEach(item => item.itemStatus = "Cancelled")
 
+    const originalTotal = order.totalAmount;
     if (order.paymentStatus === "Paid" && order.totalAmount > 0) {
       const user = await User.findById(userId);
       if (!user.wallet || Array.isArray(user.wallet)) {
         user.wallet = { balance: 0, transactions: [] };
       }
 
-      user.wallet.balance += order.totalAmount;
+      const refundAmount = order.totalAmount;
+      user.wallet.balance += refundAmount;
       user.wallet.transactions.push({
         type: "credit",
         amount: order.totalAmount,
@@ -113,9 +115,21 @@ const cancelOrder = async (req, res) => {
       order.paymentStatus = "Refunded";
     }
 
-    order.totalAmount = 0; 
+    const refundAmount = (order.paymentStatus === "Refunded") ? originalTotal : 0;
+    order.totalAmount = 0;
     await order.save()
-    res.json({ success: true, message: "Order cancelled successfully" })
+
+    let message = "Order cancelled successfully.";
+    if (refundAmount > 0) {
+      message += ` ₹${refundAmount} has been credited to your wallet.`;
+    }
+
+    res.json({
+      success: true,
+      message: message
+    });
+
+
   } catch (error) {
     console.log(error)
     res.status(500).json({ success: false, message: "Internal server error" })
@@ -155,7 +169,7 @@ const cancelOrderItem = async (req, res) => {
     item.itemStatus = "Cancelled"
     item.cancelReason = reason
 
-    
+
     const reductionAmount = Math.min(item.price * item.quantity, order.totalAmount);
     order.totalAmount -= reductionAmount;
 
@@ -187,7 +201,15 @@ const cancelOrderItem = async (req, res) => {
     }
 
     await order.save()
-    res.json({ success: true, message: "Item cancelled successfully" })
+
+    let message = "Item cancelled successfully.";
+    if (order.paymentStatus === "Paid" && reductionAmount > 0) {
+      message += ` ₹${reductionAmount} has been credited to your wallet.`;
+    } else if (allCancelled && order.paymentStatus === "Refunded") {
+      
+    }
+
+    res.json({ success: true, message: message })
   } catch (error) {
     console.log(error)
     res.status(500).json({ success: false, message: "Internal server error" })
