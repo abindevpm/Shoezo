@@ -47,17 +47,39 @@ const getMatchCondition = (reportType, fromDate, toDate) => {
 
 const loadSalesReport = async (req, res) => {
   try {
+
+   const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const skip = (page - 1) * limit;
+
+
     const { reportType, fromDate, toDate } = req.query;
     const matchCondition = getMatchCondition(reportType, fromDate, toDate);
 
+  const totalOrders = await Order.countDocuments(matchCondition);
+
     const orders = await Order.find(matchCondition)
       .populate("userId")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
 
-    const totalOrders = orders.length;
-    const totalSalesAmount = orders.reduce((acc, order) => acc + (order.totalAmount || 0), 0);
-    const totalCouponDiscount = orders.reduce((acc, order) => acc + (order.discountAmount || 0), 0);
-    const totalOfferDiscount = orders.reduce((acc, order) => acc + (order.totalOfferDiscount || 0), 0);
+          const allOrders = await Order.find(matchCondition);
+
+
+   const totalSalesAmount = allOrders.reduce(
+  (acc, order) => acc + (order.totalAmount || 0), 0
+);
+
+const totalCouponDiscount = allOrders.reduce(
+  (acc, order) => acc + (order.discountAmount || 0), 0
+);
+
+const totalOfferDiscount = allOrders.reduce(
+  (acc, order) => acc + (order.totalOfferDiscount || 0), 0
+);
+
+     const totalPages = Math.ceil(totalOrders / limit);
 
     res.render("salesReport", {
       orders,
@@ -65,6 +87,8 @@ const loadSalesReport = async (req, res) => {
       totalSalesAmount,
       totalCouponDiscount,
       totalOfferDiscount,
+        currentPage: page,
+      totalPages,
       reportType: reportType || "all",
       fromDate: fromDate || "",
       toDate: toDate || "",

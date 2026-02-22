@@ -98,6 +98,7 @@ router.post("/addAdress", addressController.addAdress)
 router.get("/address/delete/:addressId", addressController.deleteAddress)
 router.get("/editAddress/:id", userAuth, addressController.loadEditAddress)
 router.post("/updateAddress/:id", addressController.updateAddress)
+router.get("/address/set-default/:id", userAuth, addressController.setDefaultAddress)
 
 
 //  cart management
@@ -152,16 +153,16 @@ router.post("/wishlist/remove", userAuth, WishlistController.removeFromWishlist)
 router.post("/wishlist/move-to-cart", userAuth, WishlistController.moveToCart);
 
 // referal page
-router.get("/referal",userController.loadReferralPage)
+router.get("/referal", userController.loadReferralPage)
 
 // wallet 
 
-router.get("/wallet", userAuth,WalletController.loadWallet)
+router.get("/wallet", userAuth, WalletController.loadWallet)
 
 // coupon
-router.get("/available-coupons",userAuth, userController.getAvailableCoupons);
-router.post("/apply-coupon",userAuth, userController.applyCoupon);
-router.post("/remove-coupon",userAuth, userController.removeCoupon);
+router.get("/available-coupons", userAuth, userController.getAvailableCoupons);
+router.post("/apply-coupon", userAuth, userController.applyCoupon);
+router.post("/remove-coupon", userAuth, userController.removeCoupon);
 
 
 

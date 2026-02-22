@@ -154,6 +154,43 @@
             font-size: 0.75rem;
             font-weight: 600;
         }
+
+
+        .pagination-container {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.page-btn,
+.page-number {
+  display: inline-block;
+  margin: 5px;
+  padding: 8px 14px;
+  border: 1px solid #000;
+  color: #000;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+.page-number:hover,
+.page-btn:hover {
+  background: #000;
+  color: #fff;
+}
+
+.active-page {
+  background: #000;
+  color: #fff;
+}
+
+
+
+
+
+
+
     </style>
 </head>
 
@@ -310,6 +347,44 @@
                                                 <% } %>
                             </tbody>
                         </table>
+
+
+
+                        <div class="pagination-container">
+
+  <% if (currentPage > 1) { %>
+    <a href="?page=<%= currentPage - 1 %>&reportType=<%= reportType %>&fromDate=<%= fromDate %>&toDate=<%= toDate %>"
+       class="page-btn">
+       Previous
+    </a>
+  <% } %>
+
+  <% for (let i = 1; i <= totalPages; i++) { %>
+    <a href="?page=<%= i %>&reportType=<%= reportType %>&fromDate=<%= fromDate %>&toDate=<%= toDate %>"
+       class="page-number <%= i === currentPage ? 'active-page' : '' %>">
+       <%= i %>
+    </a>
+  <% } %>
+
+  <% if (currentPage < totalPages) { %>
+    <a href="?page=<%= currentPage + 1 %>&reportType=<%= reportType %>&fromDate=<%= fromDate %>&toDate=<%= toDate %>"
+       class="page-btn">
+       Next
+    </a>
+  <% } %>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
                     </div>
                 </div>
             </main>

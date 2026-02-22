@@ -339,12 +339,14 @@
                       </p>
 
                       <div class="card-actions">
-                        <a href="/editAddress/<%= address._id %>">Edit</a>
-                        <a href="javascript:void(0)" onclick="confirmDelete('<%= address._id %>')">
-                          Delete
-                        </a>
-
-
+                        <% if (!address.isDefault) { %>
+                          <a href="/address/set-default/<%= address._id %>" style="color: #000; font-weight: bold;">Set
+                            as Default</a>
+                          <% } %>
+                            <a href="/editAddress/<%= address._id %>">Edit</a>
+                            <a href="javascript:void(0)" onclick="confirmDelete('<%= address._id %>')">
+                              Delete
+                            </a>
                       </div>
 
                 </div>

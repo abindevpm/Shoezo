@@ -411,6 +411,14 @@
 
 
 
+            <!-- DEFAULT ADDRESS -->
+            <div class="input-group" style="display:flex; align-items:center; gap:10px;">
+              <input type="checkbox" name="isDefault" id="isDefault" style="width:auto; margin:0;" <%=address.isDefault
+                ? 'checked' : '' %>>
+              <label for="isDefault" style="margin:0; font-size:13px; color:#444;">Set as default address</label>
+            </div>
+
+
             <!-- SUBMIT -->
             <div style="text-align:center; margin-top:25px;">
               <button type="submit" class="black-btn" style="padding:10px 50px;">

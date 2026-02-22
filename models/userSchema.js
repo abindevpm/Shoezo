@@ -27,6 +27,14 @@ const addressSchema = new Schema({
     type: String,
     required: true
   },
+  addressType: {
+    type: String,
+    default: "HOME"
+  },
+  landmark: {
+    type: String,
+    default: ""
+  },
   isDefault: {
     type: Boolean,
     default: false
@@ -69,7 +77,7 @@ const userSchema = new Schema({
     transactions: [
       {
         type: {
-          type: String, 
+          type: String,
           enum: ["credit", "debit"]
         },
         amount: {

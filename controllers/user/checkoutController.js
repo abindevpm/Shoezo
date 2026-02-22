@@ -184,7 +184,7 @@ const placeOrder = async (req, res) => {
       });
     }
 
-  
+
     for (const item of cart.items) {
       const variant = item.productId.variants.find(
         v => Number(v.size) === Number(item.size)
@@ -335,12 +335,21 @@ const addAddressCheckout = async (req, res) => {
       state,
       pincode,
       addressType,
-      landmark
+      landmark,
+      isDefault
     } = req.body;
 
 
     if (!fullName || !phone || !addressLine || !city || !state || !pincode) {
       return res.status(400).json({ success: false, message: "Required fields are missing" });
+    }
+
+    const defaultStatus = isDefault === true || isDefault === "true";
+
+    if (defaultStatus) {
+      await User.findByIdAndUpdate(userId, {
+        $set: { "addresses.$[].isDefault": false }
+      });
     }
 
     const newAddress = {
@@ -351,7 +360,8 @@ const addAddressCheckout = async (req, res) => {
       state,
       pincode,
       addressType: addressType || "HOME",
-      landmark: landmark || ""
+      landmark: landmark || "",
+      isDefault: defaultStatus
     };
 
     const user = await User.findByIdAndUpdate(

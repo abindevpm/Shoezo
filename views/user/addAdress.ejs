@@ -296,81 +296,87 @@
 </head>
 
 <body>
-c
 
-    <div class="container">
-      <%- include("../partials/userpartial/userprofile-sidebar.ejs", { user, activePage: 'address' }) %>
+  <div class="container">
+    <%- include("../partials/userpartial/userprofile-sidebar.ejs", { user, activePage: 'address' }) %>
 
-        <main>
+      <main>
 
-          <h2 style="text-align:center; margin-bottom:6px;">Add New Addresses</h2>
-          <p style="text-align:center; font-size:13px; color:#777; margin-bottom:30px;">
-            Fill in the below details to add new address
-          </p>
+        <h2 style="text-align:center; margin-bottom:6px;">Add New Addresses</h2>
+        <p style="text-align:center; font-size:13px; color:#777; margin-bottom:30px;">
+          Fill in the below details to add new address
+        </p>
 
-          <form action="/addAdress" method="POST" style="max-width:520px; margin:0 auto;"
-            onsubmit="return validateAddAddressForm()">
+        <form action="/addAdress" method="POST" style="max-width:520px; margin:0 auto;"
+          onsubmit="return validateAddAddressForm()">
 
 
-            <!-- NAME -->
-            <div class="input-group">
-              <label>Name</label>
-              <input type="text" name="fullName">
-              <small class="error"></small>
-            </div>
+          <!-- NAME -->
+          <div class="input-group">
+            <label>Name</label>
+            <input type="text" name="fullName">
+            <small class="error"></small>
+          </div>
 
-            <!-- STATE -->
-            <div class="input-group">
-              <label>State</label>
-              <input type="text" name="state">
-              <small class="error"></small>
-            </div>
+          <!-- STATE -->
+          <div class="input-group">
+            <label>State</label>
+            <input type="text" name="state">
+            <small class="error"></small>
+          </div>
 
-            <!-- ADDRESS -->
-            <div class="input-group">
-              <label>Address</label>
-              <textarea name="addressLine" rows="3"></textarea>
-              <small class="error"></small>
-            </div>
+          <!-- ADDRESS -->
+          <div class="input-group">
+            <label>Address</label>
+            <textarea name="addressLine" rows="3"></textarea>
+            <small class="error"></small>
+          </div>
 
-            <!-- PINCODE -->
-            <div class="input-group">
-              <label>Pin Code</label>
-              <input type="text" name="pincode">
-              <small class="error"></small>
-            </div>
+          <!-- PINCODE -->
+          <div class="input-group">
+            <label>Pin Code</label>
+            <input type="text" name="pincode">
+            <small class="error"></small>
+          </div>
 
-            <!-- MOBILE -->
-            <div class="input-group">
-              <label>Mobile Number</label>
-              <input type="text" name="phone">
-              <small class="error"></small>
-            </div>
+          <!-- MOBILE -->
+          <div class="input-group">
+            <label>Mobile Number</label>
+            <input type="text" name="phone">
+            <small class="error"></small>
+          </div>
 
-            <!-- ALTERNATE -->
-            <div class="input-group">
-              <label>Alternate Number</label>
-              <input type="text" name="alternatePhone">
-              <small class="error"></small>
-            </div>
-
+          <!-- ALTERNATE -->
+          <div class="input-group">
+            <label>Alternate Number</label>
+            <input type="text" name="alternatePhone">
+            <small class="error"></small>
+          </div>
 
 
 
-            <!-- SUBMIT -->
-            <div style="text-align:center; margin-top:25px;">
-              <button type="submit" class="black-btn" style="padding:10px 50px;">
-                ADD
-              </button>
-            </div>
 
-          </form>
+          <!-- DEFAULT ADDRESS -->
+          <div class="input-group" style="display:flex; align-items:center; gap:10px;">
+            <input type="checkbox" name="isDefault" id="isDefault" style="width:auto; margin:0;">
+            <label for="isDefault" style="margin:0; font-size:13px; color:#444;">Set as default address</label>
+          </div>
 
-        </main>
 
-    </div>
+          <!-- SUBMIT -->
+          <div style="text-align:center; margin-top:25px;">
+            <button type="submit" class="black-btn" style="padding:10px 50px;">
+              ADD
+            </button>
+          </div>
 
-    <%- include("../partials/userpartial/footer.ejs") %>
+        </form>
+
+      </main>
+
+  </div>
+
+  <%- include("../partials/userpartial/footer.ejs") %>
 
 </body>
 

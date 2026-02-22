@@ -127,7 +127,7 @@
                               </strong>
 
                               <% if (addr.isDefault) { %>
-                                <span class="badge">HOME</span>
+                                <span class="badge" style="background: #000; color: #fff;">DEFAULT</span>
                                 <% } %>
 
                                   <p>
@@ -181,7 +181,14 @@
                                   <input type="text" id="newPincode" placeholder="6-digit Pincode">
                                 </div>
                               </div>
-                              <button class="btn-black-sm" id="saveNewAddressBtn">Save & Deliver Here</button>
+                              <div class="form-group"
+                                style="display:flex; align-items:center; gap:8px; margin-top:10px;">
+                                <input type="checkbox" id="newIsDefault" style="width:auto; margin:0;">
+                                <label for="newIsDefault" style="margin:0; font-size:13px; color:#444;">Set as default
+                                  address</label>
+                              </div>
+                              <button class="btn-black-sm" id="saveNewAddressBtn" style="margin-top:15px;">Save &
+                                Deliver Here</button>
                             </div>
                       </div>
 
@@ -875,7 +882,8 @@
       addressLine: document.getElementById("newAddressLine").value,
       city: document.getElementById("newCity").value,
       state: document.getElementById("newState").value,
-      pincode: document.getElementById("newPincode").value
+      pincode: document.getElementById("newPincode").value,
+      isDefault: document.getElementById("newIsDefault").checked
     };
 
     if (Object.values(data).some(val => !val.trim())) {
@@ -900,13 +908,14 @@
           <input type="radio" name="addressRadio" value="${addr._id}" checked>
           <div class="address-text">
             <strong>${addr.fullName} <br> ${addr.addressLine}<br> ${addr.pincode}</strong>
+            ${addr.isDefault ? '<span class="badge" style="background: #000; color: #fff;">DEFAULT</span>' : ''}
             <p>${addr.city}, ${addr.state}</p>
             <p>Mobile: +91 ${addr.phone}</p>
           </div>
         `;
         document.getElementById("addressList").insertBefore(option, document.getElementById("confirmAddressBtn").previousSibling.previousSibling);
 
-        // Update selection UI
+
         selectedBox.querySelector(".addr-name strong").innerHTML = `${addr.fullName},<br>${addr.addressLine},<br>${addr.pincode}`;
         selectedBox.querySelector(".addr-desc").innerText = `${addr.city}, ${addr.state}`;
         selectedBox.querySelector(".addr-phone").innerText = `Mobile: +91 ${addr.phone}`;
@@ -1004,7 +1013,7 @@
           if (verifyData.success) {
             window.location.href = "/order-success";
           } else {
-            // Mark payment as failed in DB if verification fails
+
             await fetch("/mark-order-failed", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -1015,7 +1024,7 @@
         },
         modal: {
           ondismiss: async function () {
-            // Mark payment as failed when user closes the modal
+
             await fetch("/mark-order-failed", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -1029,7 +1038,7 @@
       const rzp = new Razorpay(options);
 
       rzp.on("payment.failed", async function (response) {
-        // Mark payment as failed when payment fails
+
         await fetch("/mark-order-failed", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1187,14 +1196,14 @@
       const data = await res.json();
 
       if (data.success) {
-        // hide coupon discount row
+
         document.getElementById("couponDiscountRow").style.display = "none";
         document.getElementById("couponDiscountAmount").innerText = "0";
 
-        // reset total back to original discounted price
+
         document.getElementById("finalTotal").innerText = data.totalPrice;
 
-        // clear coupon input and message
+
         document.getElementById("couponCode").value = "";
         document.getElementById("couponMessage").innerText = "Coupon removed.";
       }
@@ -1209,7 +1218,7 @@
 
   async function loadCoupons() {
     try {
-      // Use final cart total (after offer discounts) to filter eligible coupons
+
       const cartTotal = parseFloat(document.getElementById("finalTotal").innerText) || <%= totalPrice %>;
       const response = await fetch(`/available-coupons?subtotal=${cartTotal}`);
       const data = await response.json();

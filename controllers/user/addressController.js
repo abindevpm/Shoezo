@@ -6,7 +6,7 @@ const loadAddresses = async (req, res) => {
 
     res.render("address", {
       user,
-      addresses: user.addresses || [], 
+      addresses: user.addresses || [],
       activePage: "address"
     });
   } catch (err) {
@@ -16,65 +16,72 @@ const loadAddresses = async (req, res) => {
 };
 
 
-const loadaddAdresses = async(req,res)=>{
+const loadaddAdresses = async (req, res) => {
 
   try {
 
     const user = await User.findById(req.session.user)
 
-    res.render("addAdress",{
+    res.render("addAdress", {
       user,
-       addresses: user.addressess|| [] 
+      addresses: user.addressess || []
     })
-    
+
   } catch (error) {
-    console.log(error,"Add address have error")
+    console.log(error, "Add address have error")
     res.redirect("address")
-    
+
   }
 
 }
 
 
-const addAdress =  async(req,res)=>{
+const addAdress = async (req, res) => {
 
-   try {
+  try {
 
-     const userId = req.session.user;
+    const userId = req.session.user;
 
-     const {
-
+    const {
       fullName,
       phone,
       addressLine,
       city,
       state,
-      pincode
+      pincode,
+      isDefault
+    } = req.body;
 
-     } = req.body;
+    const defaultStatus = isDefault === "on" || isDefault === true;
 
+    if (defaultStatus) {
+      await User.findByIdAndUpdate(userId, {
+        $set: { "addresses.$[].isDefault": false }
+      });
+    }
 
-     await User.findByIdAndUpdate(userId,{
-      $push:{
-        addresses:{
+    await User.findByIdAndUpdate(userId, {
+      $push: {
+        addresses: {
           fullName,
           phone,
           addressLine,
           city,
           state,
-          pincode
+          pincode,
+          isDefault: defaultStatus
         }
       }
-     })
+    })
 
-     res.redirect("address")
+    res.redirect("address")
 
-    
-   } catch (error) {
-    console.log(error,"Add address have error")
+
+  } catch (error) {
+    console.log(error, "Add address have error")
     res.redirect("addAdress")
-    
-   }
+
+  }
 
 }
 
@@ -98,14 +105,14 @@ const deleteAddress = async (req, res) => {
 };
 
 
-  const loadEditAddress = async (req, res) => {
+const loadEditAddress = async (req, res) => {
   try {
     const userId = req.session.user;
     const addressId = req.params.id;
 
     const user = await User.findById(userId);
 
-  
+
     const address = user.addresses.id(addressId);
 
     if (!address) {
@@ -125,10 +132,10 @@ const deleteAddress = async (req, res) => {
 
 
 
-const updateAddress = async(req,res)=>{
+const updateAddress = async (req, res) => {
 
 
-    try {
+  try {
     const userId = req.session.user;
     const addressId = req.params.id;
 
@@ -140,8 +147,17 @@ const updateAddress = async(req,res)=>{
       state,
       pincode,
       addressType,
-      landmark
+      landmark,
+      isDefault
     } = req.body;
+
+    const defaultStatus = isDefault === "on" || isDefault === true;
+
+    if (defaultStatus) {
+      await User.findByIdAndUpdate(userId, {
+        $set: { "addresses.$[].isDefault": false }
+      });
+    }
 
     await User.updateOne(
       { _id: userId, "addresses._id": addressId },
@@ -154,11 +170,12 @@ const updateAddress = async(req,res)=>{
           "addresses.$.state": state,
           "addresses.$.pincode": pincode,
           "addresses.$.addressType": addressType,
-          "addresses.$.landmark": landmark
+          "addresses.$.landmark": landmark,
+          "addresses.$.isDefault": defaultStatus
         }
       }
     );
-  res.redirect("/address?updated=true");
+    res.redirect("/address?updated=true");
 
   } catch (error) {
     console.log("Update address error:", error);
@@ -174,12 +191,34 @@ const updateAddress = async(req,res)=>{
 
 
 
+const setDefaultAddress = async (req, res) => {
+  try {
+    const userId = req.session.user;
+    const addressId = req.params.id;
+
+    await User.findByIdAndUpdate(userId, {
+      $set: { "addresses.$[].isDefault": false }
+    });
+
+    await User.updateOne(
+      { _id: userId, "addresses._id": addressId },
+      { $set: { "addresses.$.isDefault": true } }
+    );
+
+    res.redirect("/address");
+  } catch (error) {
+    console.log("Set default address error:", error);
+    res.redirect("/address");
+  }
+};
+
 
 module.exports = {
-    loadAddresses,
-    loadaddAdresses,
-    addAdress,
-    deleteAddress,
-    loadEditAddress,
-    updateAddress
+  loadAddresses,
+  loadaddAdresses,
+  addAdress,
+  deleteAddress,
+  loadEditAddress,
+  updateAddress,
+  setDefaultAddress
 }
