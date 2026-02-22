@@ -187,11 +187,7 @@ const toggleBrand = async (req, res) => {
       });
     }
 
-<<<<<<< HEAD
-  
-=======
-    
->>>>>>> 5b9dd39acf705af20666809c35197c685e87e174
+
     brand.isListed = !brand.isListed;
     await brand.save();
 

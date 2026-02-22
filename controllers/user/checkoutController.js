@@ -264,11 +264,9 @@ const placeOrder = async (req, res) => {
       subtotal: baseSubtotal,
       offerDiscount: baseSubtotal - subtotal,
       discountAmount,
-<<<<<<< HEAD
+
       couponCode: req.session.appliedCoupon || null,
-=======
       totalOfferDiscount,
->>>>>>> 5b9dd39acf705af20666809c35197c685e87e174
       totalAmount
     });
 
