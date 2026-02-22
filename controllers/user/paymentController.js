@@ -43,6 +43,7 @@ const createOrder = async (req, res) => {
     const today = new Date();
     let subtotal = 0;
     let orderItems = [];
+    let totalOfferDiscount = 0;
 
     let baseSubtotal = 0;
     for (const item of cart.items) {
@@ -76,8 +77,14 @@ const createOrder = async (req, res) => {
         ? variant.offerPrice
         : (variant.salePrice || variant.price);
 
+<<<<<<< HEAD
       
       const saleBase = variant.salePrice || variant.offerPrice || variant.price;
+=======
+      const offerDiscountAmount = (variant.price - currentPrice) * item.quantity;
+      totalOfferDiscount += offerDiscountAmount;
+
+>>>>>>> 5b9dd39acf705af20666809c35197c685e87e174
       subtotal += currentPrice * item.quantity;
       baseSubtotal += Number(saleBase) * item.quantity;
 
@@ -89,6 +96,11 @@ const createOrder = async (req, res) => {
       });
     }
 
+<<<<<<< HEAD
+=======
+    const gstAmount = Math.round(subtotal * 0.18);
+
+>>>>>>> 5b9dd39acf705af20666809c35197c685e87e174
     const discountAmount = req.session.discountAmount || 0;
     const appliedCouponCode = req.session.appliedCoupon;
 
@@ -129,7 +141,11 @@ const createOrder = async (req, res) => {
       subtotal: baseSubtotal,
       offerDiscount: baseSubtotal - subtotal,
       discountAmount,
+<<<<<<< HEAD
       couponCode: req.session.appliedCoupon || null,
+=======
+      totalOfferDiscount,
+>>>>>>> 5b9dd39acf705af20666809c35197c685e87e174
       status: "Placed"
     });
 

@@ -8,6 +8,7 @@ const brandController = require("../controllers/admin/brandController")
 const productController = require("../controllers/admin/productController")
 const { uploadProduct } = require("../middlewares/multer")
 const couponController = require("../controllers/admin/couponController")
+const SalesReportController = require("../controllers/admin/salesReportController")
 
 
 
@@ -86,6 +87,13 @@ router.get("/coupons", adminAuth, couponController.loadCouponPage)
 router.post("/createCoupon", adminAuth, couponController.createCoupon)
 router.patch("/toggleCoupon/:id", adminAuth, couponController.toggleCouponStatus)
 router.patch("/updateCoupon/:id", adminAuth, couponController.updateCoupon)
+
+// sales Report
+router.get("/sales-report", adminAuth, SalesReportController.loadSalesReport)
+router.get("/sales-report/download/pdf", adminAuth, SalesReportController.SalesReportPDF);
+router.get("/sales-report/download/excel", adminAuth, SalesReportController.downloadSalesReportExcel);
+
+
 
 
 
