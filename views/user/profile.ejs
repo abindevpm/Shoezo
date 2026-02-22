@@ -393,8 +393,10 @@
                 <div class="refer-container">
                   <button class="refer-btn">Refer & Earn</button>
                   <div class="refer-box">
-                    <span style="font-size: 18px; color: #555;">ox3291756</span>
-                    <i class="far fa-copy" style="cursor: pointer; font-size: 20px;"></i>
+                    <span id="referralCode" style="font-size: 18px; color: #555;">
+                      <%= user.referalCode || 'Generating...' %>
+                    </span>
+                    <i class="far fa-copy" style="cursor: pointer; font-size: 20px;" onclick="copyReferralCode()"></i>
                   </div>
                 </div>
         </main>
@@ -407,5 +409,12 @@
 </html>
 
 <script>
-
+  function copyReferralCode() {
+    const code = document.getElementById('referralCode').innerText;
+    navigator.clipboard.writeText(code).then(() => {
+      alert('Referral code copied to clipboard!');
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+    });
+  }
 </script>

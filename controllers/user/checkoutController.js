@@ -26,6 +26,7 @@ const loadCheckout = async (req, res) => {
 
     const today = new Date();
     let subtotal = 0;
+    let baseSubtotal = 0;
     let totalItems = 0;
 
     cart.items.forEach(item => {
@@ -37,7 +38,7 @@ const loadCheckout = async (req, res) => {
       if (!variant) return;
 
       let appliedDiscount = 0;
-    
+
       if (product.productOffer &&
         product.productOffer.isActive &&
         product.productOffer.startDate <= today &&
@@ -45,7 +46,7 @@ const loadCheckout = async (req, res) => {
         appliedDiscount = Math.max(appliedDiscount, Number(product.productOffer.discountValue) || 0);
       }
 
-  
+
       if (product.category &&
         product.category.categoryOffer &&
         product.category.categoryOffer.isActive &&
@@ -54,21 +55,24 @@ const loadCheckout = async (req, res) => {
         appliedDiscount = Math.max(appliedDiscount, Number(product.category.categoryOffer.discountValue) || 0);
       }
 
-      const currentPrice = appliedDiscount > 0
-        ? Math.floor(variant.price * (1 - appliedDiscount / 100))
-        : variant.price;
+      const currentPrice = variant.offerPrice && variant.offerPrice > 0
+  ? variant.offerPrice
+  : variant.price;
+
 
       const quantity = Number(item.quantity);
       subtotal += currentPrice * quantity;
+      baseSubtotal += Number(variant.price) * quantity;
       totalItems += quantity;
     });
 
 
-    const gstAmount = Math.round(subtotal * 0.18);
     const discountAmount = req.session.discountAmount || 0;
+    const offerDiscount = baseSubtotal - subtotal;
     const deliveryCharge = 0;
-    const totalPrice = subtotal + gstAmount - discountAmount;
-    req.session.subtotal = subtotal;
+    const totalPrice = subtotal - discountAmount;
+
+    req.session.subtotal = subtotal; 
     req.session.totalPrice = totalPrice;
 
     const addresses = user.addresses || [];
@@ -82,9 +86,9 @@ const loadCheckout = async (req, res) => {
       user,
       cartItems: cart.items,
 
-      subtotal,
+      subtotal: baseSubtotal,
+      offerDiscount,
       totalItems,
-      gstAmount,
       discountAmount,
       deliveryCharge,
       totalPrice,
@@ -129,6 +133,7 @@ const placeOrder = async (req, res) => {
 
     const today = new Date();
     let subtotal = 0;
+    let baseSubtotal = 0;
     let orderItems = [];
 
     for (const item of cart.items) {
@@ -142,7 +147,7 @@ const placeOrder = async (req, res) => {
       }
 
       let appliedDiscount = 0;
-  
+
       if (product.productOffer &&
         product.productOffer.isActive &&
         product.productOffer.startDate <= today &&
@@ -150,7 +155,7 @@ const placeOrder = async (req, res) => {
         appliedDiscount = Math.max(appliedDiscount, Number(product.productOffer.discountValue) || 0);
       }
 
-    
+
       if (product.category &&
         product.category.categoryOffer &&
         product.category.categoryOffer.isActive &&
@@ -159,11 +164,12 @@ const placeOrder = async (req, res) => {
         appliedDiscount = Math.max(appliedDiscount, Number(product.category.categoryOffer.discountValue) || 0);
       }
 
-      const currentPrice = appliedDiscount > 0
-        ? Math.floor(variant.price * (1 - appliedDiscount / 100))
-        : variant.price;
+     const currentPrice = variant.offerPrice && variant.offerPrice > 0
+  ? variant.offerPrice
+  : variant.price;
 
       subtotal += currentPrice * item.quantity;
+      baseSubtotal += Number(variant.price) * item.quantity;
 
       orderItems.push({
         productId: product._id,
@@ -173,9 +179,18 @@ const placeOrder = async (req, res) => {
       });
     }
 
-    const gstAmount = Math.round(subtotal * 0.18);
     const discountAmount = req.session.discountAmount || 0;
-    const totalAmount = subtotal + gstAmount - discountAmount;
+    const appliedCouponCode = req.session.appliedCoupon;
+
+    if (appliedCouponCode) {
+      const Coupon = require("../../models/couponSchema");
+      const coupon = await Coupon.findOne({ code: appliedCouponCode, isActive: true });
+      if (!coupon || coupon.usedCount >= coupon.usageLimit) {
+        return res.redirect("/checkout?error=Applied coupon is no longer available");
+      }
+    }
+
+    const totalAmount = subtotal - discountAmount;
 
 
     console.log(`Processing ${paymentMethod} order for user ${userId}. Total: ${totalAmount}`);
@@ -242,13 +257,22 @@ const placeOrder = async (req, res) => {
       paymentMethod: paymentMethod || "COD",
       paymentStatus: (paymentMethod && paymentMethod.toUpperCase() === "WALLET") ? "Paid" : "Pending",
       status: "Placed",
-      subtotal,
-      gstAmount,
+      subtotal: baseSubtotal,
+      offerDiscount: baseSubtotal - subtotal,
       discountAmount,
+      couponCode: req.session.appliedCoupon || null,
       totalAmount
     });
 
     await order.save();
+
+    if (req.session.appliedCoupon) {
+      const Coupon = require("../../models/couponSchema");
+      await Coupon.updateOne(
+        { code: req.session.appliedCoupon },
+        { $inc: { usedCount: 1 } }
+      );
+    }
 
 
     if (paymentMethod && paymentMethod.toUpperCase() === "WALLET") {
@@ -258,12 +282,11 @@ const placeOrder = async (req, res) => {
     }
 
     await Cart.deleteOne({ userId });
-    console.log("Order created successfully:", order.orderId);
-    res.redirect("/order-success");
 
-
-    req.session.discountAmount = null;
+    req.session.discountAmount = 0;
     req.session.appliedCoupon = null;
+
+    return res.json({ success: true });
 
   } catch (err) {
     console.error("Order placement error:", err);

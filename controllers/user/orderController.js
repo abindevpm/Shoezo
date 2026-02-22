@@ -146,7 +146,7 @@ const cancelOrderItem = async (req, res) => {
     item.itemStatus = "Cancelled"
     item.cancelReason = reason
 
-  
+
     if (order.paymentStatus === "Paid") {
       const refundAmount = item.price * item.quantity
 
@@ -165,9 +165,9 @@ const cancelOrderItem = async (req, res) => {
       });
       await user.save({ validateBeforeSave: false });
 
-      
+
       order.totalAmount -= refundAmount
-  
+
     }
 
     const allCancelled = order.items.every(i => i.itemStatus === "Cancelled")
@@ -286,7 +286,8 @@ const downloadInvoice = async (req, res) => {
 
 
     doc.fontSize(14).text("Shipping Address:", { underline: true })
-    doc.fontSize(10).text(`${order.address.name}`)
+    doc.fontSize(10).text(`${order.address.fullName}`)
+    doc.text(`${order.address.addressLine}`)
     doc.text(`${order.address.city}, ${order.address.state}`)
     doc.text(`Phone: ${order.address.phone}`)
     doc.text(`Pincode: ${order.address.pincode}`).moveDown()
@@ -315,10 +316,17 @@ const downloadInvoice = async (req, res) => {
 
     y += 20
     doc.fontSize(10).text(`Subtotal: ₹${order.subtotal.toFixed(2)}`, 400, y)
-    y += 15
-    doc.text(`GST (5%): ₹${order.gstAmount.toFixed(2)}`, 400, y)
-    y += 15
-    doc.text(`Discount: -₹${order.discountAmount.toFixed(2)}`, 400, y)
+
+    if (order.offerDiscount > 0) {
+      y += 15
+      doc.text(`Offers Discount: -₹${order.offerDiscount.toFixed(2)}`, 400, y)
+    }
+
+    if (order.discountAmount > 0) {
+      y += 15
+      doc.text(`Coupon Discount: -₹${order.discountAmount.toFixed(2)}`, 400, y)
+    }
+
     y += 20
     doc.fontSize(14).text(`GRAND TOTAL: ₹${order.totalAmount.toFixed(2)}`, 350, y)
 

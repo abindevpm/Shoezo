@@ -28,7 +28,7 @@ const getWishlist = async (req, res) => {
 
       if (v) {
         let appliedDiscount = 0;
-        // Check Product Offer
+    
         if (productObj.productOffer &&
           productObj.productOffer.isActive &&
           productObj.productOffer.startDate <= today &&
@@ -36,7 +36,7 @@ const getWishlist = async (req, res) => {
           appliedDiscount = Math.max(appliedDiscount, Number(productObj.productOffer.discountValue) || 0);
         }
 
-        // Check Category Offer
+    
         if (productObj.category &&
           productObj.category.categoryOffer &&
           productObj.category.categoryOffer.isActive &&

@@ -284,37 +284,35 @@
               </span>
             </div>
 
-            <div class="summary-line">
-              <span>GST Amount (5%)</span>
-              <span>₹<%= gstAmount %></span>
-            </div>
+            <!-- Product and Category Offers Discount -->
+            <% if (offerDiscount> 0) { %>
+              <div class="summary-line" id="offerDiscountRow">
+                <span>Offers Discount</span>
+                <span style="color:#d32f2f;">-₹<span id="offerDiscountAmount">
+                    <%= offerDiscount %>
+                  </span></span>
+              </div>
+              <% } %>
 
-            <div class="summary-line discount">
-              <span>Discount (30%)</span>
-              <span style="color:#d32f2f;">-₹<span id="discountAmount">
-                  <%= discountAmount %>
-                </span></span>
-            </div>
-
-            <div class="summary-line discount" id="couponDiscountRow" style="display:none;">
-              <span>
-                Coupon Discount
-                <button onclick="removeCoupon()" id="removeCouponBtn" style="
+                <div class="summary-line discount" id="couponDiscountRow" style="display:none;">
+                  <span>
+                    Coupon Discount
+                    <button onclick="removeCoupon()" id="removeCouponBtn" style="
                   background:none; border:none; color:#d32f2f; font-size:12px;
                   cursor:pointer; text-decoration:underline; padding:0; margin-left:6px;
                 ">Remove</button>
-              </span>
-              <span style="color:#d32f2f;">-₹<span id="couponDiscountAmount">0</span></span>
-            </div>
+                  </span>
+                  <span style="color:#d32f2f;">-₹<span id="couponDiscountAmount">0</span></span>
+                </div>
 
-            <hr>
+                <hr>
 
-            <div class="total-line">
-              <span>Total Price</span>
-              <span>₹<span id="finalTotal">
-                  <%= totalPrice %>
-                </span></span>
-            </div>
+                <div class="total-line">
+                  <span>Total Price</span>
+                  <span>₹<span id="finalTotal">
+                      <%= totalPrice %>
+                    </span></span>
+                </div>
 
           </div>
 
@@ -324,7 +322,8 @@
           </div>
 
           <p id="couponMessage"></p>
-          <div id="couponList" style="margin-top:15px;"></div>
+          <div class="available-coupons-title">Available Coupons</div>
+          <div id="couponList" style="margin-top:10px; max-height: 400px; overflow-y: auto; padding-right: 5px;"></div>
         </div>
       </div>
       </div>
@@ -760,37 +759,89 @@
 
 
   .coupon-card {
-    background: #fff;
-    border: 1px solid #e5e5e5;
+    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+    border: 1px solid #e2e8f0;
     border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 15px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-    transition: 0.3s;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-left: 5px solid #000;
+    position: relative;
+    overflow: hidden;
   }
 
   .coupon-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    transform: translateX(5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
   }
 
   .coupon-card strong {
-    font-size: 16px;
+    font-size: 18px;
+    font-weight: 800;
+    color: #1a202c;
+    letter-spacing: 0.5px;
+  }
+
+  .coupon-details {
+    font-size: 14px;
+    color: #4a5568;
+    line-height: 1.5;
+  }
+
+  .coupon-offer {
+    color: #e53e3e;
     font-weight: 700;
+    font-size: 16px;
+  }
+
+  .coupon-expiry {
+    font-size: 11px;
+    color: #a0aec0;
+    text-transform: uppercase;
+    font-weight: 600;
   }
 
   .coupon-card button {
-    margin-top: 8px;
+    align-self: flex-start;
     background: #000;
     color: #fff;
     border: none;
-    padding: 6px 14px;
-    border-radius: 6px;
+    padding: 8px 20px;
+    border-radius: 8px;
     cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: 0.2s;
   }
 
   .coupon-card button:hover {
-    background: #333;
+    background: #2d3748;
+    transform: scale(1.05);
+  }
+
+  .coupon-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .available-coupons-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 25px 0 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #2d3748;
+  }
+
+  .available-coupons-title::before {
+    content: '🎟️';
+    font-size: 20px;
   }
 </style>
 
@@ -801,16 +852,20 @@
   const selectedInput = document.getElementById("addressIdInput");
 
 
-  changeBtn.onclick = () => {
-    addressList.style.display = "block";
-  };
+  if (changeBtn) {
+    changeBtn.onclick = () => {
+      addressList.style.display = "block";
+    };
+  }
 
   const showAddBtn = document.getElementById("showAddAddressFormBtn");
   const newAddressForm = document.getElementById("newAddressForm");
 
-  showAddBtn.onclick = () => {
-    newAddressForm.style.display = newAddressForm.style.display === "none" ? "block" : "none";
-    showAddBtn.innerText = newAddressForm.style.display === "none" ? "+ Add New Address" : "Cancel";
+  if (showAddBtn) {
+    showAddBtn.onclick = () => {
+      newAddressForm.style.display = newAddressForm.style.display === "none" ? "block" : "none";
+      showAddBtn.innerText = newAddressForm.style.display === "none" ? "+ Add New Address" : "Cancel";
+    }
   }
 
   async function saveNewAddress() {
@@ -869,24 +924,28 @@
     }
   }
 
-  document.getElementById("saveNewAddressBtn").onclick = saveNewAddress;
+  const saveBtn = document.getElementById("saveNewAddressBtn");
+  if (saveBtn) saveBtn.onclick = saveNewAddress;
 
-  document.getElementById("confirmAddressBtn").onclick = () => {
-    const selected = document.querySelector("input[name='addressRadio']:checked");
-    if (!selected) return;
+  const confirmBtn = document.getElementById("confirmAddressBtn");
+  if (confirmBtn) {
+    confirmBtn.onclick = () => {
+      const selected = document.querySelector("input[name='addressRadio']:checked");
+      if (!selected) return;
 
-    const label = selected.closest(".address-option");
-    const nameLine = label.querySelector("strong").innerText;
-    const desc = label.querySelector("p").innerText;
-    const phone = label.querySelectorAll("p")[1].innerText;
+      const label = selected.closest(".address-option");
+      const nameLine = label.querySelector("strong").innerText;
+      const desc = label.querySelector("p").innerText;
+      const phone = label.querySelectorAll("p")[1].innerText;
 
-    selectedBox.querySelector(".addr-name strong").innerText = nameLine;
-    selectedBox.querySelector(".addr-desc").innerText = desc;
-    selectedBox.querySelector(".addr-phone").innerText = phone;
+      selectedBox.querySelector(".addr-name strong").innerText = nameLine;
+      selectedBox.querySelector(".addr-desc").innerText = desc;
+      selectedBox.querySelector(".addr-phone").innerText = phone;
 
-    selectedInput.value = selected.value;
-    addressList.style.display = "none";
-  };
+      selectedInput.value = selected.value;
+      addressList.style.display = "none";
+    };
+  }
 
 
   document.getElementById("rzp-button").addEventListener("click", async function (e) {
@@ -998,6 +1057,42 @@
   toggleButtons();
 
 
+  async function submitOrder() {
+    const addressId = document.getElementById("addressIdInput")?.value;
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+
+    if (!addressId) {
+      return Swal.fire("Warning", "Please select a delivery address", "warning");
+    }
+
+    try {
+      const response = await fetch("/place-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ addressId, paymentMethod })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        window.location.href = "/order-success";
+      } else {
+        Swal.fire("Error", result.message || "Something went wrong", "error");
+      }
+    } catch (error) {
+      console.error("Order error:", error);
+      Swal.fire("Error", "Internal Server Error", "error");
+    }
+  }
+
+  const orderForm = document.querySelector('form[action="/place-order"]');
+  if (orderForm) {
+    orderForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await submitOrder();
+    });
+  }
+
+
   if (walletPayBtn) {
     walletPayBtn.addEventListener('click', () => {
       Swal.fire({
@@ -1008,10 +1103,9 @@
         confirmButtonColor: '#000',
         cancelButtonColor: '#d33',
         confirmButtonText: 'Yes, Pay Now'
-      }).then((result) => {
+      }).then(async (result) => {
         if (result.isConfirmed) {
-          // Submit the main form
-          document.querySelector('form[action="/place-order"]').submit();
+          await submitOrder();
         }
       });
     });
@@ -1097,7 +1191,9 @@
 
   async function loadCoupons() {
     try {
-      const response = await fetch("/available-coupons");
+      // Use final cart total (after offer discounts) to filter eligible coupons
+      const cartTotal = parseFloat(document.getElementById("finalTotal").innerText) || <%= totalPrice %>;
+      const response = await fetch(`/available-coupons?subtotal=${cartTotal}`);
       const data = await response.json();
 
       if (!data.success) return;
@@ -1105,24 +1201,38 @@
       const container = document.getElementById("couponList");
       container.innerHTML = "";
 
+      if (data.coupons.length === 0) {
+        container.innerHTML = '<p style="font-size: 14px; color: #666; padding: 10px;">No coupons available at this time.</p>';
+        return;
+      }
+
       data.coupons.forEach(coupon => {
+        const expiryDate = new Date(coupon.expiryDate).toLocaleDateString('en-GB', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        });
 
         const div = document.createElement("div");
         div.className = "coupon-card";
 
         div.innerHTML = `
-        <strong>${coupon.code}</strong><br>
-         ${coupon.discountType === "percentage"
+          <div class="coupon-header-row">
+            <strong>${coupon.code}</strong>
+            <span class="coupon-offer">
+              ${coupon.discountType === "percentage"
             ? coupon.discountValue + "% OFF"
             : "₹" + coupon.discountValue + " OFF"}
-
-<br>
-Min Purchase: ₹${coupon.minPurchase}
-        <br>
-        <button onclick="autoApply('${coupon.code}')">
-          Apply
-        </button>
-      `;
+            </span>
+          </div>
+          <div class="coupon-details">
+            Min Purchase: ₹${coupon.minPurchase}<br>
+            <span class="coupon-expiry">Expires: ${expiryDate}</span>
+          </div>
+          <button onclick="autoApply('${coupon.code}')">
+            Apply Coupon
+          </button>
+        `;
 
         container.appendChild(div);
       });

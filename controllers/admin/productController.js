@@ -104,13 +104,19 @@ const AddProducts = async (req, res) => {
       req.files.forEach(file => images.push(file.filename));
     }
 
-    const variants = data.variants
+    const rawVariants = data.variants
       ? Object.values(data.variants)
       : [];
 
-    if (variants.length === 0) {
+    if (rawVariants.length === 0) {
       return res.redirect("/admin/add-products?status=error");
     }
+
+
+    const variants = rawVariants.map(v => ({
+      ...v,
+      salePrice: Number(v.offerPrice) || Number(v.price)
+    }));
 
     const newProduct = new Product({
       name: data.name,
@@ -212,9 +218,15 @@ const updateProduct = async (req, res) => {
     let variants = [];
 
     if (data.variants) {
-      variants = Array.isArray(data.variants)
+      const rawVariants = Array.isArray(data.variants)
         ? data.variants
         : Object.values(data.variants);
+
+    
+      variants = rawVariants.map(v => ({
+        ...v,
+        salePrice: Number(v.offerPrice) || Number(v.price)
+      }));
     }
 
     const updateData = {
@@ -335,14 +347,14 @@ const manageProductOffer = async (req, res) => {
     const categoryOffer = product.category?.categoryOffer;
     const catDiscount = (categoryOffer && categoryOffer.isActive) ? Number(categoryOffer.discountValue) : 0;
     const finalDiscount = Math.max(discount, isNaN(catDiscount) ? 0 : catDiscount);
-
-    // Calculate new offer prices for all variants robustly
     if (product.variants && product.variants.length > 0) {
       product.variants.forEach(variant => {
-        const originalPrice = Number(variant.price);
-        if (!isNaN(originalPrice)) {
-          variant.offerPrice = Math.floor(originalPrice * (1 - finalDiscount / 100));
+        
+        if (!variant.salePrice) {
+          variant.salePrice = variant.offerPrice || variant.price;
         }
+        const basePrice = Number(variant.salePrice);
+        variant.offerPrice = Math.floor(basePrice * (1 - finalDiscount / 100));
       });
     }
 
@@ -381,9 +393,6 @@ const manageProductOffer = async (req, res) => {
 
 
 
-
-
-
 const removeProductOffer = async (req, res) => {
   try {
     const { productId } = req.body;
@@ -401,11 +410,13 @@ const removeProductOffer = async (req, res) => {
     if (category && category.categoryOffer && category.categoryOffer.isActive) {
       const discount = category.categoryOffer.discountValue;
       product.variants.forEach(variant => {
-        variant.offerPrice = Math.floor(variant.price * (1 - discount / 100));
+        const base = Number(variant.salePrice || variant.price);
+        variant.offerPrice = Math.floor(base * (1 - discount / 100));
       });
     } else {
       product.variants.forEach(variant => {
-        variant.offerPrice = variant.price;
+    
+        variant.offerPrice = variant.salePrice || variant.price;
       });
     }
 

@@ -44,6 +44,7 @@ const createOrder = async (req, res) => {
     let subtotal = 0;
     let orderItems = [];
 
+    let baseSubtotal = 0;
     for (const item of cart.items) {
       const product = item.productId;
       const variant = product.variants.find(
@@ -53,7 +54,7 @@ const createOrder = async (req, res) => {
       if (!variant) continue;
 
       let appliedDiscount = 0;
-      
+
       if (product.productOffer &&
         product.productOffer.isActive &&
         product.productOffer.startDate <= today &&
@@ -70,11 +71,15 @@ const createOrder = async (req, res) => {
         appliedDiscount = Math.max(appliedDiscount, Number(product.category.categoryOffer.discountValue) || 0);
       }
 
-      const currentPrice = appliedDiscount > 0
-        ? Math.floor(variant.price * (1 - appliedDiscount / 100))
-        : variant.price;
+    
+      const currentPrice = variant.offerPrice && variant.offerPrice > 0
+        ? variant.offerPrice
+        : (variant.salePrice || variant.price);
 
+      
+      const saleBase = variant.salePrice || variant.offerPrice || variant.price;
       subtotal += currentPrice * item.quantity;
+      baseSubtotal += Number(saleBase) * item.quantity;
 
       orderItems.push({
         productId: product._id,
@@ -84,10 +89,18 @@ const createOrder = async (req, res) => {
       });
     }
 
-    const gstAmount = Math.round(subtotal * 0.18);
-    
     const discountAmount = req.session.discountAmount || 0;
-    const totalAmount = subtotal + gstAmount - discountAmount;
+    const appliedCouponCode = req.session.appliedCoupon;
+
+    if (appliedCouponCode) {
+      const Coupon = require("../../models/couponSchema");
+      const coupon = await Coupon.findOne({ code: appliedCouponCode, isActive: true });
+      if (!coupon || coupon.usedCount >= coupon.usageLimit) {
+        return res.status(400).json({ success: false, message: "Applied coupon is no longer available" });
+      }
+    }
+
+    const totalAmount = subtotal - discountAmount;
 
     const options = {
       amount: totalAmount * 100,
@@ -113,9 +126,10 @@ const createOrder = async (req, res) => {
       paymentMethod: "ONLINE",
       paymentStatus: "Pending",
       totalAmount,
-      subtotal,
-      gstAmount,
+      subtotal: baseSubtotal,
+      offerDiscount: baseSubtotal - subtotal,
       discountAmount,
+      couponCode: req.session.appliedCoupon || null,
       status: "Placed"
     });
 
@@ -181,7 +195,18 @@ const verifyPayment = async (req, res) => {
       );
     }
 
+    if (updatedOrder.couponCode) {
+      const Coupon = require("../../models/couponSchema");
+      await Coupon.updateOne(
+        { code: updatedOrder.couponCode },
+        { $inc: { usedCount: 1 } }
+      );
+    }
+
     await Cart.deleteOne({ userId });
+
+    req.session.discountAmount = 0;
+    req.session.appliedCoupon = null;
 
     return res.json({ success: true });
 

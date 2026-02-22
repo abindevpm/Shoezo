@@ -72,7 +72,7 @@ const loadShopPage = async (req, res) => {
 
 
 
-    // pagination
+  
 
     const page = parseInt(req.query.page) || 1;
     const limit = 6;
@@ -85,7 +85,7 @@ const loadShopPage = async (req, res) => {
 
     let pipeline = [
       { $match: filter },
-      // Lookup product offer
+
       {
         $lookup: {
           from: "offers",
@@ -95,7 +95,7 @@ const loadShopPage = async (req, res) => {
         }
       },
       { $unwind: { path: "$prodOfferInfo", preserveNullAndEmptyArrays: true } },
-      // Lookup category info
+    
       {
         $lookup: {
           from: "categories",
@@ -105,7 +105,7 @@ const loadShopPage = async (req, res) => {
         }
       },
       { $unwind: { path: "$catInfo", preserveNullAndEmptyArrays: true } },
-      // Lookup category offer
+    
       {
         $lookup: {
           from: "offers",
@@ -115,7 +115,7 @@ const loadShopPage = async (req, res) => {
         }
       },
       { $unwind: { path: "$catOfferInfo", preserveNullAndEmptyArrays: true } },
-      // Add dynamic fields for sorting
+      
       {
         $addFields: {
           validProdDisc: {
@@ -199,14 +199,14 @@ const loadShopPage = async (req, res) => {
       { path: "productOffer" }
     ]);
 
-    // Calculate finalPrice and appliedDiscount for the frontend
+    
     products.forEach(p => {
       const v = p.variants && p.variants.length > 0 ? p.variants[0] : null;
 
       if (v) {
         let appliedDiscount = 0;
 
-        // Check Product Offer
+        
         if (p.productOffer &&
           p.productOffer.isActive &&
           p.productOffer.startDate <= today &&
@@ -214,7 +214,7 @@ const loadShopPage = async (req, res) => {
           appliedDiscount = Math.max(appliedDiscount, Number(p.productOffer.discountValue) || 0);
         }
 
-        // Check Category Offer
+      
         if (p.category &&
           p.category.categoryOffer &&
           p.category.categoryOffer.isActive &&

@@ -353,21 +353,23 @@
                                             <div class="col-md-6 offset-md-6">
                                                 <div class="summary-row">
                                                     <span class="text-muted">Subtotal</span>
-                                                    <span class="fw-500">₹<%= order.subtotal.toFixed(2) %></span>
+                                                    <span class="fw-500">₹<%= (order.subtotal || 0).toFixed(2) %></span>
                                                 </div>
                                                 <div class="summary-row">
                                                     <span class="text-muted">GST (5%)</span>
-                                                    <span class="fw-500">₹<%= order.gstAmount.toFixed(2) %></span>
+                                                    <span class="fw-500">₹<%= (order.gstAmount || 0).toFixed(2) %>
+                                                            </span>
                                                 </div>
                                                 <div class="summary-row">
                                                     <span class="text-muted">Discount</span>
-                                                    <span class="text-danger fw-500">-₹<%=
-                                                            order.discountAmount.toFixed(2) %>
+                                                    <span class="text-danger fw-500">-₹<%= (order.discountAmount ||
+                                                            0).toFixed(2) %>
                                                     </span>
                                                 </div>
                                                 <div class="summary-total">
                                                     <span>Total Amount</span>
-                                                    <span class="text-success">₹<%= order.totalAmount.toFixed(2) %>
+                                                    <span class="text-success">₹<%= (order.totalAmount || 0).toFixed(2)
+                                                            %>
                                                     </span>
                                                 </div>
                                             </div>

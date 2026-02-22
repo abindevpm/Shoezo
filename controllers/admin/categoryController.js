@@ -187,7 +187,12 @@ const manageCategoryOffer = async (req, res) => {
         const finalDiscount = Math.max(discount, productDiscount);
 
         product.variants.forEach(variant => {
-          variant.offerPrice = Math.floor(variant.price * (1 - finalDiscount / 100));
+      
+          if (!variant.salePrice) {
+            variant.salePrice = variant.offerPrice || variant.price;
+          }
+          const base = Number(variant.salePrice);
+          variant.offerPrice = Math.floor(base * (1 - finalDiscount / 100));
         });
         product.markModified('variants');
         await product.save();
@@ -225,7 +230,10 @@ const removeCategoryOffer = async (req, res) => {
         }
 
         product.variants.forEach(variant => {
-          variant.offerPrice = Math.floor(variant.price * (1 - productDiscount / 100));
+          const base = Number(variant.salePrice || variant.price);
+          variant.offerPrice = productDiscount > 0
+            ? Math.floor(base * (1 - productDiscount / 100))
+            : (variant.salePrice || variant.price);
         });
         product.markModified('variants');
         await product.save();

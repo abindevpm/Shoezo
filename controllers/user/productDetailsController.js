@@ -22,7 +22,7 @@ const loadProductDetails = async (req, res) => {
     const today = new Date();
     let appliedDiscount = 0;
 
-    // Check Product Offer
+  
     if (product.productOffer &&
       product.productOffer.isActive &&
       product.productOffer.startDate <= today &&
@@ -30,7 +30,7 @@ const loadProductDetails = async (req, res) => {
       appliedDiscount = Math.max(appliedDiscount, Number(product.productOffer.discountValue) || 0);
     }
 
-    // Check Category Offer
+
     if (product.category &&
       product.category.categoryOffer &&
       product.category.categoryOffer.isActive &&
@@ -41,14 +41,13 @@ const loadProductDetails = async (req, res) => {
 
     product.discount = appliedDiscount;
 
-    // Optionally update offerPrice for consistency in view if needed, 
-    // but the template usually uses product.discount to show the badge.
     if (product.variants && product.variants.length > 0) {
       product.variants.forEach(v => {
+        const base = Number(v.salePrice || v.price);
         if (appliedDiscount > 0) {
-          v.offerPrice = Math.floor(v.price * (1 - appliedDiscount / 100));
+          v.offerPrice = Math.floor(base * (1 - appliedDiscount / 100));
         } else {
-          v.offerPrice = v.price;
+          v.offerPrice = base;
         }
       });
     }

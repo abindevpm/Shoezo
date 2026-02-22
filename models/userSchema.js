@@ -62,34 +62,34 @@ const userSchema = new Schema({
 
 
   wallet: {
-  balance: {
-    type: Number,
-    default: 0
-  },
-  transactions: [
-    {
-      type: {
-        type: String, // credit or debit
-        enum: ["credit", "debit"]
-      },
-      amount: {
-        type: Number,
-        required: true
-      },
-      description: {
-        type: String
-      },
-      orderId: {
-        type: Schema.Types.ObjectId,
-        ref: "Order"
-      },
-      date: {
-        type: Date,
-        default: Date.now
+    balance: {
+      type: Number,
+      default: 0
+    },
+    transactions: [
+      {
+        type: {
+          type: String, // credit or debit
+          enum: ["credit", "debit"]
+        },
+        amount: {
+          type: Number,
+          required: true
+        },
+        description: {
+          type: String
+        },
+        orderId: {
+          type: Schema.Types.ObjectId,
+          ref: "Order"
+        },
+        date: {
+          type: Date,
+          default: Date.now
+        }
       }
-    }
-  ]
-},
+    ]
+  },
 
 
 
@@ -108,9 +108,22 @@ const userSchema = new Schema({
 
   createdOn: { type: Date, default: Date.now },
 
-  referalCode: String,
+  referalCode: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
 
-  redeemed: Boolean,
+  referredBy: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    default: null
+  },
+
+  redeemed: {
+    type: Boolean,
+    default: false
+  },
 
   redeemedUsers: [{ type: Schema.Types.ObjectId, ref: "User" }],
 

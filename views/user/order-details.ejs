@@ -341,7 +341,8 @@
                                                     <div class="product-name">
                                                         <%= item.productId.name %>
                                                     </div>
-                                                    <div class="product-meta">Size: <%= item.size %>
+                                                    <div class="product-meta">Size: <%= item.size %> | Price: ₹<%=
+                                                                item.price %>
                                                     </div>
                                                 </div>
                                             </div>
@@ -393,10 +394,26 @@
                         </table>
 
                         <div class="summary-wrapper" style="max-width: 100%;">
-                            <div class="summary-row grand-total">
-                                <span>FINAL AMOUNT PAID</span>
-                                <span>₹ <%= order.totalAmount.toLocaleString() %></span>
+                            <div class="summary-row">
+                                <span>Subtotal</span>
+                                <span>₹ <%= (order.subtotal || order.totalAmount).toLocaleString() %></span>
                             </div>
+                            <% if (order.offerDiscount> 0) { %>
+                                <div class="summary-row" style="color: #d32f2f;">
+                                    <span>Offers Discount</span>
+                                    <span>-₹ <%= order.offerDiscount.toLocaleString() %></span>
+                                </div>
+                                <% } %>
+                                    <% if (order.discountAmount> 0) { %>
+                                        <div class="summary-row" style="color: #d32f2f;">
+                                            <span>Coupon Discount (<%= order.couponCode %>)</span>
+                                            <span>-₹ <%= order.discountAmount.toLocaleString() %></span>
+                                        </div>
+                                        <% } %>
+                                            <div class="summary-row grand-total">
+                                                <span>FINAL AMOUNT PAID</span>
+                                                <span>₹ <%= order.totalAmount.toLocaleString() %></span>
+                                            </div>
                         </div>
                     </div>
                 </main>

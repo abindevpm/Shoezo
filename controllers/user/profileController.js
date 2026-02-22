@@ -3,32 +3,45 @@ const bcrypt = require("bcrypt");
 const transporter = require("../../config/nodemailer");
 
 
-const loadProfile = async(req,res)=>{
-    try {
-        if(!req.session.user){
-            return res.redirect("login")
-        }
-        const user = await User.findById(req.session.user._id);
-        if(!user)return res.redirect("login");
-
-         res.render("profile",{user})
-
-    } catch (error) {
-        console.log(error,"load Profile error")
-        res.status(500).send("server error")
-        
+const loadProfile = async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.redirect("login");
     }
-}
 
-const loadEditProfile = async(req,res)=>{
-    try {
-        const user = await User.findById(req.session.user._id)
-        if(!user)return res.redirect("login")
-            res.render("edit-profile",{user})
-        
-    } catch (error) {
-        
+    let user = await User.findById(req.session.user._id);
+    if (!user) return res.redirect("login");
+
+    if (!user.referalCode) {
+      const referral = "SH" + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+      await User.findByIdAndUpdate(user._id, {
+        referalCode: referral
+      });
+
+      user.referalCode = referral; 
     }
+
+    res.render("profile", { user });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Server error");
+  }
+};
+
+
+
+
+const loadEditProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.session.user._id)
+    if (!user) return res.redirect("login")
+    res.render("edit-profile", { user })
+
+  } catch (error) {
+
+  }
 }
 
 
@@ -46,7 +59,7 @@ const editProfile = async (req, res) => {
       return res.redirect("/user/edit-profile");
     }
 
-    
+
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       {
@@ -67,32 +80,32 @@ const editProfile = async (req, res) => {
   }
 };
 
-const uploadProfileImage = async(req,res)=>{
+const uploadProfileImage = async (req, res) => {
 
-try{
+  try {
 
-    if(!req.file){
-        return res.redirect("login")
+    if (!req.file) {
+      return res.redirect("login")
 
     }
     const imagePath = "/uploads/profile-images/" + req.file.filename;
     const updatedUser = await User.findByIdAndUpdate(
-        req.session.user._id,
-        {profileImage:imagePath},
-        {new: true}
-    
+      req.session.user._id,
+      { profileImage: imagePath },
+      { new: true }
+
     )
 
     req.session.user = updatedUser;
-     req.session.user.profileImage = imagePath;
+    req.session.user.profileImage = imagePath;
 
     res.redirect("profile")
 
-}catch(error){
-    console.log(error,"Profile picture error")
+  } catch (error) {
+    console.log(error, "Profile picture error")
     res.redirect("profile")
 
-}
+  }
 
 
 }
@@ -104,24 +117,24 @@ const changePassword = async (req, res) => {
     const { currentPassword, newPassword, confirmPassword } = req.body;
     const userId = req.session.user._id;
 
-    
+
     if (!currentPassword || !newPassword || !confirmPassword) {
       return res.redirect("edit-profile");
     }
 
-    
+
     if (newPassword.length < 6) {
       return res.redirect("edit-profile");
     }
 
-    
+
     if (newPassword !== confirmPassword) {
       return res.redirect("edit-profile");
     }
 
     const user = await User.findById(userId);
 
-    
+
     const isMatch = await bcrypt.compare(
       currentPassword,
       user.password
@@ -136,7 +149,7 @@ const changePassword = async (req, res) => {
     user.password = hashedPassword;
     await user.save();
 
-    
+
     return res.redirect("profile");
 
   } catch (error) {
@@ -146,48 +159,48 @@ const changePassword = async (req, res) => {
 };
 
 
-const sendEmailOtp = async(req,res)=>{
-  try{
+const sendEmailOtp = async (req, res) => {
+  try {
 
-    const {email} = req.body
-   const otp = Math.floor(1000 + Math.random() * 9000);
+    const { email } = req.body
+    const otp = Math.floor(1000 + Math.random() * 9000);
 
 
     req.session.emailOtp = otp;
     req.session.newEmail = email;
-    req.session.emailOtpExpiry = Date.now()+5*60*1000;
+    req.session.emailOtpExpiry = Date.now() + 5 * 60 * 1000;
 
-      console.log(otp)
+    console.log(otp)
 
-  await transporter.sendMail({
-    from:process.env.NODEMAILER_EMAIL,
-    to:email,
-    subject:"SHOEZO Email Verification",
-    html:`<h3>Your OTP: ${otp}</h3><p>Valid for 5 minutes</p>`
-   
-  })
+    await transporter.sendMail({
+      from: process.env.NODEMAILER_EMAIL,
+      to: email,
+      subject: "SHOEZO Email Verification",
+      html: `<h3>Your OTP: ${otp}</h3><p>Valid for 5 minutes</p>`
+
+    })
 
     res.json({ success: true });
 
-  }catch(error){
-        console.log(err);
+  } catch (error) {
+    console.log(err);
     res.json({ success: false, message: "OTP sending failed" });
   }
 
-  }
+}
 
 
-  const loadVerifyEmailOtp = async (req, res) => {
+const loadVerifyEmailOtp = async (req, res) => {
   try {
 
-  
+
     if (!req.session.emailOtp || !req.session.newEmail) {
       return res.redirect("profile");
     }
 
     res.render("verify-email-otp", {
       error: null,
-         email: req.session.newEmail 
+      email: req.session.newEmail
     });
 
   } catch (error) {
@@ -219,7 +232,7 @@ const verifyEmailOtp = async (req, res) => {
       email: req.session.newEmail
     });
 
-    
+
     req.session.emailOtp = null;
     req.session.emailOtpExpiry = null;
     req.session.newEmail = null;
@@ -234,33 +247,33 @@ const verifyEmailOtp = async (req, res) => {
 
 
 
-const resendEmailOtp = async(req,res)=>{
+const resendEmailOtp = async (req, res) => {
   try {
-       if (!req.session.newEmail) {
+    if (!req.session.newEmail) {
       return res.json({
         success: false,
         message: "Session expired. Please try again."
       });
     }
 
-        const otp = Math.floor(1000 + Math.random() * 9000);
+    const otp = Math.floor(1000 + Math.random() * 9000);
 
-          req.session.emailOtp = otp;
-        req.session.emailOtpExpiry = Date.now() + 2 * 60 * 1000; 
+    req.session.emailOtp = otp;
+    req.session.emailOtpExpiry = Date.now() + 2 * 60 * 1000;
 
-            await transporter.sendMail({
+    await transporter.sendMail({
       to: req.session.newEmail,
       subject: "Your Email Verification OTP",
       html: `<h2>Your OTP is ${otp}</h2>`
     });
     console.log(otp)
 
-     return res.json({
+    return res.json({
       success: true,
       message: "OTP resent successfully"
     });
 
-    
+
   } catch (error) {
     console.log(error);
     return res.json({
@@ -268,16 +281,8 @@ const resendEmailOtp = async(req,res)=>{
       message: "Failed to resend OTP"
     });
   }
-    
-  }
 
-
-
-
-
-
-
-
+}
 
 
 
@@ -296,14 +301,14 @@ const removeProfileImage = async (req, res) => {
 
 
 module.exports = {
-    loadProfile,
-    loadEditProfile,
-    editProfile,
-    uploadProfileImage,
-    changePassword,
-    sendEmailOtp,
-    verifyEmailOtp,
-    loadVerifyEmailOtp,
-    removeProfileImage,
-    resendEmailOtp
+  loadProfile,
+  loadEditProfile,
+  editProfile,
+  uploadProfileImage,
+  changePassword,
+  sendEmailOtp,
+  verifyEmailOtp,
+  loadVerifyEmailOtp,
+  removeProfileImage,
+  resendEmailOtp
 }

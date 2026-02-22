@@ -8,7 +8,7 @@ const productSchema = new mongoose.Schema({
   },
 
   brand: {
-    type:mongoose.Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: "Brand",
     required: true
   },
@@ -23,24 +23,24 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  
-productOffer: {
-  type: mongoose.Schema.Types.ObjectId,
-  ref: "Offer",
-  default: null
-},
+
+  productOffer: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Offer",
+    default: null
+  },
 
   images: {
-      type: [String],
+    type: [String],
     required: true
   },
 
   variants: [
     {
       size: { type: Number, required: true },
-      price:{type:Number,required:true},
-      offerPrice:{type:Number,required:true},
-    
+      price: { type: Number, required: true },
+      salePrice: { type: Number, default: null },
+      offerPrice: { type: Number, required: true },
       stock: { type: Number, required: true }
     }
   ],
@@ -49,9 +49,9 @@ productOffer: {
     type: Boolean,
     default: false
   },
-  isListed:{
-    type:Boolean,
-    default:false
+  isListed: {
+    type: Boolean,
+    default: false
   }
 
 }, { timestamps: true });

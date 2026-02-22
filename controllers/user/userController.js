@@ -45,7 +45,7 @@ const loadHomepage = async (req, res) => {
       if (v) {
         let appliedDiscount = 0;
 
-        // Check Product Offer
+
         if (productObj.productOffer &&
           productObj.productOffer.isActive &&
           productObj.productOffer.startDate <= today &&
@@ -53,7 +53,7 @@ const loadHomepage = async (req, res) => {
           appliedDiscount = Math.max(appliedDiscount, Number(productObj.productOffer.discountValue) || 0);
         }
 
-        // Check Category Offer
+
         if (productObj.category &&
           productObj.category.categoryOffer &&
           productObj.category.categoryOffer.isActive &&
@@ -64,9 +64,10 @@ const loadHomepage = async (req, res) => {
 
         productObj.price = v.price;
         if (appliedDiscount > 0) {
-          productObj.offerPrice = Math.floor(v.price * (1 - appliedDiscount / 100));
+          const base = Number(v.salePrice || v.price);
+          productObj.offerPrice = Math.floor(base * (1 - appliedDiscount / 100));
         } else {
-          productObj.offerPrice = 0;
+          productObj.offerPrice = v.salePrice || 0;
         }
       } else {
         productObj.price = 0;
@@ -248,7 +249,7 @@ const resendOtp = async (req, res) => {
 
 const signup = async (req, res) => {
   try {
-    const { name, phone, email, password, confirmPassword } = req.body;
+    const { name, phone, email, password, confirmPassword, referalCode } = req.body;
 
     if (!email || !password || !confirmPassword) {
       return res.render("signup", { message: "All required fields must be filled", formData: req.body });
@@ -265,6 +266,13 @@ const signup = async (req, res) => {
 
     }
 
+    if (referalCode) {
+      const referrer = await User.findOne({ referalCode });
+      if (!referrer) {
+        return res.render("signup", { message: "Invalid referral code", formData: req.body });
+      }
+    }
+
     const otp = generateOtp();
     const emailSent = await sendVerificationEmail(email, otp);
 
@@ -275,7 +283,7 @@ const signup = async (req, res) => {
     req.session.userOtp = otp;
     req.session.otpExpiry = Date.now() + 102 * 1000;
 
-    req.session.userData = { name, phone, email, password };
+    req.session.userData = { name, phone, email, password, referalCode };
 
     res.render("otp");
     console.log("OTP Sent", otp);
@@ -324,13 +332,6 @@ const otp = async (req, res) => {
       });
     }
 
-    console.log("OTP:", req.session.userOtp);
-    console.log("OTP Expiry:", req.session.otpExpiry);
-    console.log("Now:", Date.now());
-    console.log("Remaining (sec):", (req.session.otpExpiry - Date.now()) / 1000);
-
-
-
     if (otp !== req.session.userOtp) {
       return res.status(400).json({
         success: false,
@@ -342,12 +343,80 @@ const otp = async (req, res) => {
     const user = req.session.userData;
     const passwordHash = await securePassword(user.password);
 
+
+    const newReferralCode = "SH" + Math.random().toString(36).substring(2, 8).toUpperCase();
+
     const saveUserData = new User({
       name: user.name,
       email: user.email,
       phone: user.phone,
-      password: passwordHash
+      password: passwordHash,
+      referalCode: newReferralCode
     });
+
+
+    if (user.referalCode) {
+      const referrer = await User.findOne({ referalCode: user.referalCode });
+      if (referrer) {
+        saveUserData.referredBy = referrer._id;
+
+
+        referrer.redeemedUsers.push(saveUserData._id);
+
+
+        const couponCode = "REF" + Math.random().toString(36).substring(2, 8).toUpperCase();
+        const expiry = new Date();
+        expiry.setDate(expiry.getDate() + 30);
+
+        const newCoupon = new Coupon({
+          code: couponCode,
+          discountType: "fixed",
+          discountValue: 100,
+          minPurchase: 500,
+          startDate: new Date(),
+          expiryDate: expiry,
+          usageLimit: 1,
+          couponType: "New user Join"
+        });
+        await newCoupon.save();
+
+
+
+        await referrer.save();
+
+
+        try {
+          const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+              user: process.env.NODEMAILER_EMAIL,
+              pass: process.env.NODEMAILER_PASSWORD
+            }
+          });
+
+          await transporter.sendMail({
+            from: `"Shoezo 👟" <${process.env.NODEMAILER_EMAIL}>`,
+            to: referrer.email,
+            subject: "You've earned a Referral Reward! 🎁",
+            html: `
+              <div style="font-family: Arial, sans-serif; padding: 20px;">
+                <h2>Hello ${referrer.name}!</h2>
+                <p>Great news! Your friend just joined Shoezo using your referral code.</p>
+                <p>As a token of our appreciation, we've generated a special coupon for you:</p>
+                <div style="background: #f0f0f0; padding: 15px; font-size: 24px; font-weight: bold; text-align: center; border-radius: 8px;">
+                  ${couponCode}
+                </div>
+                <p>Use this code to get ₹100 off on your next purchase (minimum ₹500).</p>
+                <p>Happy Shopping!</p>
+                <p><strong>Team Shoezo</strong></p>
+              </div>
+            `
+          });
+        } catch (emailErr) {
+          console.error("Failed to send reward email:", emailErr);
+        }
+      }
+    }
 
     await saveUserData.save();
 
@@ -497,9 +566,10 @@ const productlist = async (req, res) => {
 
       const finalDiscount = Math.max(productDiscount, categoryDiscount);
 
-      const finalPrice = Math.round(
-        basePrice - (basePrice * finalDiscount) / 100
-      );
+      const baseSalePrice = variant.salePrice || variant.price;
+      const finalPrice = finalDiscount > 0
+        ? Math.round(baseSalePrice * (1 - finalDiscount / 100))
+        : baseSalePrice;
 
       return {
         ...product.toObject(),
@@ -664,20 +734,26 @@ const orderFailure = async (req, res) => {
 
 const getAvailableCoupons = async (req, res) => {
   try {
-
     const today = new Date();
+    const { subtotal } = req.query;
+    const subtotalValue = subtotal ? Number(subtotal) : 0;
 
-    const coupons = await Coupon.find({
+    const query = {
       isActive: true,
-      expiryDate: { $gt: today }
-    }).select("code discountValue discountType minPurchase expiryDate")
+      startDate: { $lte: today },
+      expiryDate: { $gt: today },
+      $expr: { $lt: ["$usedCount", "$usageLimit"] },
+      minPurchase: { $lte: subtotalValue }   // always filter by cart total
+    };
+
+    const coupons = await Coupon.find(query)
+      .select("code discountValue discountType minPurchase expiryDate");
 
     res.json({ success: true, coupons });
 
   } catch (error) {
-    console.log("Available Coupon error", error)
+    console.log("Available Coupon error", error);
     res.json({ success: false });
-
   }
 }
 const applyCoupon = async (req, res) => {
@@ -698,8 +774,11 @@ const applyCoupon = async (req, res) => {
       return res.json({ success: false, message: "Invalid or Expired coupon" });
     }
 
+    if (coupon.usedCount >= coupon.usageLimit) {
+      return res.json({ success: false, message: "Coupon usage limit reached" });
+    }
+
     const subtotal = req.session.subtotal || 0;
-    const totalPrice = req.session.totalPrice || subtotal; // after 30% discount + GST
 
     if (subtotal < coupon.minPurchase) {
       return res.json({
@@ -711,16 +790,16 @@ const applyCoupon = async (req, res) => {
     let discount = 0;
 
     if (coupon.discountType === "percentage") {
-      discount = Math.round((totalPrice * coupon.discountValue) / 100);
+      discount = Math.round((subtotal * coupon.discountValue) / 100);
     } else {
       discount = coupon.discountValue;
     }
 
-    const finalTotal = totalPrice - discount;
-
+    const finalTotal = subtotal - discount;
 
     req.session.discountAmount = discount;
     req.session.appliedCoupon = coupon.code;
+    req.session.totalPrice = finalTotal;
 
     res.json({
       success: true,
@@ -739,9 +818,10 @@ const removeCoupon = (req, res) => {
   req.session.discountAmount = 0;
   req.session.appliedCoupon = null;
 
-  const totalPrice = req.session.totalPrice || 0;
+  const subtotal = req.session.subtotal || 0;
+  req.session.totalPrice = subtotal;
 
-  res.json({ success: true, totalPrice });
+  res.json({ success: true, totalPrice: subtotal });
 };
 
 
