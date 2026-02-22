@@ -9,7 +9,19 @@ const loadorders = async (req, res) => {
     if (!userId) return res.redirect("/login")
 
     const { search } = req.query
-    let query = { userId }
+
+    let query = {
+      userId,
+      $and: [
+        { paymentStatus: { $ne: "Failed" } },
+        {
+          $or: [
+            { paymentMethod: "COD" },
+            { paymentStatus: "Paid" }
+          ]
+        }
+      ]
+    }
 
     if (search) {
       const productIds = await Product.find({ name: { $regex: search, $options: "i" } }).distinct("_id")
@@ -20,7 +32,6 @@ const loadorders = async (req, res) => {
       ]
 
       query.$or.push({ "address.fullName": { $regex: search, $options: "i" } })
-
 
       if (!isNaN(search)) {
         query.$or.push({ totalAmount: Number(search) })
@@ -83,8 +94,7 @@ const cancelOrder = async (req, res) => {
     order.cancelReason = reason
     order.items.forEach(item => item.itemStatus = "Cancelled")
 
-    if (order.paymentStatus === "Paid") {
-
+    if (order.paymentStatus === "Paid" && order.totalAmount > 0) {
       const user = await User.findById(userId);
       if (!user.wallet || Array.isArray(user.wallet)) {
         user.wallet = { balance: 0, transactions: [] };
@@ -94,7 +104,7 @@ const cancelOrder = async (req, res) => {
       user.wallet.transactions.push({
         type: "credit",
         amount: order.totalAmount,
-        description: "Refund for Cancel Order",
+        description: `Refund for cancelled order (${order.orderId})`,
         orderId: order._id,
         date: new Date()
       });
@@ -103,8 +113,7 @@ const cancelOrder = async (req, res) => {
       order.paymentStatus = "Refunded";
     }
 
-
-
+    order.totalAmount = 0; 
     await order.save()
     res.json({ success: true, message: "Order cancelled successfully" })
   } catch (error) {
@@ -123,7 +132,7 @@ const cancelOrderItem = async (req, res) => {
       return res.status(400).json({ success: false, message: "Cancellation reason is mandatory" })
     }
 
-    const order = await Order.findOne({ _id: orderId, userId })
+    const order = await Order.findOne({ _id: orderId, userId }).populate("items.productId")
     if (!order) return res.status(404).json({ success: false, message: "Order not found" })
 
     const itemIndex = order.items.findIndex(item => item._id.toString() === itemId)
@@ -146,34 +155,32 @@ const cancelOrderItem = async (req, res) => {
     item.itemStatus = "Cancelled"
     item.cancelReason = reason
 
+    
+    const reductionAmount = Math.min(item.price * item.quantity, order.totalAmount);
+    order.totalAmount -= reductionAmount;
 
-    if (order.paymentStatus === "Paid") {
-      const refundAmount = item.price * item.quantity
-
+    if (order.paymentStatus === "Paid" && reductionAmount > 0) {
       const user = await User.findById(userId);
       if (!user.wallet || Array.isArray(user.wallet)) {
         user.wallet = { balance: 0, transactions: [] };
       }
 
-      user.wallet.balance += refundAmount;
+      user.wallet.balance += reductionAmount;
       user.wallet.transactions.push({
         type: "credit",
-        amount: refundAmount,
-        description: `Refund for Cancelled Item (${item.productId.name || 'Product'})`,
+        amount: reductionAmount,
+        description: `Refund for cancelled item: ${item.productId.name || 'Product'} (${order.orderId})`,
         orderId: order._id,
         date: new Date()
       });
       await user.save({ validateBeforeSave: false });
-
-
-      order.totalAmount -= refundAmount
-
     }
 
     const allCancelled = order.items.every(i => i.itemStatus === "Cancelled")
     if (allCancelled) {
       order.status = "Cancelled"
       order.cancelReason = "All items cancelled: " + (reason || "")
+      order.totalAmount = 0;
       if (order.paymentStatus === "Paid") {
         order.paymentStatus = "Refunded"
       }

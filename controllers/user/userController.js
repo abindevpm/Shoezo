@@ -743,7 +743,7 @@ const getAvailableCoupons = async (req, res) => {
       startDate: { $lte: today },
       expiryDate: { $gt: today },
       $expr: { $lt: ["$usedCount", "$usageLimit"] },
-      minPurchase: { $lte: subtotalValue }   // always filter by cart total
+      minPurchase: { $lte: subtotalValue }  
     };
 
     const coupons = await Coupon.find(query)

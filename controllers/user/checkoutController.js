@@ -56,8 +56,8 @@ const loadCheckout = async (req, res) => {
       }
 
       const currentPrice = variant.offerPrice && variant.offerPrice > 0
-  ? variant.offerPrice
-  : variant.price;
+        ? variant.offerPrice
+        : variant.price;
 
 
       const quantity = Number(item.quantity);
@@ -72,7 +72,7 @@ const loadCheckout = async (req, res) => {
     const deliveryCharge = 0;
     const totalPrice = subtotal - discountAmount;
 
-    req.session.subtotal = subtotal; 
+    req.session.subtotal = subtotal;
     req.session.totalPrice = totalPrice;
 
     const addresses = user.addresses || [];
@@ -115,7 +115,7 @@ const placeOrder = async (req, res) => {
 
     if (!userId) {
       console.log("Order placement failed: No user ID in session");
-      return res.redirect("/login");
+      return res.json({ success: false, message: "Please login to continue" });
     }
 
     const cart = await Cart.findOne({ userId }).populate({
@@ -128,7 +128,7 @@ const placeOrder = async (req, res) => {
 
     if (!cart || cart.items.length === 0) {
       console.log("Order placement failed: Empty cart for user", userId);
-      return res.redirect("/cart");
+      return res.json({ success: false, message: "Your cart is empty" });
     }
 
     const today = new Date();
@@ -165,15 +165,16 @@ const placeOrder = async (req, res) => {
         appliedDiscount = Math.max(appliedDiscount, Number(product.category.categoryOffer.discountValue) || 0);
       }
 
-     const currentPrice = variant.offerPrice && variant.offerPrice > 0
-  ? variant.offerPrice
-  : variant.price;
+      const currentPrice = variant.offerPrice && variant.offerPrice > 0
+        ? variant.offerPrice
+        : (variant.salePrice || variant.price);
 
+      const saleBase = variant.salePrice || variant.offerPrice || variant.price;
       const offerDiscountAmount = (variant.price - currentPrice) * item.quantity;
       totalOfferDiscount += offerDiscountAmount;
 
       subtotal += currentPrice * item.quantity;
-      baseSubtotal += Number(variant.price) * item.quantity;
+      baseSubtotal += Number(saleBase) * item.quantity;
 
       orderItems.push({
         productId: product._id,
@@ -183,6 +184,16 @@ const placeOrder = async (req, res) => {
       });
     }
 
+  
+    for (const item of cart.items) {
+      const variant = item.productId.variants.find(
+        v => Number(v.size) === Number(item.size)
+      );
+      if (!variant || variant.stock < item.quantity) {
+        return res.json({ success: false, message: `Insufficient stock for ${item.productId.name} (Size: ${item.size})` });
+      }
+    }
+
     const discountAmount = req.session.discountAmount || 0;
     const appliedCouponCode = req.session.appliedCoupon;
 
@@ -190,7 +201,7 @@ const placeOrder = async (req, res) => {
       const Coupon = require("../../models/couponSchema");
       const coupon = await Coupon.findOne({ code: appliedCouponCode, isActive: true });
       if (!coupon || coupon.usedCount >= coupon.usageLimit) {
-        return res.redirect("/checkout?error=Applied coupon is no longer available");
+        return res.json({ success: false, message: "Applied coupon is no longer available" });
       }
     }
 
@@ -205,7 +216,7 @@ const placeOrder = async (req, res) => {
 
     if (!selectedAddress) {
       console.log("Order placement failed: Address not found", addressId);
-      return res.redirect("/checkout?error=Please select a valid address");
+      return res.json({ success: false, message: "Please select a valid address" });
     }
 
 
@@ -216,7 +227,7 @@ const placeOrder = async (req, res) => {
 
       if (user.wallet.balance < totalAmount) {
         console.log("Insufficient wallet balance for user", userId, "Balance:", user.wallet.balance, "Need:", totalAmount);
-        return res.redirect(`/checkout?error=Insufficient Wallet Balance (Current: ₹${user.wallet.balance})`);
+        return res.json({ success: false, message: `Insufficient Wallet Balance (Current: ₹${user.wallet.balance})` });
       }
     }
 
@@ -267,8 +278,6 @@ const placeOrder = async (req, res) => {
 
 
       couponCode: req.session.appliedCoupon || null,
-      totalOfferDiscount,
- referal,
       totalAmount
     });
 
@@ -298,7 +307,7 @@ const placeOrder = async (req, res) => {
 
   } catch (err) {
     console.error("Order placement error:", err);
-    res.redirect("/checkout?error=Internal Server Error");
+    res.json({ success: false, message: "Internal Server Error" });
   }
 };
 

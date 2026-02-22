@@ -9,6 +9,7 @@ const productController = require("../controllers/admin/productController")
 const { uploadProduct } = require("../middlewares/multer")
 const couponController = require("../controllers/admin/couponController")
 const SalesReportController = require("../controllers/admin/salesReportController")
+const adminOrderController = require("../controllers/admin/adminOrderController")
 
 
 
@@ -48,7 +49,6 @@ router.patch("/toggle-brand/:id", adminAuth, brandController.toggleBrand);
 
 
 
-const adminOrderController = require("../controllers/admin/adminOrderController")
 
 // product managemant
 router.get("/products", productController.loadProducts);

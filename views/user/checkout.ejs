@@ -1004,11 +1004,23 @@
           if (verifyData.success) {
             window.location.href = "/order-success";
           } else {
+            // Mark payment as failed in DB if verification fails
+            await fetch("/mark-order-failed", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ dbOrderId })
+            });
             window.location.href = `/order-failure?orderId=${dbOrderId}`;
           }
         },
         modal: {
-          ondismiss: function () {
+          ondismiss: async function () {
+            // Mark payment as failed when user closes the modal
+            await fetch("/mark-order-failed", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ dbOrderId })
+            });
             window.location.href = `/order-failure?orderId=${dbOrderId}`;
           }
         }
@@ -1016,7 +1028,13 @@
 
       const rzp = new Razorpay(options);
 
-      rzp.on("payment.failed", function (response) {
+      rzp.on("payment.failed", async function (response) {
+        // Mark payment as failed when payment fails
+        await fetch("/mark-order-failed", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ dbOrderId })
+        });
         window.location.href = `/order-failure?orderId=${dbOrderId}`;
       });
 

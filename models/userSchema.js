@@ -69,7 +69,7 @@ const userSchema = new Schema({
     transactions: [
       {
         type: {
-          type: String, // credit or debit
+          type: String, 
           enum: ["credit", "debit"]
         },
         amount: {
@@ -90,15 +90,6 @@ const userSchema = new Schema({
       }
     ]
   },
-
-
-
-
-
-
-
-
-
 
 
 

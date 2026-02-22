@@ -11,11 +11,11 @@ async function fixWishlistIndexes() {
 
         const collection = mongoose.connection.collection("wishlists");
 
-        // List all indexes
+    
         const indexes = await collection.indexes();
         console.log("Current indexes:", indexes.map(idx => idx.name));
 
-        // Drop conflicting indexes if they exist
+
         const conflictingIndexes = ["user_1", "userId_1"];
 
         for (const indexName of conflictingIndexes) {

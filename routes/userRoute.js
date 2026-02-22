@@ -142,6 +142,7 @@ router.get("/order-failure", userController.orderFailure);
 //  payment
 router.post("/create-order", userAuth, paymentController.createOrder)
 router.post("/verify-payment", userAuth, paymentController.verifyPayment)
+router.post("/mark-order-failed", userAuth, paymentController.markOrderFailed)
 
 
 // Wishlist
@@ -153,12 +154,12 @@ router.post("/wishlist/move-to-cart", userAuth, WishlistController.moveToCart);
 
 // wallet 
 
-router.get("/wallet", WalletController.loadWallet)
+router.get("/wallet", userAuth,WalletController.loadWallet)
 
 // coupon
-router.get("/available-coupons", userController.getAvailableCoupons);
-router.post("/apply-coupon", userController.applyCoupon);
-router.post("/remove-coupon", userController.removeCoupon);
+router.get("/available-coupons",userAuth, userController.getAvailableCoupons);
+router.post("/apply-coupon",userAuth, userController.applyCoupon);
+router.post("/remove-coupon",userAuth, userController.removeCoupon);
 
 
 

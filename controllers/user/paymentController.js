@@ -226,8 +226,22 @@ const verifyPayment = async (req, res) => {
 };
 
 
+const markOrderFailed = async (req, res) => {
+  try {
+    const { dbOrderId } = req.body;
+    if (!dbOrderId) return res.json({ success: false });
+
+    await Order.findByIdAndUpdate(dbOrderId, { paymentStatus: "Failed" });
+    res.json({ success: true });
+  } catch (error) {
+    console.log("Mark Order Failed Error:", error);
+    res.json({ success: false });
+  }
+};
+
 module.exports = {
   createOrder,
-  verifyPayment
+  verifyPayment,
+  markOrderFailed
 }
 

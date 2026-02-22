@@ -98,6 +98,9 @@ const updateOrderStatus = async (req, res) => {
         const order = await Order.findById(orderId);
 
         if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+        if (order.paymentStatus === "Refunded" && (status === "Returned" || status === "Cancelled")) {
+            return res.status(400).json({ success: false, message: "Order already refunded" });
+        }
 
         const oldStatus = order.status;
 
@@ -110,7 +113,41 @@ const updateOrderStatus = async (req, res) => {
             });
         }
 
-        if (status === "Returned" && oldStatus === "Return Requested") {
+        if (status === "Returned" || status === "Cancelled") {
+        
+            for (const item of order.items) {
+                if (!item.isRestocked && !["Cancelled", "Returned"].includes(item.itemStatus)) {
+                    await Product.updateOne(
+                        { _id: item.productId, "variants.size": item.size },
+                        { $inc: { "variants.$.stock": item.quantity } }
+                    );
+                    item.isRestocked = true;
+                }
+                item.itemStatus = status;
+            }
+
+    
+            if (order.paymentStatus === "Paid" && order.totalAmount > 0) {
+                const user = await User.findById(order.userId);
+                if (!user.wallet || typeof user.wallet !== 'object' || Array.isArray(user.wallet)) {
+                    user.wallet = { balance: 0, transactions: [] };
+                }
+
+                user.wallet.balance += order.totalAmount;
+                user.wallet.transactions.push({
+                    type: "credit",
+                    amount: order.totalAmount,
+                    description: `Refund for ${status.toLowerCase()} order (${order.orderId})`,
+                    orderId: order._id,
+                    date: new Date()
+                });
+
+                order.paymentStatus = "Refunded";
+                await user.save({ validateBeforeSave: false });
+            }
+            order.totalAmount = 0; 
+        } else if (status === "Returned" && oldStatus === "Return Requested") {
+        
             for (const item of order.items) {
                 if (item.itemStatus === "Return Requested" || item.itemStatus === "Delivered") {
                     if (!item.isRestocked) {
@@ -123,29 +160,6 @@ const updateOrderStatus = async (req, res) => {
                     item.itemStatus = "Returned";
                 }
             }
-            if (order.paymentStatus === "Paid") {
-                const user = await User.findById(order.userId);
-                if (!user.wallet || Array.isArray(user.wallet)) {
-                    user.wallet = { balance: 0, transactions: [] };
-                }
-
-                user.wallet.balance += order.totalAmount;
-
-                user.wallet.transactions.push({
-                    type: "credit",
-                    amount: order.totalAmount,
-                    description: "Refund for returned order",
-                    orderId: order._id
-                })
-                order.paymentStatus = "Refunded";
-
-                await user.save({ validateBeforeSave: false })
-
-            }
-
-
-
-
         } else if (status === "Return Rejected" && oldStatus === "Return Requested") {
             order.items.forEach(item => {
                 if (item.itemStatus === "Return Requested") {
@@ -183,7 +197,7 @@ const updatePaymentStatus = async (req, res) => {
 const approveItemReturn = async (req, res) => {
     try {
         const { orderId, itemId } = req.params;
-        const order = await Order.findById(orderId);
+        const order = await Order.findById(orderId).populate("items.productId");
         if (!order) return res.status(404).json({ success: false, message: "Order not found" });
 
         const item = order.items.id(itemId);
@@ -202,24 +216,23 @@ const approveItemReturn = async (req, res) => {
 
         item.itemStatus = "Returned";
 
+    
+        const reductionAmount = Math.min(item.price * item.quantity, order.totalAmount);
+        order.totalAmount -= reductionAmount;
 
-
-        if (order.paymentStatus === "Paid") {
-
+        if (order.paymentStatus === "Paid" && reductionAmount > 0) {
             const user = await User.findById(order.userId);
-            if (!user.wallet || Array.isArray(user.wallet)) {
+            if (!user.wallet || typeof user.wallet !== 'object' || Array.isArray(user.wallet)) {
                 user.wallet = { balance: 0, transactions: [] };
             }
 
-            const refundAmount = item.price * item.quantity;
-
-            user.wallet.balance += refundAmount;
-
+            user.wallet.balance += reductionAmount;
             user.wallet.transactions.push({
                 type: "credit",
-                amount: refundAmount,
-                description: "Refund for returned item",
-                orderId: order._id
+                amount: reductionAmount,
+                description: `Refund for returned item: ${item.productId.name || 'Product'} (${order.orderId})`,
+                orderId: order._id,
+                date: new Date()
             });
 
             await user.save({ validateBeforeSave: false });
@@ -232,6 +245,7 @@ const approveItemReturn = async (req, res) => {
         if (allTerminal) {
             order.status = "Returned";
             order.paymentStatus = "Refunded";
+            order.totalAmount = 0;
         }
 
 
@@ -268,7 +282,7 @@ const cancelItemAdmin = async (req, res) => {
         const { orderId, itemId } = req.params;
         const { reason } = req.body;
 
-        const order = await Order.findById(orderId);
+        const order = await Order.findById(orderId).populate("items.productId");
         if (!order) return res.status(404).json({ success: false, message: "Order not found" });
 
         const item = order.items.id(itemId);
@@ -295,10 +309,36 @@ const cancelItemAdmin = async (req, res) => {
         item.cancelReason = reason || "Cancelled by Admin";
 
 
-        const allCancelled = order.items.every(i => i.itemStatus === "Cancelled");
-        if (allCancelled) {
-            order.status = "Cancelled";
-            order.cancelReason = "All items cancelled by Admin";
+        const reductionAmount = Math.min(item.price * item.quantity, order.totalAmount);
+        order.totalAmount -= reductionAmount;
+
+        
+        if (order.paymentStatus === "Paid" && reductionAmount > 0) {
+            const user = await User.findById(order.userId);
+            if (!user.wallet || typeof user.wallet !== 'object' || Array.isArray(user.wallet)) {
+                user.wallet = { balance: 0, transactions: [] };
+            }
+
+            user.wallet.balance += reductionAmount;
+            user.wallet.transactions.push({
+                type: "credit",
+                amount: reductionAmount,
+                description: `Refund for item cancelled by admin: ${item.productId.name || 'Product'} (${order.orderId})`,
+                orderId: order._id,
+                date: new Date()
+            });
+
+            await user.save({ validateBeforeSave: false });
+        }
+
+
+        const allTerminal = order.items.every(i => ["Cancelled", "Returned"].includes(i.itemStatus));
+        if (allTerminal) {
+            order.status = (order.items.every(i => i.itemStatus === "Cancelled")) ? "Cancelled" : "Returned";
+            if (order.paymentStatus === "Paid") {
+                order.paymentStatus = "Refunded";
+                order.totalAmount = 0;
+            }
         }
 
         await order.save();
