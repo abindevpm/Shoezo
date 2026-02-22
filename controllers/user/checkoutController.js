@@ -135,6 +135,7 @@ const placeOrder = async (req, res) => {
     let subtotal = 0;
     let baseSubtotal = 0;
     let orderItems = [];
+    let totalOfferDiscount = 0;
 
     for (const item of cart.items) {
       const product = item.productId;
@@ -167,6 +168,9 @@ const placeOrder = async (req, res) => {
      const currentPrice = variant.offerPrice && variant.offerPrice > 0
   ? variant.offerPrice
   : variant.price;
+
+      const offerDiscountAmount = (variant.price - currentPrice) * item.quantity;
+      totalOfferDiscount += offerDiscountAmount;
 
       subtotal += currentPrice * item.quantity;
       baseSubtotal += Number(variant.price) * item.quantity;
@@ -260,7 +264,6 @@ const placeOrder = async (req, res) => {
       subtotal: baseSubtotal,
       offerDiscount: baseSubtotal - subtotal,
       discountAmount,
-      couponCode: req.session.appliedCoupon || null,
       totalAmount
     });
 

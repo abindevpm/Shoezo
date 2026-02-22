@@ -187,7 +187,7 @@ const toggleBrand = async (req, res) => {
       });
     }
 
-  
+
     brand.isListed = !brand.isListed;
     await brand.save();
 

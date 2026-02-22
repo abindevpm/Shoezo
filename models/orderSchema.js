@@ -86,6 +86,14 @@ const orderSchema = new mongoose.Schema({
     default: null
   },
 
+  gstAmount: Number,
+  discountAmount: Number, 
+  totalOfferDiscount: { 
+    type: Number,
+    default: 0
+  },
+
+
   totalAmount: {
     type: Number,
     required: true
