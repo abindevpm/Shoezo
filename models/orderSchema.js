@@ -72,6 +72,7 @@ const orderSchema = new mongoose.Schema({
   },
 
   subtotal: Number,
+
   gstAmount: {
     type: Number,
     default: 0
@@ -85,6 +86,14 @@ const orderSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+
+  gstAmount: Number,
+  discountAmount: Number, 
+  totalOfferDiscount: { 
+    type: Number,
+    default: 0
+  },
+
 
   gstAmount: Number,
   discountAmount: Number, 

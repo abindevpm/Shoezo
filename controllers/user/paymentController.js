@@ -7,8 +7,6 @@ const User = require("../../models/userSchema");
 
 
 
-
-
 const createOrder = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -72,15 +70,14 @@ const createOrder = async (req, res) => {
         appliedDiscount = Math.max(appliedDiscount, Number(product.category.categoryOffer.discountValue) || 0);
       }
 
-    
+
       const currentPrice = variant.offerPrice && variant.offerPrice > 0
         ? variant.offerPrice
         : (variant.salePrice || variant.price);
 
 
-      
-      const saleBase = variant.salePrice || variant.offerPrice || variant.price;
 
+      const saleBase = variant.salePrice || variant.offerPrice || variant.price;
       const offerDiscountAmount = (variant.price - currentPrice) * item.quantity;
       totalOfferDiscount += offerDiscountAmount;
 
@@ -142,7 +139,6 @@ const createOrder = async (req, res) => {
       discountAmount,
 
       couponCode: req.session.appliedCoupon || null,
-
       status: "Placed"
     });
 

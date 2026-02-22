@@ -264,6 +264,11 @@ const placeOrder = async (req, res) => {
       subtotal: baseSubtotal,
       offerDiscount: baseSubtotal - subtotal,
       discountAmount,
+
+
+      couponCode: req.session.appliedCoupon || null,
+      totalOfferDiscount,
+ referal,
       totalAmount
     });
 
