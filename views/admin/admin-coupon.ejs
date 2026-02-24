@@ -97,6 +97,79 @@
 
 
 
+/* ===== Coupon Filter Section ===== */
+
+.filter-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
+  background: #ffffff;
+  padding: 18px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+}
+
+/* Input & Select Styling */
+.filter-form input,
+.filter-form select {
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s ease;
+  min-width: 180px;
+  background: #f9f9f9;
+}
+
+/* Focus Effect */
+.filter-form input:focus,
+.filter-form select:focus {
+  border-color: #0d6efd;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+}
+
+/* Date Inputs Slightly Smaller */
+.filter-form input[type="date"] {
+  min-width: 160px;
+}
+
+/* Filter Button */
+.filter-form button {
+  padding: 10px 18px;
+  background: #0d6efd;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+/* Button Hover */
+.filter-form button:hover {
+  background: #0b5ed7;
+  transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .filter-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-form input,
+  .filter-form select,
+  .filter-form button {
+    width: 100%;
+  }
+}
+
+
 
     </style>
 </head>
@@ -115,6 +188,46 @@
                         <i class="fas fa-plus me-2"></i>Create Coupon
                     </button>
                 </div>
+
+
+
+
+
+
+                <form method="GET" action="/admin/coupons" class="filter-form">
+
+  <input type="text" name="search" placeholder="Search by code" />
+
+  <select name="status">
+    <option value="">All Status</option>
+    <option value="Active">Active</option>
+    <option value="Cancelled">Cancelled</option>
+    <option value="Expired">Expired</option>
+  </select>
+
+  <select name="type">
+    <option value="">All Types</option>
+    <option value="New user Join">New user Join</option>
+    <option value="Above 1000 order">Above 1000 order</option>
+  </select>
+
+  <input type="date" name="startDate" />
+  <input type="date" name="endDate" />
+
+  <button type="submit">Filter</button>
+
+</form>
+
+
+
+
+
+
+
+
+
+
+
 
                 <!-- Coupon Table -->
                 <div class="table-card p-4">

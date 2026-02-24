@@ -246,6 +246,7 @@ const updateCartQty = async (req, res) => {
 
 
     const updatedItem = populatedCart.items.find(i => i._id.toString() === itemId);
+
     let itemTotal = 0;
     if (updatedItem) {
       const p = updatedItem.productId;
@@ -258,6 +259,8 @@ const updateCartQty = async (req, res) => {
       const cp = v.offerPrice && v.offerPrice > 0
         ? v.offerPrice
         : v.price;
+
+          itemTotal = updatedItem.quantity * cp;
     }
 
     res.json({

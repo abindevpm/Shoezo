@@ -4,14 +4,54 @@ const coupon = require("../../models/couponSchema")
 const loadCouponPage = async (req, res) => {
     try {
 
+        const {search,status,type,startDate,endDate} = req.query
+        
+
+        let query = {}
+
+        if(search){
+            query.code = {$regex:search,$options:"i"}
+        }
+
+
+  const today = new Date();
+
+if (status === "Active") {
+  query.isActive = true;
+  query.expiryDate = { $gte: today };
+}
+
+else if (status === "Cancelled") {
+  query.isActive = false;
+}
+
+else if (status === "Expired") {
+  query.expiryDate = { $lt: today };
+}
+
+
+
+     
+        if(type){
+            query.couponType = type
+        }
+        
+        if(startDate && endDate){
+            query.startDate = {
+                $gte:new Date(startDate),
+               $lte:new Date(endDate)
+            }
+        }
+
+
         const page = parseInt(req.query.page) || 1;
         const limit = 5;
         const skip = (page-1)*limit
 
-        const total = await coupon.countDocuments()
+        const total = await coupon.countDocuments(query)
 
 
-        const coupons = await coupon.find()
+        const coupons = await coupon.find(query)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -20,13 +60,17 @@ const loadCouponPage = async (req, res) => {
         res.render("admin-coupon", {
             coupons,
             currentPage:page,
-            totalPages : Math.ceil(total/limit)
+            totalPages : Math.ceil(total/limit),
+            queryParams:req.query
         })
     } catch (error) {
         console.log("Load Coupon page Error", error)
         return res.redirect("/dashboard")
     }
 }
+
+
+
 const createCoupon = async (req, res) => {
     try {
         const {
