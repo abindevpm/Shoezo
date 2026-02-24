@@ -30,9 +30,17 @@
           <a href="/wishlist" class="icon-link" title="Wishlist">
             <i class="fa-regular fa-heart"></i>
           </a>
-          <a href="/cart" class="icon-link" title="Cart">
+          <!-- <a href="/cart" class="icon-link" title="Cart">
             <i class="fa-solid fa-cart-shopping"></i>
-          </a>
+          </a> -->
+
+
+          <div class="cart-wrapper">
+  <a href="/cart">
+    <i class="fa fa-shopping-cart"></i>
+    <span id="cartCount" class="cart-badge"><%= cartCount || 0 %></span>
+  </a>
+</div>
         </div>
 
         <!-- SEARCH -->
@@ -236,4 +244,26 @@
     justify-content: center;
     font-weight: 700;
   }
+
+
+
+
+  .cart-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  background: red;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 7px;
+  border-radius: 50%;
+  min-width: 18px;
+  text-align: center;
+}
 </style>
