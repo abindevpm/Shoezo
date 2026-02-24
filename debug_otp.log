@@ -1,0 +1,265 @@
+[2026-02-23T03:50:46.450Z] Verification started for OTP: 8986
+[2026-02-23T03:50:46.454Z] Checking for existing user: lalu@gmail.com
+[2026-02-23T03:50:46.459Z] Hashing password...
+[2026-02-23T03:50:46.621Z] Creating User instance with explicit empty addresses array...
+[2026-02-23T03:50:46.633Z] User object BEFORE save: {"name":"lalu","email":"lalu@gmail.com","phone":"0623598657","password":"[HASHED]","isBlocked":false,"isAdmin":false,"cart":[],"wallet":{"balance":0,"transactions":[]},"orderHistory":[],"referalCode":"SH8AW97P","referredBy":null,"redeemed":false,"redeemedUsers":[],"lastLogin":null,"profileImage":"","addresses":[],"_id":"699bce96eec667b1b9cef660","createdOn":"2026-02-23T03:50:46.631Z","searchHistory":[]}
+[2026-02-23T03:50:46.666Z] Referral logic for code: SH8J6X3W
+[2026-02-23T03:50:46.677Z] Referrer found: niyas@gmail.com
+[2026-02-23T03:50:46.720Z] CRITICAL ERROR: User validation failed: addresses.0.city: Path `city` is required.
+[2026-02-23T03:50:46.723Z] Validation details: {"addresses.0.city":{"name":"ValidatorError","message":"Path `city` is required.","properties":{"message":"Path `city` is required.","type":"required","path":"city"},"kind":"required","path":"city"}}
+[2026-02-23T03:50:46.725Z] Stack: ValidationError: User validation failed: addresses.0.city: Path `city` is required.
+    at Document.invalidate (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongoose\lib\document.js:3362:32)
+    at Subdocument.invalidate (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongoose\lib\types\subdocument.js:257:12)
+    at C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongoose\lib\document.js:3123:17
+    at C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongoose\lib\schemaType.js:1420:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
+[2026-02-23T03:50:51.903Z] Verification started for OTP: 8986
+[2026-02-23T03:50:51.905Z] Checking for existing user: lalu@gmail.com
+[2026-02-23T03:50:51.941Z] Hashing password...
+[2026-02-23T03:50:52.093Z] Creating User instance with explicit empty addresses array...
+[2026-02-23T03:50:52.096Z] User object BEFORE save: {"name":"lalu","email":"lalu@gmail.com","phone":"0623598657","password":"[HASHED]","isBlocked":false,"isAdmin":false,"cart":[],"wallet":{"balance":0,"transactions":[]},"orderHistory":[],"referalCode":"SHJ2R96Q","referredBy":null,"redeemed":false,"redeemedUsers":[],"lastLogin":null,"profileImage":"","addresses":[],"_id":"699bce9ceec667b1b9cef686","createdOn":"2026-02-23T03:50:52.095Z","searchHistory":[]}
+[2026-02-23T03:50:52.097Z] Referral logic for code: SH8J6X3W
+[2026-02-23T03:50:52.107Z] Referrer found: niyas@gmail.com
+[2026-02-23T03:50:52.121Z] CRITICAL ERROR: User validation failed: addresses.0.city: Path `city` is required.
+[2026-02-23T03:50:52.123Z] Validation details: {"addresses.0.city":{"name":"ValidatorError","message":"Path `city` is required.","properties":{"message":"Path `city` is required.","type":"required","path":"city"},"kind":"required","path":"city"}}
+[2026-02-23T03:50:52.125Z] Stack: ValidationError: User validation failed: addresses.0.city: Path `city` is required.
+    at Document.invalidate (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongoose\lib\document.js:3362:32)
+    at Subdocument.invalidate (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongoose\lib\types\subdocument.js:257:12)
+    at C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongoose\lib\document.js:3123:17
+    at C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongoose\lib\schemaType.js:1420:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
+[2026-02-23T03:51:49.091Z] Verification started for OTP: 2796
+[2026-02-23T03:51:49.094Z] Checking for existing user: lalu@gmail.com
+[2026-02-23T03:51:49.099Z] Hashing password...
+[2026-02-23T03:51:49.264Z] Creating User instance with explicit empty addresses array...
+[2026-02-23T03:51:49.275Z] User object BEFORE save: {"name":"lalu","email":"lalu@gmail.com","phone":"6235298657","password":"[HASHED]","isBlocked":false,"isAdmin":false,"cart":[],"wallet":{"balance":0,"transactions":[]},"orderHistory":[],"referalCode":"SHQ0KJDO","referredBy":null,"redeemed":false,"redeemedUsers":[],"lastLogin":null,"profileImage":"","addresses":[],"_id":"699bced5f6025cf2566512b2","createdOn":"2026-02-23T03:51:49.275Z","searchHistory":[]}
+[2026-02-23T03:51:49.278Z] Attempting to save user to database...
+[2026-02-23T03:51:49.311Z] User saved successfully
+[2026-02-23T03:51:49.313Z] Verification success. Redirecting...
+[2026-02-23T03:53:05.777Z] Verification started for OTP: 2298
+[2026-02-23T03:53:05.779Z] Checking for existing user: jinu@gmail.com
+[2026-02-23T03:53:05.785Z] Hashing password...
+[2026-02-23T03:53:05.942Z] Creating User instance with explicit empty addresses array...
+[2026-02-23T03:53:05.946Z] User object BEFORE save: {"name":"jinu","email":"jinu@gmail.com","phone":"6235298657","password":"[HASHED]","isBlocked":false,"isAdmin":false,"cart":[],"wallet":{"balance":0,"transactions":[]},"orderHistory":[],"referalCode":"SHD3MSCL","referredBy":null,"redeemed":false,"redeemedUsers":[],"lastLogin":null,"profileImage":"","addresses":[],"_id":"699bcf21f6025cf256651416","createdOn":"2026-02-23T03:53:05.946Z","searchHistory":[]}
+[2026-02-23T03:53:05.948Z] Referral logic for code: SH8J6X3W
+[2026-02-23T03:53:05.958Z] Referrer found: niyas@gmail.com
+[2026-02-23T03:53:05.982Z] CRITICAL ERROR: User validation failed: addresses.0.city: Path `city` is required.
+[2026-02-23T03:53:05.986Z] Validation details: {"addresses.0.city":{"name":"ValidatorError","message":"Path `city` is required.","properties":{"message":"Path `city` is required.","type":"required","path":"city"},"kind":"required","path":"city"}}
+[2026-02-23T03:53:05.990Z] Stack: ValidationError: User validation failed: addresses.0.city: Path `city` is required.
+    at Document.invalidate (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongoose\lib\document.js:3362:32)
+    at Subdocument.invalidate (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongoose\lib\types\subdocument.js:257:12)
+    at C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongoose\lib\document.js:3123:17
+    at C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongoose\lib\schemaType.js:1420:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
+[2026-02-23T03:56:07.051Z] Verification started for OTP: 3635
+[2026-02-23T03:56:07.053Z] Checking for existing user: jinu@gmail.com
+[2026-02-23T03:56:07.058Z] Hashing password...
+[2026-02-23T03:56:07.219Z] Creating User instance with explicit empty addresses array...
+[2026-02-23T03:56:07.228Z] User object BEFORE save: {"name":"jinu","email":"jinu@gmail.com","phone":"0623298657","password":"[HASHED]","isBlocked":false,"isAdmin":false,"cart":[],"wallet":{"balance":0,"transactions":[]},"orderHistory":[],"referalCode":"SHR6U5LN","referredBy":null,"redeemed":false,"redeemedUsers":[],"lastLogin":null,"profileImage":"","addresses":[],"_id":"699bcfd7b686cf6769ffe8fc","createdOn":"2026-02-23T03:56:07.228Z","searchHistory":[]}
+[2026-02-23T03:56:07.230Z] Processing referral: SH8J6X3W
+[2026-02-23T03:56:07.268Z] Referrer found: niyas@gmail.com
+[2026-02-23T03:56:07.300Z] Referral reward generated and referrer updated
+[2026-02-23T03:56:08.430Z] Verification started for OTP: 3635
+[2026-02-23T03:56:08.432Z] Checking for existing user: jinu@gmail.com
+[2026-02-23T03:56:08.437Z] Hashing password...
+[2026-02-23T03:56:08.598Z] Creating User instance with explicit empty addresses array...
+[2026-02-23T03:56:08.602Z] User object BEFORE save: {"name":"jinu","email":"jinu@gmail.com","phone":"0623298657","password":"[HASHED]","isBlocked":false,"isAdmin":false,"cart":[],"wallet":{"balance":0,"transactions":[]},"orderHistory":[],"referalCode":"SH4XGHKG","referredBy":null,"redeemed":false,"redeemedUsers":[],"lastLogin":null,"profileImage":"","addresses":[],"_id":"699bcfd8b686cf6769ffe923","createdOn":"2026-02-23T03:56:08.601Z","searchHistory":[]}
+[2026-02-23T03:56:08.603Z] Processing referral: SH8J6X3W
+[2026-02-23T03:56:08.611Z] Referrer found: niyas@gmail.com
+[2026-02-23T03:56:08.625Z] Referral reward generated and referrer updated
+[2026-02-23T03:56:09.021Z] Verification started for OTP: 3635
+[2026-02-23T03:56:09.023Z] Checking for existing user: jinu@gmail.com
+[2026-02-23T03:56:09.027Z] Hashing password...
+[2026-02-23T03:56:09.164Z] Creating User instance with explicit empty addresses array...
+[2026-02-23T03:56:09.167Z] User object BEFORE save: {"name":"jinu","email":"jinu@gmail.com","phone":"0623298657","password":"[HASHED]","isBlocked":false,"isAdmin":false,"cart":[],"wallet":{"balance":0,"transactions":[]},"orderHistory":[],"referalCode":"SHRUFSWO","referredBy":null,"redeemed":false,"redeemedUsers":[],"lastLogin":null,"profileImage":"","addresses":[],"_id":"699bcfd9b686cf6769ffe94a","createdOn":"2026-02-23T03:56:09.166Z","searchHistory":[]}
+[2026-02-23T03:56:09.168Z] Processing referral: SH8J6X3W
+[2026-02-23T03:56:09.176Z] Referrer found: niyas@gmail.com
+[2026-02-23T03:56:09.216Z] Referral reward generated and referrer updated
+[2026-02-23T03:56:09.276Z] Verification started for OTP: 3635
+[2026-02-23T03:56:09.277Z] Checking for existing user: jinu@gmail.com
+[2026-02-23T03:56:09.281Z] Hashing password...
+[2026-02-23T03:56:09.416Z] Creating User instance with explicit empty addresses array...
+[2026-02-23T03:56:09.418Z] User object BEFORE save: {"name":"jinu","email":"jinu@gmail.com","phone":"0623298657","password":"[HASHED]","isBlocked":false,"isAdmin":false,"cart":[],"wallet":{"balance":0,"transactions":[]},"orderHistory":[],"referalCode":"SHX507MQ","referredBy":null,"redeemed":false,"redeemedUsers":[],"lastLogin":null,"profileImage":"","addresses":[],"_id":"699bcfd9b686cf6769ffe971","createdOn":"2026-02-23T03:56:09.418Z","searchHistory":[]}
+[2026-02-23T03:56:09.419Z] Processing referral: SH8J6X3W
+[2026-02-23T03:56:09.427Z] Referrer found: niyas@gmail.com
+[2026-02-23T03:56:09.436Z] Referral reward generated and referrer updated
+[2026-02-23T03:56:09.532Z] Verification started for OTP: 3635
+[2026-02-23T03:56:09.533Z] Checking for existing user: jinu@gmail.com
+[2026-02-23T03:56:09.537Z] Hashing password...
+[2026-02-23T03:56:09.673Z] Creating User instance with explicit empty addresses array...
+[2026-02-23T03:56:09.676Z] User object BEFORE save: {"name":"jinu","email":"jinu@gmail.com","phone":"0623298657","password":"[HASHED]","isBlocked":false,"isAdmin":false,"cart":[],"wallet":{"balance":0,"transactions":[]},"orderHistory":[],"referalCode":"SHI5E5KL","referredBy":null,"redeemed":false,"redeemedUsers":[],"lastLogin":null,"profileImage":"","addresses":[],"_id":"699bcfd9b686cf6769ffe998","createdOn":"2026-02-23T03:56:09.676Z","searchHistory":[]}
+[2026-02-23T03:56:09.677Z] Processing referral: SH8J6X3W
+[2026-02-23T03:56:09.685Z] Referrer found: niyas@gmail.com
+[2026-02-23T03:56:09.697Z] Referral reward generated and referrer updated
+[2026-02-23T03:56:09.704Z] Verification started for OTP: 3635
+[2026-02-23T03:56:09.706Z] Checking for existing user: jinu@gmail.com
+[2026-02-23T03:56:09.741Z] Hashing password...
+[2026-02-23T03:56:09.899Z] Creating User instance with explicit empty addresses array...
+[2026-02-23T03:56:09.901Z] User object BEFORE save: {"name":"jinu","email":"jinu@gmail.com","phone":"0623298657","password":"[HASHED]","isBlocked":false,"isAdmin":false,"cart":[],"wallet":{"balance":0,"transactions":[]},"orderHistory":[],"referalCode":"SH12QTPE","referredBy":null,"redeemed":false,"redeemedUsers":[],"lastLogin":null,"profileImage":"","addresses":[],"_id":"699bcfd9b686cf6769ffe9bf","createdOn":"2026-02-23T03:56:09.900Z","searchHistory":[]}
+[2026-02-23T03:56:09.902Z] Processing referral: SH8J6X3W
+[2026-02-23T03:56:09.910Z] Referrer found: niyas@gmail.com
+[2026-02-23T03:56:09.952Z] Referral reward generated and referrer updated
+[2026-02-23T03:56:10.330Z] Referral email sent
+[2026-02-23T03:56:10.332Z] Attempting to save new user...
+[2026-02-23T03:56:10.339Z] User saved successfully
+[2026-02-23T03:56:10.340Z] Verification success. Redirecting...
+[2026-02-23T03:56:10.349Z] Verification started for OTP: 3635
+[2026-02-23T03:56:10.351Z] ERROR: Session OTP data missing. userOtp=null, expiry=null
+[2026-02-23T03:56:10.356Z] Verification started for OTP: 3635
+[2026-02-23T03:56:10.357Z] ERROR: Session OTP data missing. userOtp=null, expiry=null
+[2026-02-23T03:56:10.362Z] Verification started for OTP: 3635
+[2026-02-23T03:56:10.364Z] ERROR: Session OTP data missing. userOtp=null, expiry=null
+[2026-02-23T03:56:11.457Z] Referral email sent
+[2026-02-23T03:56:11.459Z] Attempting to save new user...
+[2026-02-23T03:56:11.502Z] CRITICAL ERROR: E11000 duplicate key error collection: shoezo.users index: email_1 dup key: { email: "jinu@gmail.com" }
+[2026-02-23T03:56:11.504Z] Stack: MongoServerError: E11000 duplicate key error collection: shoezo.users index: email_1 dup key: { email: "jinu@gmail.com" }
+    at InsertOneOperation.handleOk (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at tryOperation (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\execute_operation.js:214:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async executeOperation (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async Collection.insertOne (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\collection.js:154:16)
+[2026-02-23T03:56:12.481Z] Referral email sent
+[2026-02-23T03:56:12.482Z] Attempting to save new user...
+[2026-02-23T03:56:12.487Z] CRITICAL ERROR: E11000 duplicate key error collection: shoezo.users index: email_1 dup key: { email: "jinu@gmail.com" }
+[2026-02-23T03:56:12.489Z] Stack: MongoServerError: E11000 duplicate key error collection: shoezo.users index: email_1 dup key: { email: "jinu@gmail.com" }
+    at InsertOneOperation.handleOk (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at tryOperation (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\execute_operation.js:214:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async executeOperation (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async Collection.insertOne (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\collection.js:154:16)
+[2026-02-23T03:56:12.742Z] Referral email sent
+[2026-02-23T03:56:12.744Z] Attempting to save new user...
+[2026-02-23T03:56:12.750Z] CRITICAL ERROR: E11000 duplicate key error collection: shoezo.users index: email_1 dup key: { email: "jinu@gmail.com" }
+[2026-02-23T03:56:12.751Z] Stack: MongoServerError: E11000 duplicate key error collection: shoezo.users index: email_1 dup key: { email: "jinu@gmail.com" }
+    at InsertOneOperation.handleOk (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at tryOperation (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\execute_operation.js:214:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async executeOperation (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async Collection.insertOne (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\collection.js:154:16)
+[2026-02-23T03:56:13.637Z] Referral email sent
+[2026-02-23T03:56:13.638Z] Attempting to save new user...
+[2026-02-23T03:56:13.644Z] CRITICAL ERROR: E11000 duplicate key error collection: shoezo.users index: email_1 dup key: { email: "jinu@gmail.com" }
+[2026-02-23T03:56:13.645Z] Stack: MongoServerError: E11000 duplicate key error collection: shoezo.users index: email_1 dup key: { email: "jinu@gmail.com" }
+    at InsertOneOperation.handleOk (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at tryOperation (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\execute_operation.js:214:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async executeOperation (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async Collection.insertOne (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\collection.js:154:16)
+[2026-02-23T03:56:13.922Z] Referral email sent
+[2026-02-23T03:56:13.923Z] Attempting to save new user...
+[2026-02-23T03:56:13.930Z] CRITICAL ERROR: E11000 duplicate key error collection: shoezo.users index: email_1 dup key: { email: "jinu@gmail.com" }
+[2026-02-23T03:56:13.932Z] Stack: MongoServerError: E11000 duplicate key error collection: shoezo.users index: email_1 dup key: { email: "jinu@gmail.com" }
+    at InsertOneOperation.handleOk (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at tryOperation (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\execute_operation.js:214:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async executeOperation (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async Collection.insertOne (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\collection.js:154:16)
+[2026-02-23T03:57:56.391Z] Verification started for OTP: 5502
+[2026-02-23T03:57:56.393Z] Checking for existing user: kia@gmail.com
+[2026-02-23T03:57:56.398Z] Hashing password...
+[2026-02-23T03:57:56.559Z] Creating User instance with explicit empty addresses array...
+[2026-02-23T03:57:56.564Z] User object BEFORE save: {"name":"kia","email":"kia@gmail.com","phone":"0623598657","password":"[HASHED]","isBlocked":false,"isAdmin":false,"cart":[],"wallet":{"balance":0,"transactions":[]},"orderHistory":[],"referalCode":"SHH1V28N","referredBy":null,"redeemed":false,"redeemedUsers":[],"lastLogin":null,"profileImage":"","addresses":[],"_id":"699bd044b686cf6769ffea27","createdOn":"2026-02-23T03:57:56.564Z","searchHistory":[]}
+[2026-02-23T03:57:56.567Z] Processing referral: SH8J6X3W
+[2026-02-23T03:57:56.576Z] Referrer found: niyas@gmail.com
+[2026-02-23T03:57:56.589Z] Referral reward generated and referrer updated
+[2026-02-23T03:57:58.389Z] Verification started for OTP: 5502
+[2026-02-23T03:57:58.391Z] Checking for existing user: kia@gmail.com
+[2026-02-23T03:57:58.398Z] Hashing password...
+[2026-02-23T03:57:58.554Z] Creating User instance with explicit empty addresses array...
+[2026-02-23T03:57:58.557Z] User object BEFORE save: {"name":"kia","email":"kia@gmail.com","phone":"0623598657","password":"[HASHED]","isBlocked":false,"isAdmin":false,"cart":[],"wallet":{"balance":0,"transactions":[]},"orderHistory":[],"referalCode":"SHT5W748","referredBy":null,"redeemed":false,"redeemedUsers":[],"lastLogin":null,"profileImage":"","addresses":[],"_id":"699bd046b686cf6769ffea4e","createdOn":"2026-02-23T03:57:58.557Z","searchHistory":[]}
+[2026-02-23T03:57:58.558Z] Processing referral: SH8J6X3W
+[2026-02-23T03:57:58.564Z] Referrer found: niyas@gmail.com
+[2026-02-23T03:57:58.575Z] Referral reward generated and referrer updated
+[2026-02-23T03:57:58.893Z] Verification started for OTP: 5502
+[2026-02-23T03:57:58.895Z] Checking for existing user: kia@gmail.com
+[2026-02-23T03:57:58.900Z] Hashing password...
+[2026-02-23T03:57:59.061Z] Creating User instance with explicit empty addresses array...
+[2026-02-23T03:57:59.064Z] User object BEFORE save: {"name":"kia","email":"kia@gmail.com","phone":"0623598657","password":"[HASHED]","isBlocked":false,"isAdmin":false,"cart":[],"wallet":{"balance":0,"transactions":[]},"orderHistory":[],"referalCode":"SHVLXAZS","referredBy":null,"redeemed":false,"redeemedUsers":[],"lastLogin":null,"profileImage":"","addresses":[],"_id":"699bd047b686cf6769ffea75","createdOn":"2026-02-23T03:57:59.063Z","searchHistory":[]}
+[2026-02-23T03:57:59.065Z] Processing referral: SH8J6X3W
+[2026-02-23T03:57:59.073Z] Referrer found: niyas@gmail.com
+[2026-02-23T03:57:59.085Z] Referral reward generated and referrer updated
+[2026-02-23T03:57:59.285Z] Verification started for OTP: 5502
+[2026-02-23T03:57:59.287Z] Checking for existing user: kia@gmail.com
+[2026-02-23T03:57:59.291Z] Hashing password...
+[2026-02-23T03:57:59.451Z] Creating User instance with explicit empty addresses array...
+[2026-02-23T03:57:59.454Z] User object BEFORE save: {"name":"kia","email":"kia@gmail.com","phone":"0623598657","password":"[HASHED]","isBlocked":false,"isAdmin":false,"cart":[],"wallet":{"balance":0,"transactions":[]},"orderHistory":[],"referalCode":"SHN0DGYY","referredBy":null,"redeemed":false,"redeemedUsers":[],"lastLogin":null,"profileImage":"","addresses":[],"_id":"699bd047b686cf6769ffea9c","createdOn":"2026-02-23T03:57:59.454Z","searchHistory":[]}
+[2026-02-23T03:57:59.456Z] Processing referral: SH8J6X3W
+[2026-02-23T03:57:59.464Z] Referrer found: niyas@gmail.com
+[2026-02-23T03:57:59.474Z] Referral reward generated and referrer updated
+[2026-02-23T03:57:59.496Z] Referral email sent
+[2026-02-23T03:57:59.497Z] Attempting to save new user...
+[2026-02-23T03:57:59.503Z] User saved successfully
+[2026-02-23T03:57:59.506Z] Verification success. Redirecting...
+[2026-02-23T03:58:01.537Z] Referral email sent
+[2026-02-23T03:58:01.539Z] Attempting to save new user...
+[2026-02-23T03:58:01.546Z] CRITICAL ERROR: E11000 duplicate key error collection: shoezo.users index: email_1 dup key: { email: "kia@gmail.com" }
+[2026-02-23T03:58:01.548Z] Stack: MongoServerError: E11000 duplicate key error collection: shoezo.users index: email_1 dup key: { email: "kia@gmail.com" }
+    at InsertOneOperation.handleOk (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at tryOperation (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\execute_operation.js:214:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async executeOperation (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async Collection.insertOne (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\collection.js:154:16)
+[2026-02-23T03:58:02.543Z] Referral email sent
+[2026-02-23T03:58:02.546Z] Attempting to save new user...
+[2026-02-23T03:58:02.550Z] CRITICAL ERROR: E11000 duplicate key error collection: shoezo.users index: email_1 dup key: { email: "kia@gmail.com" }
+[2026-02-23T03:58:02.553Z] Stack: MongoServerError: E11000 duplicate key error collection: shoezo.users index: email_1 dup key: { email: "kia@gmail.com" }
+    at InsertOneOperation.handleOk (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at tryOperation (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\execute_operation.js:214:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async executeOperation (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async Collection.insertOne (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\collection.js:154:16)
+[2026-02-23T03:58:03.016Z] Referral email sent
+[2026-02-23T03:58:03.018Z] Attempting to save new user...
+[2026-02-23T03:58:03.053Z] CRITICAL ERROR: E11000 duplicate key error collection: shoezo.users index: email_1 dup key: { email: "kia@gmail.com" }
+[2026-02-23T03:58:03.054Z] Stack: MongoServerError: E11000 duplicate key error collection: shoezo.users index: email_1 dup key: { email: "kia@gmail.com" }
+    at InsertOneOperation.handleOk (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at tryOperation (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\execute_operation.js:214:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async executeOperation (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async Collection.insertOne (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\collection.js:154:16)
+[2026-02-23T04:18:03.859Z] Verification started for OTP: 3933
+[2026-02-23T04:18:03.861Z] Checking for existing user: hijaz@gmail.com
+[2026-02-23T04:18:03.866Z] Hashing password...
+[2026-02-23T04:18:04.004Z] Creating User instance with explicit empty addresses array...
+[2026-02-23T04:18:04.015Z] User object BEFORE save: {"name":"hijaz","email":"hijaz@gmail.com","phone":"0625298657","password":"[HASHED]","isBlocked":false,"isAdmin":false,"cart":[],"wallet":{"balance":0,"transactions":[]},"orderHistory":[],"referalCode":"SHDRJFFJ","referredBy":null,"redeemed":false,"redeemedUsers":[],"lastLogin":null,"profileImage":"","addresses":[],"_id":"699bd4fca9132fd4da70b3c3","createdOn":"2026-02-23T04:18:04.014Z","searchHistory":[]}
+[2026-02-23T04:18:04.016Z] Processing referral: SHR6U5LN
+[2026-02-23T04:18:04.022Z] Referrer found: jinu@gmail.com
+[2026-02-23T04:18:04.050Z] Referral reward generated and referrer updated
+[2026-02-23T04:18:04.950Z] Verification started for OTP: 3933
+[2026-02-23T04:18:04.952Z] Checking for existing user: hijaz@gmail.com
+[2026-02-23T04:18:04.958Z] Hashing password...
+[2026-02-23T04:18:05.112Z] Creating User instance with explicit empty addresses array...
+[2026-02-23T04:18:05.116Z] User object BEFORE save: {"name":"hijaz","email":"hijaz@gmail.com","phone":"0625298657","password":"[HASHED]","isBlocked":false,"isAdmin":false,"cart":[],"wallet":{"balance":0,"transactions":[]},"orderHistory":[],"referalCode":"SHJXAKJW","referredBy":null,"redeemed":false,"redeemedUsers":[],"lastLogin":null,"profileImage":"","addresses":[],"_id":"699bd4fda9132fd4da70b3c9","createdOn":"2026-02-23T04:18:05.116Z","searchHistory":[]}
+[2026-02-23T04:18:05.118Z] Processing referral: SHR6U5LN
+[2026-02-23T04:18:05.124Z] Referrer found: jinu@gmail.com
+[2026-02-23T04:18:05.133Z] Referral reward generated and referrer updated
+[2026-02-23T04:18:07.239Z] Verification started for OTP: 3933
+[2026-02-23T04:18:07.241Z] Checking for existing user: hijaz@gmail.com
+[2026-02-23T04:18:07.245Z] Hashing password...
+[2026-02-23T04:18:07.296Z] Referral email sent
+[2026-02-23T04:18:07.298Z] Attempting to save new user...
+[2026-02-23T04:18:07.305Z] User saved successfully
+[2026-02-23T04:18:07.307Z] Verification success. Redirecting...
+[2026-02-23T04:18:07.386Z] Creating User instance with explicit empty addresses array...
+[2026-02-23T04:18:07.389Z] User object BEFORE save: {"name":"hijaz","email":"hijaz@gmail.com","phone":"0625298657","password":"[HASHED]","isBlocked":false,"isAdmin":false,"cart":[],"wallet":{"balance":0,"transactions":[]},"orderHistory":[],"referalCode":"SHUW63LO","referredBy":null,"redeemed":false,"redeemedUsers":[],"lastLogin":null,"profileImage":"","addresses":[],"_id":"699bd4ffa9132fd4da70b3d0","createdOn":"2026-02-23T04:18:07.389Z","searchHistory":[]}
+[2026-02-23T04:18:07.391Z] Processing referral: SHR6U5LN
+[2026-02-23T04:18:07.398Z] Referrer found: jinu@gmail.com
+[2026-02-23T04:18:07.410Z] Referral reward generated and referrer updated
+[2026-02-23T04:18:07.972Z] Referral email sent
+[2026-02-23T04:18:07.973Z] Attempting to save new user...
+[2026-02-23T04:18:07.980Z] CRITICAL ERROR: E11000 duplicate key error collection: shoezo.users index: email_1 dup key: { email: "hijaz@gmail.com" }
+[2026-02-23T04:18:07.981Z] Stack: MongoServerError: E11000 duplicate key error collection: shoezo.users index: email_1 dup key: { email: "hijaz@gmail.com" }
+    at InsertOneOperation.handleOk (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at tryOperation (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\execute_operation.js:214:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async executeOperation (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async Collection.insertOne (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\collection.js:154:16)
+[2026-02-23T04:18:10.833Z] Referral email sent
+[2026-02-23T04:18:10.834Z] Attempting to save new user...
+[2026-02-23T04:18:10.840Z] CRITICAL ERROR: E11000 duplicate key error collection: shoezo.users index: email_1 dup key: { email: "hijaz@gmail.com" }
+[2026-02-23T04:18:10.841Z] Stack: MongoServerError: E11000 duplicate key error collection: shoezo.users index: email_1 dup key: { email: "hijaz@gmail.com" }
+    at InsertOneOperation.handleOk (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at tryOperation (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\execute_operation.js:214:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async executeOperation (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async Collection.insertOne (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongodb\lib\collection.js:154:16)

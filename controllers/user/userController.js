@@ -285,8 +285,8 @@ const signup = async (req, res) => {
 
     req.session.userData = { name, phone, email, password, referalCode };
 
-    res.render("otp");
-    console.log("OTP Sent", otp);
+    res.render("otp", { email });
+    console.log("OTP Sent to", email, ":", otp);
 
   } catch (error) {
     console.error("Signup error", error);
@@ -310,131 +310,179 @@ const securePassword = async (password) => {
 
 
 const otp = async (req, res) => {
-  try {
-    const { otp } = req.body;
+  const fs = require('fs');
+  const logFile = 'debug_otp.log';
 
+  const log = (msg) => {
+    const time = new Date().toISOString();
+    fs.appendFileSync(logFile, `[${time}] ${msg}\n`);
+    console.log(msg);
+  };
+
+  try {
+    const { otp: enteredOtp } = req.body;
+    log(`Verification started for OTP: ${enteredOtp}`);
+
+    if (!req.session) {
+      log("ERROR: Session object missing entirely");
+      return res.status(500).json({ success: false, message: "Server error: Session missing" });
+    }
 
     if (!req.session.userOtp || !req.session.otpExpiry) {
+      log(`ERROR: Session OTP data missing. userOtp=${req.session.userOtp}, expiry=${req.session.otpExpiry}`);
       return res.status(400).json({
         success: false,
         message: "OTP expired. Please request a new OTP."
       });
     }
-
 
     if (Date.now() > req.session.otpExpiry) {
+      log("ERROR: OTP expired by time");
       req.session.userOtp = null;
       req.session.otpExpiry = null;
-
       return res.status(400).json({
         success: false,
         message: "OTP expired. Please request a new OTP."
       });
     }
 
-    if (otp !== req.session.userOtp) {
+    if (enteredOtp !== req.session.userOtp) {
+      log(`ERROR: Invalid OTP. Got=${enteredOtp}, Expected=${req.session.userOtp}`);
       return res.status(400).json({
         success: false,
         message: "Invalid OTP"
       });
     }
 
+    const userData = req.session.userData;
+    if (!userData) {
+      log("ERROR: userData missing in session");
+      return res.status(400).json({
+        success: false,
+        message: "Session expired. Please sign up again."
+      });
+    }
 
-    const user = req.session.userData;
-    const passwordHash = await securePassword(user.password);
+    log(`Checking for existing user: ${userData.email}`);
+    const existingUser = await User.findOne({ email: userData.email });
+    if (existingUser) {
+      log(`ERROR: User already exists: ${userData.email}`);
+      return res.status(400).json({
+        success: false,
+        message: "User already exists with this email."
+      });
+    }
 
+    log("Hashing password...");
+    if (!userData.password) {
+      log("ERROR: Password missing in userData");
+      throw new Error("Password missing in session data");
+    }
+    const passwordHash = await securePassword(userData.password);
+    if (!passwordHash) {
+      log("ERROR: securePassword returned undefined");
+      throw new Error("Password hashing failed");
+    }
 
     const newReferralCode = "SH" + Math.random().toString(36).substring(2, 8).toUpperCase();
 
+    log("Creating User instance with explicit empty addresses array...");
     const saveUserData = new User({
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
+      name: userData.name,
+      email: userData.email,
+      phone: userData.phone,
       password: passwordHash,
-      referalCode: newReferralCode
+      referalCode: newReferralCode,
+      addresses: [] 
     });
 
+    log(`User object BEFORE save: ${JSON.stringify({
+      ...saveUserData.toObject(),
+      password: '[HASHED]'
+    })}`);
 
-    if (user.referalCode) {
-      const referrer = await User.findOne({ referalCode: user.referalCode });
-      if (referrer) {
-        saveUserData.referredBy = referrer._id;
+  
+    try {
+      if (userData.referalCode) {
+        log(`Processing referral: ${userData.referalCode}`);
+        const referrer = await User.findOne({ referalCode: userData.referalCode });
+        if (referrer) {
+          log(`Referrer found: ${referrer.email}`);
+          saveUserData.referredBy = referrer._id;
 
+          const couponCode = "REF" + Math.random().toString(36).substring(2, 8).toUpperCase();
+          const expiry = new Date();
+          expiry.setDate(expiry.getDate() + 30);
 
-        referrer.redeemedUsers.push(saveUserData._id);
-
-
-        const couponCode = "REF" + Math.random().toString(36).substring(2, 8).toUpperCase();
-        const expiry = new Date();
-        expiry.setDate(expiry.getDate() + 30);
-
-        const newCoupon = new Coupon({
-          code: couponCode,
-          discountType: "fixed",
-          discountValue: 100,
-          minPurchase: 500,
-          startDate: new Date(),
-          expiryDate: expiry,
-          usageLimit: 1,
-          couponType: "New user Join"
-        });
-        await newCoupon.save();
-
-
-
-        await referrer.save();
-
-
-        try {
-          const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-              user: process.env.NODEMAILER_EMAIL,
-              pass: process.env.NODEMAILER_PASSWORD
-            }
+          const newCoupon = new Coupon({
+            code: couponCode,
+            discountType: "fixed",
+            discountValue: 100,
+            minPurchase: 500,
+            startDate: new Date(),
+            expiryDate: expiry,
+            usageLimit: 1,
+            couponType: "New user Join"
           });
 
-          await transporter.sendMail({
-            from: `"Shoezo 👟" <${process.env.NODEMAILER_EMAIL}>`,
-            to: referrer.email,
-            subject: "You've earned a Referral Reward! 🎁",
-            html: `
-              <div style="font-family: Arial, sans-serif; padding: 20px;">
-                <h2>Hello ${referrer.name}!</h2>
-                <p>Great news! Your friend just joined Shoezo using your referral code.</p>
-                <p>As a token of our appreciation, we've generated a special coupon for you:</p>
-                <div style="background: #f0f0f0; padding: 15px; font-size: 24px; font-weight: bold; text-align: center; border-radius: 8px;">
-                  ${couponCode}
-                </div>
-                <p>Use this code to get ₹100 off on your next purchase (minimum ₹500).</p>
-                <p>Happy Shopping!</p>
-                <p><strong>Team Shoezo</strong></p>
-              </div>
-            `
-          });
-        } catch (emailErr) {
-          console.error("Failed to send reward email:", emailErr);
+          await newCoupon.save();
+
+          await User.updateOne(
+            { _id: referrer._id },
+            { $push: { redeemedUsers: saveUserData._id } }
+          );
+
+          log("Referral reward generated and referrer updated");
+
+          try {
+            const transporter = nodemailer.createTransport({
+              service: "gmail",
+              auth: {
+                user: process.env.NODEMAILER_EMAIL,
+                pass: process.env.NODEMAILER_PASSWORD.trim()
+              }
+            });
+
+            await transporter.sendMail({
+              from: `"Shoezo 👟" <${process.env.NODEMAILER_EMAIL}>`,
+              to: referrer.email,
+              subject: "You've earned a Referral Reward! 🎁",
+              html: `<h2>Hello ${referrer.name}!</h2><p>Your friend joined Shoezo! Your voucher: <strong>${couponCode}</strong></p>`
+            });
+            log("Referral email sent");
+          } catch (emailErr) {
+            log(`WARNING: Referral email failed: ${emailErr.message}`);
+          }
+        } else {
+          log(`Referrer not found for code: ${userData.referalCode}`);
         }
       }
+    } catch (referralErr) {
+      log(`CRITICAL WARNING: Referral logic failed, but continuing signup: ${referralErr.message}`);
     }
 
+    log("Attempting to save new user...");
     await saveUserData.save();
-
-    req.session.user = user;
+    log("User saved successfully");
 
     req.session.userOtp = null;
     req.session.otpExpiry = null;
     req.session.userData = null;
-
     req.session.user = saveUserData._id;
 
+    log("Verification success. Redirecting...");
     res.json({ success: true, redirectUrl: "/" });
 
   } catch (error) {
-    console.error("OTP Verify Error:", error);
+    log(`CRITICAL ERROR: ${error.message}`);
+    if (error.errors) {
+      log(`Validation details: ${JSON.stringify(error.errors)}`);
+    }
+    log(`Stack: ${error.stack}`);
+
     res.status(500).json({
       success: false,
-      message: "Server error"
+      message: "Server Error: " + error.message
     });
   }
 };
@@ -743,7 +791,7 @@ const getAvailableCoupons = async (req, res) => {
       startDate: { $lte: today },
       expiryDate: { $gt: today },
       $expr: { $lt: ["$usedCount", "$usageLimit"] },
-      minPurchase: { $lte: subtotalValue }  
+      minPurchase: { $lte: subtotalValue }
     };
 
     const coupons = await Coupon.find(query)
@@ -835,7 +883,7 @@ const loadReferralPage = async (req, res) => {
       user
     });
   } catch (error) {
-    console.log(error,"Referal page error");
+    console.log(error, "Referal page error");
     res.redirect("/profile");
   }
 };

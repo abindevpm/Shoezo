@@ -1,17 +1,32 @@
 const coupon = require("../../models/couponSchema")
 
+
 const loadCouponPage = async (req, res) => {
     try {
-        const coupons = await coupon.find().sort({ createdAt: -1 })
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = 5;
+        const skip = (page-1)*limit
+
+        const total = await coupon.countDocuments()
+
+
+        const coupons = await coupon.find()
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+
+
         res.render("admin-coupon", {
-            coupons
+            coupons,
+            currentPage:page,
+            totalPages : Math.ceil(total/limit)
         })
     } catch (error) {
         console.log("Load Coupon page Error", error)
         return res.redirect("/dashboard")
     }
 }
-
 const createCoupon = async (req, res) => {
     try {
         const {

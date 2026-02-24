@@ -1,0 +1,9 @@
+
+--- 2026-02-23T03:47:37.691Z ---
+Error: User validation failed: addresses.0.city: Path `city` is required.
+Stack: ValidationError: User validation failed: addresses.0.city: Path `city` is required.
+    at Document.invalidate (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongoose\lib\document.js:3362:32)
+    at Subdocument.invalidate (C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongoose\lib\types\subdocument.js:257:12)
+    at C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongoose\lib\document.js:3123:17
+    at C:\Users\LENOVO\Desktop\SHOEZO\node_modules\mongoose\lib\schemaType.js:1420:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
