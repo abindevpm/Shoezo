@@ -296,6 +296,9 @@
                                                     %>'>
                                                     <i class="fas fa-edit"></i>
                                                 </button>
+
+
+
                                                 <% if (coupon.isActive) { %>
                                                     <button class="btn btn-outline-danger btn-sm"
                                                         onclick="toggleCoupon('<%= coupon._id %>')">
@@ -307,6 +310,17 @@
                                                             <i class="fas fa-check-circle"></i> Activate
                                                         </button>
                                                         <% } %>
+
+                                                        
+                                                      <button onclick="deleteCoupon('<%= coupon._id %>')" 
+                                                     class="btn btn-danger btn-sm">
+                                                          Delete
+                                                        </button>
+
+
+
+
+
                                             </div>
                                         </td>
                                     </tr>
@@ -676,6 +690,53 @@
                         });
                     }
                 }
+
+
+
+async function deleteCoupon(id) {
+
+  const result = await Swal.fire({
+    title: "Are you sure?",
+    text: "This coupon will be permanently deleted!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes, delete it!"
+  });
+
+  if (result.isConfirmed) {
+
+    const response = await fetch(`/admin/delete-coupon/${id}`, {
+      method: "POST"
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      Swal.fire("Deleted!", "Coupon has been deleted.", "success")
+        .then(() => {
+          location.reload();
+        });
+    } else {
+      Swal.fire("Error!", "Something went wrong.", "error");
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             </script>
 </body>
 

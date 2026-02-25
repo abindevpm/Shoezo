@@ -1,4 +1,5 @@
 const coupon = require("../../models/couponSchema")
+const { find } = require("../../models/orderSchema")
 
 
 const loadCouponPage = async (req, res) => {
@@ -184,9 +185,35 @@ const toggleCouponStatus = async (req, res) => {
     }
 }
 
+
+const deleteCoupon = async(req,res)=>{
+    try {
+        const couponId = req.params.id
+
+        await coupon.findByIdAndDelete(couponId);
+
+        res.status(200).json({success:true})
+
+
+
+        
+    } catch (error) {
+         console.log("Delete Coupon Error",error)
+         res.status(500).json({success:false})
+        
+    }
+}
+
+
+
+
+
+
+
 module.exports = {
     createCoupon,
     loadCouponPage,
     toggleCouponStatus,
-    updateCoupon
+    updateCoupon,
+    deleteCoupon
 }

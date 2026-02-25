@@ -87,6 +87,7 @@ router.get("/coupons", adminAuth, couponController.loadCouponPage)
 router.post("/createCoupon", adminAuth, couponController.createCoupon)
 router.patch("/toggleCoupon/:id", adminAuth, couponController.toggleCouponStatus)
 router.patch("/updateCoupon/:id", adminAuth, couponController.updateCoupon)
+router.post("/delete-coupon/:id",adminAuth,couponController.deleteCoupon)
 
 // sales Report
 router.get("/sales-report", adminAuth, SalesReportController.loadSalesReport)
