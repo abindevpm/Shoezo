@@ -450,14 +450,14 @@
 
       if (!data.success) return;
 
-      // update quantity
+    
       document.getElementById(`qty-${itemId}`).innerText = data.quantity;
 
-      // update item total
+    
       document.getElementById(`item-total-${itemId}`).innerText =
         "₹" + data.itemTotal;
 
-      // update summary
+    
       document.getElementById("subtotal").innerText = "₹" + data.subtotal;
 
       const gstEl = document.getElementById("gst");
@@ -474,7 +474,7 @@
 
       document.getElementById("grandTotal").innerText = "₹" + data.grandTotal;
 
-      // enable / disable buttons states
+      
       const decBtn = document.getElementById(`dec-${itemId}`);
       const incBtn = document.getElementById(`inc-${itemId}`);
 
@@ -485,6 +485,8 @@
       console.log(err);
     }
   }
+
+
 
 
 

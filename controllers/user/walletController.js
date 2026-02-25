@@ -2,8 +2,16 @@ const User = require("../../models/userSchema")
 
 const loadWallet = async (req, res) => {
     try {
+
+
+
         const userId = req.session.user;
         const user = await User.findById(userId);
+
+
+
+
+
 
         if (!user) {
             return res.redirect("/login");
@@ -11,7 +19,9 @@ const loadWallet = async (req, res) => {
 
         res.render("wallet", {
             user,
-            activePage: 'wallet'
+            activePage: 'wallet',
+     
+            
         });
 
     } catch (error) {

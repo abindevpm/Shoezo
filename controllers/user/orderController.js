@@ -12,16 +12,8 @@ const loadorders = async (req, res) => {
 
     let query = {
       userId,
-      $and: [
-        { paymentStatus: { $ne: "Failed" } },
-        {
-          $or: [
-            { paymentMethod: "COD" },
-            { paymentStatus: { $in: ["Paid", "Refunded"] } }
-          ]
-        }
-      ]
-    }
+      paymentStatus: { $in: ["Paid", "Refunded", "Failed"] }
+    };
 
     if (search) {
       const productIds = await Product.find({ name: { $regex: search, $options: "i" } }).distinct("_id")
@@ -42,7 +34,8 @@ const loadorders = async (req, res) => {
       .populate("items.productId")
       .sort({ createdAt: -1 })
 
-    res.render("orders", { orders, searchQuery: search || "" })
+    const user = await User.findById(userId);
+    res.render("orders", { orders, searchQuery: search || "", user })
 
   } catch (error) {
     console.log(error)
@@ -58,7 +51,8 @@ const getOrderDetails = async (req, res) => {
     const order = await Order.findOne({ _id: req.params.id, userId }).populate("items.productId")
     if (!order) return res.redirect("/orders")
 
-    res.render("order-details", { order })
+    const user = await User.findById(userId);
+    res.render("order-details", { order, user })
   } catch (error) {
     console.log(error)
     res.redirect("/orders")
@@ -206,7 +200,7 @@ const cancelOrderItem = async (req, res) => {
     if (order.paymentStatus === "Paid" && reductionAmount > 0) {
       message += ` ₹${reductionAmount} has been credited to your wallet.`;
     } else if (allCancelled && order.paymentStatus === "Refunded") {
-      
+
     }
 
     res.json({ success: true, message: message })

@@ -35,7 +35,7 @@ router.get('/login', userController.loadlogin)
 router.post("/login", userController.login)
 
 // user logout
-router.get("/logout", userController.logout)  
+router.get("/logout", userController.logout)
 
 
 // google auth
@@ -148,6 +148,7 @@ router.get("/order-failure", userController.orderFailure);
 router.post("/create-order", userAuth, paymentController.createOrder)
 router.post("/verify-payment", userAuth, paymentController.verifyPayment)
 router.post("/mark-order-failed", userAuth, paymentController.markOrderFailed)
+router.post("/orders/retry-payment/:orderId", userAuth, paymentController.retryPayment);
 
 
 // Wishlist

@@ -97,6 +97,7 @@
       .review-bar-fill { height:100%; background:#10b981; border-radius:9999px; }
       .scrollbar-hide::-webkit-scrollbar { display:none; } .scrollbar-hide { -ms-overflow-style:none; scrollbar-width:none; }
     </style> -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
       </head>
 
       <body class="antialiased text-gray-900">
@@ -278,10 +279,8 @@
 
                     <div class="flex gap-3 pt-2">
 
-                      <form action="/cart/<%= product._id %>" method="POST" class="flex-1">
-
+                      <form id="addToCartForm" class="flex-1">
                         <input type="hidden" name="variant" id="selectedVariant">
-
                         <button id="addToCartBtn" type="submit"
                           class="w-full py-3 border border-gray-300 rounded-lg hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed">
                           Add to Cart
@@ -443,7 +442,7 @@
             <script>
               document.addEventListener("DOMContentLoaded", () => {
 
-            
+
                 const thumbs = document.querySelectorAll('#thumbs img');
                 const mainImage = document.getElementById('mainImage');
 
@@ -458,7 +457,7 @@
                 });
 
 
-              
+
                 const zoomContainer = document.querySelector('.zoom-container');
                 const zoomImage = document.querySelector('.zoom-image');
 
@@ -480,7 +479,7 @@
                 }
 
 
-      
+
                 const variantButtons = document.querySelectorAll(".variant-btn");
                 const variantInput = document.getElementById("selectedVariant");
                 const offerPriceEl = document.getElementById("productPrice");
@@ -491,7 +490,7 @@
                   return;
                 }
 
-              
+
                 const firstBtn = variantButtons[0];
                 variantInput.value = JSON.stringify({
                   size: String(firstBtn.dataset.size)
@@ -506,7 +505,7 @@
 
                 console.log("DEFAULT SIZE:", firstBtn.dataset.size);
 
-          
+
                 variantButtons.forEach(btn => {
                   btn.addEventListener("click", () => {
                     const stock = Number(btn.dataset.stock);
@@ -514,7 +513,7 @@
                     const addToCartBtn = document.getElementById("addToCartBtn");
                     const buyNowBtn = document.getElementById("buyNowBtn");
 
-                  
+
                     variantButtons.forEach(b => {
                       const bStock = Number(b.dataset.stock);
                       b.classList.remove("bg-black", "text-white", "border-black");
@@ -525,12 +524,12 @@
                     btn.classList.add("bg-black", "text-white", "border-black");
                     if (stock <= 0) btn.classList.remove("bg-white", "bg-gray-100");
 
-                  
+
                     variantInput.value = JSON.stringify({
                       size: String(btn.dataset.size)
                     });
 
-                  
+
                     if (offerPriceEl) {
                       offerPriceEl.innerText = "₹" + Number(btn.dataset.price).toLocaleString();
                     }
@@ -538,7 +537,7 @@
                       originalPriceEl.innerText = "MRP ₹" + Number(btn.dataset.original).toLocaleString();
                     }
 
-              
+
                     if (stock <= 0) {
                       stockStatus.classList.remove("hidden");
                       addToCartBtn.disabled = true;
@@ -553,7 +552,7 @@
                   });
                 });
 
-      
+
                 const initialStock = Number(firstBtn.dataset.stock);
                 if (initialStock <= 0) {
                   document.getElementById("stockStatus").classList.remove("hidden");
@@ -561,7 +560,7 @@
                   document.getElementById("buyNowBtn").disabled = true;
                 }
 
-      
+
                 const wishlistBtn = document.querySelector(".wishlist-btn");
                 if (wishlistBtn) {
                   wishlistBtn.addEventListener("click", async () => {
@@ -582,6 +581,80 @@
                     } catch (error) {
                       console.error("Wishlist Error:", error);
                       Swal.fire("Error", "An unexpected error occurred", "error");
+                    }
+                  });
+                }
+
+                const addToCartForm = document.getElementById("addToCartForm");
+                if (addToCartForm) {
+                  addToCartForm.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+
+                    const variantData = variantInput.value;
+                    const productId = "<%= product._id %>";
+
+                    try {
+                      const response = await fetch(`/cart/${productId}`, {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ variant: variantData })
+                      });
+
+                      const data = await response.json();
+
+                      if (data.success) {
+                        Swal.fire({
+                          title: "Success!",
+                          text: data.message,
+                          icon: "success",
+                          showCancelButton: true,
+                          confirmButtonText: "Go to Cart",
+                          cancelButtonText: "Continue Shopping",
+                          confirmButtonColor: "#000",
+                          cancelButtonColor: "#6c757d"
+                        }).then((result) => {
+                          if (result.isConfirmed) {
+                            window.location.href = "/cart";
+                          } else {
+                            // Update cart count if exists
+                            const cartCountBadge = document.getElementById("cartCount");
+                            if (cartCountBadge) {
+                              cartCountBadge.innerText = parseInt(cartCountBadge.innerText) + 1;
+                            }
+                          }
+                        });
+                      } else {
+                        if (data.loginRedirect) {
+                          Swal.fire({
+                            title: "Login Required",
+                            text: data.message,
+                            icon: "info",
+                            showCancelButton: true,
+                            confirmButtonText: "Login",
+                            confirmButtonColor: "#000"
+                          }).then((result) => {
+                            if (result.isConfirmed) {
+                              window.location.href = "/login";
+                            }
+                          });
+                        } else {
+                          Swal.fire({
+                            title: "Oops!",
+                            text: data.message,
+                            icon: "error",
+                            confirmButtonColor: "#000"
+                          });
+                        }
+                      }
+                    } catch (error) {
+                      console.error("Error adding to cart:", error);
+                      Swal.fire({
+                        title: "Error",
+                        text: "Something went wrong. Please try again.",
+                        icon: "error"
+                      });
                     }
                   });
                 }

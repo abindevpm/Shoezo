@@ -121,10 +121,13 @@ const orderSchema = new mongoose.Schema({
       "Return Request Sent",
       "Return Approved",
       "Return Rejected",
-      "Returned"
+      "Returned",
+      "Failed"
     ],
     default: "Placed"
-  }
+  },retryUntil: {
+  type: Date
+}
 
 }, { timestamps: true });
 

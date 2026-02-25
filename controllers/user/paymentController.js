@@ -173,10 +173,21 @@ const verifyPayment = async (req, res) => {
       .digest("hex");
 
     if (expectedSignature !== razorpay_signature) {
+
+      const retryDays = 3;
+
       await Order.findOneAndUpdate(
         { orderId: razorpay_order_id },
-        { paymentStatus: "Failed" }
+        {
+          paymentStatus: "Failed",
+          status: "Failed",
+          retryUntil: new Date(Date.now() + retryDays * 24 * 60 * 60 * 1000),
+          $set: { "items.$[].itemStatus": "Failed" }
+        }
       );
+
+
+
       return res.status(400).json({ success: false, message: "Invalid signature" });
     }
 
@@ -188,7 +199,12 @@ const verifyPayment = async (req, res) => {
 
     const updatedOrder = await Order.findOneAndUpdate(
       { orderId: razorpay_order_id },
-      { paymentStatus: "Paid" },
+      {
+        paymentStatus: "Paid",
+        status: "Placed",
+        retryUntil: null,
+        $set: { "items.$[].itemStatus": "Placed" }
+      },
       { new: true }
     );
 
@@ -231,7 +247,18 @@ const markOrderFailed = async (req, res) => {
     const { dbOrderId } = req.body;
     if (!dbOrderId) return res.json({ success: false });
 
-    await Order.findByIdAndUpdate(dbOrderId, { paymentStatus: "Failed" });
+
+    const retryDays = 3;
+
+    await Order.findByIdAndUpdate(dbOrderId, {
+      paymentStatus: "Failed",
+      status: "Failed",
+      retryUntil: new Date(Date.now() + retryDays * 24 * 60 * 60 * 1000),
+      $set: { "items.$[].itemStatus": "Failed" }
+    });
+
+
+
     res.json({ success: true });
   } catch (error) {
     console.log("Mark Order Failed Error:", error);
@@ -239,9 +266,66 @@ const markOrderFailed = async (req, res) => {
   }
 };
 
+const retryPayment = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const userId = req.session.user;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Login required" });
+    }
+
+    const order = await Order.findOne({ _id: orderId, userId: userId });
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    if (order.status !== "Failed") {
+      return res.status(400).json({ success: false, message: "Only failed orders can be retried" });
+    }
+
+    // Check stock for all items
+    for (const item of order.items) {
+      const product = await Product.findById(item.productId);
+      if (!product) {
+        return res.status(400).json({ success: false, message: `Product not found: ${item.productId}` });
+      }
+
+      const variant = product.variants.find(v => Number(v.size) === Number(item.size));
+      if (!variant || variant.stock < item.quantity) {
+        return res.status(400).json({ success: false, message: `Insufficient stock for ${product.name} (Size: ${item.size})` });
+      }
+    }
+
+    const options = {
+      amount: order.totalAmount * 100,
+      currency: "INR",
+      receipt: "order_retry_" + Date.now(),
+    };
+
+    const razorpayOrder = await razorpay.orders.create(options);
+
+    // Update the db order with new razorpay order id
+    order.orderId = razorpayOrder.id;
+    await order.save();
+
+    res.json({
+      success: true,
+      order: razorpayOrder,
+      dbOrderId: order._id
+    });
+
+  } catch (error) {
+    console.log("Retry Payment Error:", error);
+    res.status(500).json({ success: false, message: "Failed to initiate retry" });
+  }
+};
+
 module.exports = {
   createOrder,
   verifyPayment,
-  markOrderFailed
+  markOrderFailed,
+  retryPayment
 }
 
