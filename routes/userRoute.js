@@ -35,20 +35,24 @@ router.get('/login', userController.loadlogin)
 router.post("/login", userController.login)
 
 // user logout
-router.get("/logout", userController.logout)
+router.get("/logout", userController.logout)  
 
 
 // google auth
 router.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
-router.get("/auth/google/callback", passport.authenticate("google", { failureRedirect: "/signup" }), (req, res) => {
-
-
-  req.session.user = req.user._id;
-
-  res.redirect("/");
-}
+router.get(
+  "/auth/google/callback",
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  userController.googleCallback
 );
+
+// google referal
+
+router.get("/complete-profile", userController.loadCompleteProfile);
+router.post("/apply-referral-google", userAuth, userController.applyGoogleReferral);
+
+
 
 
 //   product list  

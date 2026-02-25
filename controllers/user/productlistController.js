@@ -7,6 +7,13 @@ const mongoose = require("mongoose")
 
 
 
+const AppError = require("../../routes/utils/AppError")
+
+
+// const path = require('path');
+// console.log(path.resolve(__dirname, '../../utils/AppError.js'));
+
+
 
 const loadShopPage = async (req, res) => {
   try {
@@ -276,6 +283,32 @@ const loadShopPage = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
+
+
+
+
+
+const getProduct = async (req, res, next) => {
+  try {
+    const product = await Product.findById(req.params.id)
+
+    if (!product) {
+      return next(new AppError("Product not found", 404))
+    }
+
+    res.render("productDetails", { product })
+
+  } catch (error) {
+    next(error)  // important
+  }
+}
+
+
+
+
+
+
 
 
 

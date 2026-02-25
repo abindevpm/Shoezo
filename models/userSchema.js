@@ -60,7 +60,12 @@ const userSchema = new Schema({
     unique: true
   },
 
-  password: { type: String, required: true },
+ password: {
+  type: String,
+  required: function () {
+    return !this.googleId;  
+  }
+},
 
   isBlocked: { type: Boolean, default: false },
 

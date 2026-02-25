@@ -11,43 +11,49 @@ passport.use(
       callbackURL:"/auth/google/callback",
     },
 
-    
     async (accessToken, refreshToken, profile, done) => {
-      try {
-        let user = await User.findOne({ googleId: profile.id });
+  try {
 
-        if (user) {
-          return done(null, user);
-        } else {
-          user = new User({
-            name: profile.displayName,
-            email: profile.emails[0].value,
-            googleId: profile.id,
-          });
+    let user = await User.findOne({ googleId: profile.id });
+    let isNewUser = false;
 
-          await user.save();
-          return done(null, user);
-        }
-      } catch (error) {
-        return done(error, null);
-      }
+    if (!user) {
+      isNewUser = true;
+
+      user = new User({
+        name: profile.displayName,
+        email: profile.emails[0].value,
+        googleId: profile.id,
+      });
+
+      await user.save();
     }
+
+    user._isNewUser = isNewUser; 
+
+    return done(null, user);
+
+  } catch (error) {
+    return done(error, null);
+  }
+}
   )
 );
 
 
-   passport.serializeUser((user,done)=>{
-    done(null,user._id)
-   })  
-   
-   passport.deserializeUser(async(id,done)=>{
-    try{
-        const user = await User.findById(id);
-        done(null,user)
-    }catch(error){
-         done(error,null)
-    }
-   })
+
+passport.serializeUser((user, done) => {
+  done(null, user._id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (error) {
+    done(error, null);
+  }
+});
 
 
  module.exports = passport;

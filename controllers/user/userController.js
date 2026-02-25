@@ -123,6 +123,137 @@ const loadSignup = async (req, res) => {
 }
 
 
+const googleCallback = async (req, res) => {
+  try {
+
+    req.session.user = req.user._id;
+
+    if (req.user._isNewUser) {
+      return res.redirect("/complete-profile");
+    }
+
+    res.redirect("/");
+
+  } catch (error) {
+    console.log("Google callback Error", error);
+    res.redirect("/login");
+  }
+};
+
+
+
+
+const loadCompleteProfile = async (req, res) => {
+  try {
+    res.render("complete-profile");
+  } catch (error) {
+    console.log("Complete profile error:", error);
+    res.redirect("/");
+  }
+};
+
+
+
+const applyGoogleReferral = async (req, res) => {
+  try {
+
+    const { referralCode } = req.body;
+
+    if (!referralCode) {
+      return res.redirect("/");
+    }
+
+    const refUser = await User.findOne({ referalCode: referralCode });
+
+    if (!refUser) {
+      return res.send("Invalid referral code");
+    }
+
+    const currentUser = await User.findById(req.session.user);
+
+    if (!currentUser) {
+      return res.redirect("/login");
+    }
+
+    if (currentUser.referredBy) {
+      return res.redirect("/");
+    }
+
+    if (refUser._id.toString() === currentUser._id.toString()) {
+      return res.send("Cannot refer yourself");
+    }
+
+    currentUser.referredBy = refUser._id;
+
+    await currentUser.save();
+
+    res.redirect("/");
+
+  } catch (error) {
+    console.log("Apply referral error:", error);
+    res.redirect("/");
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function generateOtp() {
   return Math.floor(1000 + Math.random() * 9000).toString()
@@ -923,5 +1054,8 @@ module.exports = {
   getAvailableCoupons,
   applyCoupon,
   removeCoupon,
-  loadReferralPage
+  loadReferralPage,
+  googleCallback,
+  loadCompleteProfile,
+  applyGoogleReferral
 }

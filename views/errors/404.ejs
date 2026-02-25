@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>404 | Shoezo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      background: linear-gradient(135deg, #111, #222);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .container {
+      text-align: center;
+      max-width: 500px;
+      padding: 40px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .code {
+      font-size: 90px;
+      font-weight: 700;
+      color: #ff4d4d;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 15px;
+      color: #ccc;
+      margin-bottom: 25px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 25px;
+      background: #ff4d4d;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 30px;
+      transition: 0.3s ease;
+      font-weight: 600;
+    }
+
+    .btn:hover {
+      background: #ff1a1a;
+      transform: translateY(-2px);
+    }
+
+    .brand {
+      position: absolute;
+      top: 20px;
+      left: 30px;
+      font-weight: 600;
+      font-size: 18px;
+      letter-spacing: 1px;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="brand">SHOEZO 👟</div>
+
+  <div class="container">
+    <div class="code">404</div>
+    <h1>Page Not Found</h1>
+    <p><%= message || "Sorry, the page you are looking for doesn't exist or has been moved." %></p>
+    
+    <a href="/" class="btn">Back to Home</a>
+  </div>
+
+</body>
+</html>

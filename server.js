@@ -9,7 +9,10 @@ const session = require("express-session")
 const passport = require("./config/passport")
 const { userAuth, adminAuth } = require("./middlewares/auth");
 const cartCountMiddleware = require("./middlewares/cartCount");
+const errorHandler = require("./middlewares/errorHandler")
 
+
+const AppError = require('./routes/utils/AppError');
 
 
 
@@ -18,8 +21,10 @@ connectDB();
 
 app.set("views", [
   path.join(__dirname, "views/user"),
-  path.join(__dirname, "views/admin")
+  path.join(__dirname, "views/admin"),
+  path.join(__dirname,"views/errors")
 ]);
+
 app.set("view engine", "ejs");
 
 
@@ -61,7 +66,12 @@ app.use((req, res, next) => {
     next();
 });
 
+
 app.use(cartCountMiddleware);
+
+// err-handling middleware
+
+// app.use(errorHandler)
 
 
 // Routes
@@ -72,6 +82,11 @@ app.use("/admin",adminRoute)
 
 
 
+app.use((req, res, next) => {
+  next(new AppError('Page Not Found', 404));
+});
+
+app.use(errorHandler)
 
 
 // Server
