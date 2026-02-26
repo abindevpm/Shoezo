@@ -21,25 +21,68 @@ const orderSchema = new mongoose.Schema({
         ref: "Product",
         required: true
       },
-      size: Number,
-      quantity: Number,
-      price: Number,
 
+      size: Number,
+      quantity: {
+        type: Number,
+        required: true
+      },
+
+      price: {
+        type: Number,
+        required: true  
+      },
+
+      offerDiscount: {
+        type: Number,
+        default: 0
+      },
+
+      couponDiscount: {
+        type: Number,
+        default: 0
+      },
+
+      finalPrice: {
+        type: Number,
+        required: true   
+      },
 
       itemStatus: {
         type: String,
+        enum: [
+          "Placed",
+          "Processing",
+          "Shipped",
+          "Delivered",
+          "Cancelled",
+          "Return Requested",
+          "Return Approved",
+          "Return Rejected",
+          "Returned"
+        ],
         default: "Placed"
       },
-      cancelReason: {
-        type: String
+
+      cancelReason: String,
+      returnReason: String,
+
+      refundAmount: {
+        type: Number,
+        default: 0
       },
-      returnReason: {
-        type: String
+
+      refundStatus: {
+        type: String,
+        enum: ["Pending", "Completed"],
+        default: null
       },
+
       isRestocked: {
         type: Boolean,
         default: false
       }
+
     }
   ],
 
@@ -52,10 +95,11 @@ const orderSchema = new mongoose.Schema({
     addressLine: String
   },
 
-  paymentMethod: {
-    type: String,
-    default: "COD"
-  },
+paymentMethod: {
+  type: String,
+  enum: ["COD", "ONLINE", "WALLET"],
+  default: "COD"
+},
 
   paymentStatus: {
     type: String,
@@ -63,45 +107,30 @@ const orderSchema = new mongoose.Schema({
     default: "Pending"
   },
 
-  cancelReason: {
-    type: String
+  subtotal: {
+    type: Number,
+    required: true
   },
-
-  returnReason: {
-    type: String
-  },
-
-  subtotal: Number,
 
   gstAmount: {
     type: Number,
     default: 0
   },
-  offerDiscount: {
+
+  totalOfferDiscount: {
     type: Number,
     default: 0
   },
-  discountAmount: Number,
+
+  totalCouponDiscount: {
+    type: Number,
+    default: 0
+  },
+
   couponCode: {
     type: String,
     default: null
   },
-
-  gstAmount: Number,
-  discountAmount: Number, 
-  totalOfferDiscount: { 
-    type: Number,
-    default: 0
-  },
-
-
-  gstAmount: Number,
-  discountAmount: Number, 
-  totalOfferDiscount: { 
-    type: Number,
-    default: 0
-  },
-
 
   totalAmount: {
     type: Number,
@@ -118,16 +147,15 @@ const orderSchema = new mongoose.Schema({
       "Delivered",
       "Cancelled",
       "Return Requested",
-      "Return Request Sent",
       "Return Approved",
       "Return Rejected",
       "Returned",
       "Failed"
     ],
     default: "Placed"
-  },retryUntil: {
-  type: Date
-}
+  },
+
+  retryUntil: Date
 
 }, { timestamps: true });
 

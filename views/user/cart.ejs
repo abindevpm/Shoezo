@@ -447,17 +447,26 @@
       });
 
       const data = await res.json();
+      if (!data.success) {
+        if (data.message) {
+          Swal.fire({
+            icon: "warning",
+            title: "Oops!",
+            text: data.message,
+            confirmButtonColor: "#000"
+          });
+        }
+        return;
+      }
 
-      if (!data.success) return;
 
-    
       document.getElementById(`qty-${itemId}`).innerText = data.quantity;
 
-    
+
       document.getElementById(`item-total-${itemId}`).innerText =
         "₹" + data.itemTotal;
 
-    
+
       document.getElementById("subtotal").innerText = "₹" + data.subtotal;
 
       const gstEl = document.getElementById("gst");
@@ -474,7 +483,7 @@
 
       document.getElementById("grandTotal").innerText = "₹" + data.grandTotal;
 
-      
+
       const decBtn = document.getElementById(`dec-${itemId}`);
       const incBtn = document.getElementById(`inc-${itemId}`);
 

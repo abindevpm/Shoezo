@@ -164,7 +164,7 @@ const cancelOrderItem = async (req, res) => {
     item.cancelReason = reason
 
 
-    const reductionAmount = Math.min(item.price * item.quantity, order.totalAmount);
+    const reductionAmount = Math.min(item.finalPrice, order.totalAmount);
     order.totalAmount -= reductionAmount;
 
     if (order.paymentStatus === "Paid" && reductionAmount > 0) {

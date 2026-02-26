@@ -207,6 +207,35 @@ const placeOrder = async (req, res) => {
 
     const totalAmount = subtotal - discountAmount;
 
+    let updatedOrderItems = [];
+    let totalDistributed = 0;
+
+    for (let i = 0; i < orderItems.length; i++) {
+      const item = orderItems[i];
+      const itemTotal = item.price * item.quantity;
+      let couponShare = 0;
+
+      if (i === orderItems.length - 1) {
+        couponShare = discountAmount - totalDistributed;
+      } else {
+        couponShare = subtotal > 0
+          ? Math.round((itemTotal / subtotal) * discountAmount)
+          : 0;
+        totalDistributed += couponShare;
+      }
+
+      const finalPrice = itemTotal - couponShare;
+
+      updatedOrderItems.push({
+        ...item,
+        offerDiscount: 0,
+        couponDiscount: couponShare,
+        finalPrice
+      });
+    }
+
+
+
 
     console.log(`Processing ${paymentMethod} order for user ${userId}. Total: ${totalAmount}`);
 
@@ -260,7 +289,7 @@ const placeOrder = async (req, res) => {
     const order = new Order({
       orderId: generatedOrderId,
       userId,
-      items: orderItems,
+      items: updatedOrderItems,
       address: {
         fullName: selectedAddress.fullName,
         phone: selectedAddress.phone,
@@ -272,9 +301,9 @@ const placeOrder = async (req, res) => {
       paymentMethod: paymentMethod || "COD",
       paymentStatus: (paymentMethod && paymentMethod.toUpperCase() === "WALLET") ? "Paid" : "Pending",
       status: "Placed",
-      subtotal: baseSubtotal,
-      offerDiscount: baseSubtotal - subtotal,
-      discountAmount,
+      subtotal: subtotal,
+      totalOfferDiscount: baseSubtotal - subtotal,
+      totalCouponDiscount: discountAmount,
 
 
       couponCode: req.session.appliedCoupon || null,

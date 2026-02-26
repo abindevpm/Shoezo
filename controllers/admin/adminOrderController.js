@@ -222,8 +222,7 @@ const approveItemReturn = async (req, res) => {
 
         item.itemStatus = "Returned";
 
-
-        const reductionAmount = Math.min(item.price * item.quantity, order.totalAmount);
+        const reductionAmount = Math.min(item.finalPrice, order.totalAmount);
         order.totalAmount -= reductionAmount;
 
         if (order.paymentStatus === "Paid" && reductionAmount > 0) {
@@ -257,7 +256,7 @@ const approveItemReturn = async (req, res) => {
 
         await order.save();
         let message = "Item return approved";
-        if (reductionAmount > 0 && order.paymentStatus !== "Refunded") { // if not already fully refunded
+        if (reductionAmount > 0 && order.paymentStatus !== "Refunded") { 
             message += ` and ₹${reductionAmount} credited to customer wallet.`;
         } else if (order.paymentStatus === "Refunded") {
             message += " and customer fully refunded to wallet.";
@@ -280,7 +279,7 @@ const rejectItemReturn = async (req, res) => {
             return res.status(400).json({ success: false, message: "Invalid item status for return rejection" });
         }
 
-        item.itemStatus = "Return Rejected"; // Or "Delivered"
+        item.itemStatus = "Return Rejected"; 
         await order.save();
         res.json({ success: true, message: "Item return rejected" });
     } catch (error) {
@@ -320,8 +319,7 @@ const cancelItemAdmin = async (req, res) => {
         item.itemStatus = "Cancelled";
         item.cancelReason = reason || "Cancelled by Admin";
 
-
-        const reductionAmount = Math.min(item.price * item.quantity, order.totalAmount);
+        const reductionAmount = Math.min(item.finalPrice, order.totalAmount);
         order.totalAmount -= reductionAmount;
 
 

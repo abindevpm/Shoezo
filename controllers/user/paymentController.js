@@ -110,6 +110,41 @@ const createOrder = async (req, res) => {
 
     const totalAmount = subtotal - discountAmount;
 
+
+    let updatedOrderItems = [];
+let totalDistributed = 0;
+
+for (let i = 0; i < orderItems.length; i++) {
+
+  const item = orderItems[i];
+  const itemTotal = item.price * item.quantity;
+
+  let couponShare = 0;
+
+  if (i === orderItems.length - 1) {
+    couponShare = discountAmount - totalDistributed;
+  } else {
+    couponShare = subtotal > 0
+      ? Math.round((itemTotal / subtotal) * discountAmount)
+      : 0;
+
+    totalDistributed += couponShare;
+  }
+
+  const finalPrice = itemTotal - couponShare;
+
+  updatedOrderItems.push({
+    ...item,
+    offerDiscount: 0,
+    couponDiscount: couponShare,
+    finalPrice
+  });
+}
+
+
+
+
+
     const options = {
       amount: totalAmount * 100,
       currency: "INR",
@@ -122,7 +157,7 @@ const createOrder = async (req, res) => {
     const newOrder = new Order({
       orderId: razorpayOrder.id,
       userId: userId,
-      items: orderItems,
+     items: updatedOrderItems,
       address: {
         fullName: selectedAddress.fullName,
         phone: selectedAddress.phone,
@@ -134,9 +169,9 @@ const createOrder = async (req, res) => {
       paymentMethod: "ONLINE",
       paymentStatus: "Pending",
       totalAmount,
-      subtotal: baseSubtotal,
-      offerDiscount: baseSubtotal - subtotal,
-      discountAmount,
+      subtotal: subtotal,
+totalOfferDiscount: baseSubtotal - subtotal,
+totalCouponDiscount: discountAmount,
 
       couponCode: req.session.appliedCoupon || null,
       status: "Placed"
@@ -155,6 +190,7 @@ const createOrder = async (req, res) => {
     res.status(500).json({ success: false });
   }
 };
+
 
 
 const verifyPayment = async (req, res) => {
@@ -285,7 +321,7 @@ const retryPayment = async (req, res) => {
       return res.status(400).json({ success: false, message: "Only failed orders can be retried" });
     }
 
-    // Check stock for all items
+    
     for (const item of order.items) {
       const product = await Product.findById(item.productId);
       if (!product) {
@@ -306,7 +342,7 @@ const retryPayment = async (req, res) => {
 
     const razorpayOrder = await razorpay.orders.create(options);
 
-    // Update the db order with new razorpay order id
+    
     order.orderId = razorpayOrder.id;
     await order.save();
 
