@@ -974,9 +974,13 @@ const removeCoupon = (req, res) => {
 
 const loadReferralPage = async (req, res) => {
   try {
-    res.render("referal", {
-      user: req.session.user
-    });
+    const userId = req.session.user
+
+    const user = await User.findById(userId)
+    res.render("referal",{
+      user:user
+    })
+
   } catch (error) {
     console.log(error, "Referal page error");
     res.redirect("/profile");
