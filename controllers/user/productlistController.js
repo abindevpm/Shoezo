@@ -17,13 +17,20 @@ const AppError = require("../../routes/utils/AppError")
 
 const loadShopPage = async (req, res) => {
   try {
-    const userId = req.session.user;
-    let userData = await User.findById(userId);
+    const userData = res.locals.user;
 
     console.log("QUERY =>", req.query);
 
 
-    let filter = { isDeleted: false, isListed: true };
+    const activeCategories = await Category.find({ isListed: true, isDeleted: false }).distinct("_id");
+    const activeBrands = await Brand.find({ isListed: true, isDeleted: false }).distinct("_id");
+
+    let filter = {
+      isDeleted: false,
+      isListed: true,
+      category: { $in: activeCategories },
+      brand: { $in: activeBrands }
+    };
 
     if (req.query.search && req.query.search.trim() !== "") {
       const searchText = req.query.search.trim();
@@ -46,7 +53,7 @@ const loadShopPage = async (req, res) => {
 
       const categoryIds = categoryDocs.map(c => c._id);
       if (categoryIds.length > 0) {
-        filter.category = { $in: categoryIds };
+        filter.category = { $in: categoryIds.filter(id => activeCategories.some(ac => ac.equals(id))) };
       }
     }
 
@@ -68,7 +75,8 @@ const loadShopPage = async (req, res) => {
       });
 
       if (brandDocs.length > 0) {
-        filter.brand = { $in: brandDocs.map(b => b._id) };
+        const brandIds = brandDocs.map(b => b._id);
+        filter.brand = { $in: brandIds.filter(id => activeBrands.some(ab => ab.equals(id))) };
       }
     }
 
@@ -246,8 +254,6 @@ const loadShopPage = async (req, res) => {
 
 
 
-
-
     const totalProducts = await Product.countDocuments(filter);
     const totalPages = Math.ceil(totalProducts / limit);
 
@@ -287,8 +293,6 @@ const loadShopPage = async (req, res) => {
 
 
 
-
-
 const getProduct = async (req, res, next) => {
   try {
     const product = await Product.findById(req.params.id)
@@ -300,7 +304,7 @@ const getProduct = async (req, res, next) => {
     res.render("productDetails", { product })
 
   } catch (error) {
-    next(error)  // important
+    next(error)
   }
 }
 

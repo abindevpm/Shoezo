@@ -76,6 +76,45 @@
       height: 100%;
       filter: drop-shadow(0 20px 40px rgba(0,0,0,0.6));
     }
+
+.google-login-container{
+text-align:center;
+margin-top:20px;
+}
+
+.or-text{
+margin:15px 0;
+color:#777;
+}
+
+.google-login-btn{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:12px;
+border:1px solid #ddd;
+border-radius:8px;
+padding:12px;
+width:100%;
+max-width:420px;
+margin:auto;
+background:#fff;
+text-decoration:none;
+font-weight:600;
+color:#333;
+transition:0.3s;
+}
+
+.google-login-btn img{
+width:22px;
+height:22px;
+object-fit:contain;
+}
+
+.google-login-btn:hover{
+background:#f5f5f5;
+}
+
   </style>
 </head>
 <body>
@@ -140,6 +179,20 @@
               </div>
 
             </form>
+
+<div class="google-login-container">
+<p class="or-text">OR</p>
+
+<a href="/auth/google" class="google-login-btn">
+<img src="/images//googlelogo.jpeg" alt="Google">
+<span>Continue with Google</span>
+</a>
+
+</div>
+
+
+
+
           </div>
         </div>
 
@@ -163,19 +216,19 @@ document.addEventListener("DOMContentLoaded", () => {
   form.addEventListener("submit", function (e) {
     let valid = true;
 
-    // Reset errors
+  
     emailError.classList.add("d-none");
     passwordError.classList.add("d-none");
 
-    // Validate Email
+    
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email.value.trim() || !emailRegex.test(email.value.trim())) {
       emailError.classList.remove("d-none");
       valid = false;
     }
 
-    // Validate Password
-  // Validate Password
+    
+  
 if (!password.value.trim() || password.value.trim().length < 6) {
   passwordError.textContent = "Password must be at least 6 characters";
   passwordError.classList.remove("d-none");
@@ -186,7 +239,6 @@ if (!password.value.trim() || password.value.trim().length < 6) {
     if (!valid) e.preventDefault();
   });
 
-  // Live error hide
   email.addEventListener("input", () => emailError.classList.add("d-none"));
   password.addEventListener("input", () => passwordError.classList.add("d-none"));
 });

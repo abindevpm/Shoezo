@@ -2,7 +2,7 @@ const User = require("../../models/userSchema");
 
 const loadAddresses = async (req, res) => {
   try {
-    const user = await User.findById(req.session.user);
+    const user = req.user;
 
     res.render("address", {
       user,
@@ -11,36 +11,29 @@ const loadAddresses = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.redirect("profile");
+    res.redirect("/profile");
   }
 };
 
 
 const loadaddAdresses = async (req, res) => {
-
   try {
-
-    const user = await User.findById(req.session.user)
+    const user = req.user;
 
     res.render("addAdress", {
       user,
       addresses: user.addressess || []
     })
-
   } catch (error) {
     console.log(error, "Add address have error")
-    res.redirect("address")
-
+    res.redirect("/address")
   }
-
 }
 
 
 const addAdress = async (req, res) => {
-
   try {
-
-    const userId = req.session.user;
+    const userId = req.user._id;
 
     const {
       fullName,
@@ -74,12 +67,12 @@ const addAdress = async (req, res) => {
       }
     })
 
-    res.redirect("address")
+    res.redirect("/address")
 
 
   } catch (error) {
     console.log(error, "Add address have error")
-    res.redirect("addAdress")
+    res.redirect("/addAdress")
 
   }
 
@@ -88,7 +81,7 @@ const addAdress = async (req, res) => {
 
 const deleteAddress = async (req, res) => {
   try {
-    const userId = req.session.user;
+    const userId = req.user._id;
     const addressId = req.params.addressId;
 
     await User.findByIdAndUpdate(userId, {
@@ -107,16 +100,16 @@ const deleteAddress = async (req, res) => {
 
 const loadEditAddress = async (req, res) => {
   try {
-    const userId = req.session.user;
+    const userId = req.user._id;
     const addressId = req.params.id;
 
-    const user = await User.findById(userId);
+    const user = req.user;
 
 
     const address = user.addresses.id(addressId);
 
     if (!address) {
-      return res.redirect("address");
+      return res.redirect("/address");
     }
 
     res.render("editAddress", {
@@ -126,17 +119,15 @@ const loadEditAddress = async (req, res) => {
 
   } catch (error) {
     console.log("Load edit address error:", error);
-    res.redirect("address");
+    res.redirect("/address");
   }
 };
 
 
 
 const updateAddress = async (req, res) => {
-
-
   try {
-    const userId = req.session.user;
+    const userId = req.user._id;
     const addressId = req.params.id;
 
     const {
@@ -193,7 +184,7 @@ const updateAddress = async (req, res) => {
 
 const setDefaultAddress = async (req, res) => {
   try {
-    const userId = req.session.user;
+    const userId = req.user._id;
     const addressId = req.params.id;
 
     await User.findByIdAndUpdate(userId, {

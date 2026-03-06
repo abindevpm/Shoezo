@@ -190,18 +190,29 @@
                                         <h4 class="detail-title">Items in Order</h4>
                                         <% safeOrder.items.forEach(item=> { %>
                                             <div class="item-row">
-                                                <img src="/uploads/product-images/<%= item.productId.images[0] %>"
-                                                    alt="<%= item.productId.name %>" class="item-img">
-                                                <div class="item-info">
-                                                    <p><strong>
-                                                            <%= item.productId.name %>
-                                                        </strong></p>
-                                                    <p class="text-muted">Size: <%= item.size %> | Qty: <%=
-                                                                item.quantity %>
-                                                    </p>
-                                                    <p>₹<%= item.price.toLocaleString() %>
-                                                    </p>
-                                                </div>
+                                                <% if (item.productId) { %>
+                                                    <img src="/uploads/product-images/<%= item.productId.images[0] %>"
+                                                        alt="<%= item.productId.name %>" class="item-img">
+                                                    <div class="item-info">
+                                                        <p><strong>
+                                                                <%= item.productId.name %>
+                                                            </strong></p>
+                                                        <p class="text-muted">Size: <%= item.size %> | Qty: <%=
+                                                                    item.quantity %>
+                                                        </p>
+                                                        <p>₹<%= item.price.toLocaleString() %>
+                                                        </p>
+                                                    </div>
+                                                    <% } else { %>
+                                                        <div class="item-info">
+                                                            <p><strong>Product Unavailable</strong></p>
+                                                            <p class="text-muted">Size: <%= item.size %> | Qty: <%=
+                                                                        item.quantity %>
+                                                            </p>
+                                                            <p>₹<%= item.price.toLocaleString() %>
+                                                            </p>
+                                                        </div>
+                                                        <% } %>
                                             </div>
                                             <% }) %>
                                     </div>

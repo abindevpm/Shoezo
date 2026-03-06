@@ -11,8 +11,6 @@ const loadBrands = async (req, res) => {
     let skip = (page - 1) * limit;
 
 
-
-    
     const query = {
       isDeleted: false,
       name: { $regex: search, $options: "i" }
@@ -38,10 +36,6 @@ const loadBrands = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
-
-
-
-
 
 
 

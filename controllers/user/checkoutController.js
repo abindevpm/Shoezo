@@ -5,13 +5,8 @@ const Order = require("../../models/orderSchema")
 
 const loadCheckout = async (req, res) => {
   try {
-    const userId = req.session.user;
-
-    if (!userId) {
-      return res.redirect("/login");
-    }
-
-    const user = await User.findById(userId);
+    const user = req.user;
+    const userId = user._id;
     const cart = await Cart.findOne({ userId }).populate({
       path: "items.productId",
       populate: [
@@ -109,14 +104,9 @@ const loadCheckout = async (req, res) => {
 
 const placeOrder = async (req, res) => {
   try {
-    const userId = req.session.user._id || req.session.user;
+    const user = req.user;
+    const userId = user._id;
     const { addressId, paymentMethod } = req.body;
-    const user = await User.findById(userId);
-
-    if (!userId) {
-      console.log("Order placement failed: No user ID in session");
-      return res.json({ success: false, message: "Please login to continue" });
-    }
 
     const cart = await Cart.findOne({ userId }).populate({
       path: "items.productId",
@@ -351,10 +341,7 @@ const loadOrderSuccess = (req, res) => {
 
 const addAddressCheckout = async (req, res) => {
   try {
-    const userId = req.session.user;
-    if (!userId) {
-      return res.status(401).json({ success: false, message: "User not authenticated" });
-    }
+    const userId = req.user._id;
 
     const {
       fullName,

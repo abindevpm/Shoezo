@@ -93,10 +93,9 @@
                   </thead>
 
                   <tbody>
-                    <% if(user.wallet && !Array.isArray(user.wallet) && user.wallet.transactions &&
-                      user.wallet.transactions.length> 0){ %>
+                    <% if(transactions && transactions.length> 0){ %>
 
-                      <% user.wallet.transactions.slice().reverse().forEach(function(transaction, index){ %>
+                      <% transactions.forEach(function(transaction, index){ %>
 
                         <tr>
                           <td>#<%= transaction._id.toString().slice(-6) %>
@@ -147,11 +146,44 @@
                 </table>
               </div>
 
+              <!-- Pagination -->
+              <% if (totalPages> 1) { %>
+                <nav aria-label="Wallet transactions pagination" class="mt-4">
+                  <ul class="pagination justify-content-center">
+                    <% if (currentPage> 1) { %>
+                      <li class="page-item">
+                        <a class="page-link" href="/wallet?page=<%= currentPage - 1 %>" aria-label="Previous">
+                          <span aria-hidden="true">&laquo; Previous</span>
+                        </a>
+                      </li>
+                      <% } else { %>
+                        <li class="page-item disabled">
+                          <span class="page-link">&laquo; Previous</span>
+                        </li>
+                        <% } %>
 
+                          <% for(let i=1; i <=totalPages; i++) { %>
+                            <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                              <a class="page-link" href="/wallet?page=<%= i %>">
+                                <%= i %>
+                              </a>
+                            </li>
+                            <% } %>
 
-
-
-            </div>
+                              <% if (currentPage < totalPages) { %>
+                                <li class="page-item">
+                                  <a class="page-link" href="/wallet?page=<%= currentPage + 1 %>" aria-label="Next">
+                                    <span aria-hidden="true">Next &raquo;</span>
+                                  </a>
+                                </li>
+                                <% } else { %>
+                                  <li class="page-item disabled">
+                                    <span class="page-link">Next &raquo;</span>
+                                  </li>
+                                  <% } %>
+                  </ul>
+                </nav>
+                <% } %>
         </main>
     </div>
 

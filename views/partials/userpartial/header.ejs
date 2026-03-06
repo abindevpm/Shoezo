@@ -26,21 +26,21 @@
 
       <div class="nav-right">
         <!-- ACTION ICONS -->
+
+
+
+
         <div class="action-icons">
           <a href="/wishlist" class="icon-link" title="Wishlist">
             <i class="fa-regular fa-heart"></i>
           </a>
-          <!-- <a href="/cart" class="icon-link" title="Cart">
-            <i class="fa-solid fa-cart-shopping"></i>
-          </a> -->
 
-
-          <div class="cart-wrapper">
-  <a href="/cart">
-    <i class="fa fa-shopping-cart"></i>
-    <span id="cartCount" class="cart-badge"><%= cartCount || 0 %></span>
-  </a>
-</div>
+          <a href="/cart" class="icon-link" title="Cart">
+            <i class="fa fa-shopping-cart"></i>
+            <span id="cartCount" class="cart-badge">
+              <%= cartCount || 0 %>
+            </span>
+          </a>
         </div>
 
         <!-- SEARCH -->
@@ -110,6 +110,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 16px 0;
+    gap: 40px;
   }
 
   /* LOGO */
@@ -124,7 +125,7 @@
   /* NAV LINKS */
   .nav-links {
     display: flex;
-    gap: 24px;
+    gap: 32px;
     font-weight: 500;
   }
 
@@ -189,7 +190,11 @@
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
+    justify-content: center;
     text-decoration: none;
+    position: relative;
+    width: 24px;
+    height: 24px;
   }
 
   .icon-link:hover {
@@ -205,7 +210,7 @@
 
   .nav-left,
   .nav-right {
-    flex: 1;
+    flex: 1 1 0;
     display: flex;
     align-items: center;
   }
@@ -213,13 +218,14 @@
   .nav-right {
     justify-content: flex-end;
     gap: 32px;
+    min-width: fit-content;
   }
 
   .nav-center {
     flex: 0 0 auto;
     display: flex;
     justify-content: center;
-   }
+  }
 
 
   /* USER BUTTON */
@@ -248,22 +254,21 @@
 
 
 
-  .cart-wrapper {
-  position: relative;
-  display: inline-block;
-}
-
-.cart-badge {
-  position: absolute;
-  top: -8px;
-  right: -10px;
-  background: red;
-  color: white;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 7px;
-  border-radius: 50%;
-  min-width: 18px;
-  text-align: center;
-}
+  .cart-badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: #ef4444;
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 5px;
+    border-radius: 9999px;
+    min-width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+  }
 </style>

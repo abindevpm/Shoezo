@@ -5,14 +5,13 @@ const PDFDocument = require("pdfkit")
 
 const loadorders = async (req, res) => {
   try {
-    const userId = req.session.user
-    if (!userId) return res.redirect("/login")
+    const userId = req.user._id;
 
     const { search } = req.query
 
     let query = {
       userId,
-      paymentStatus: { $in: ["Paid", "Refunded", "Failed"] }
+      paymentStatus: { $in: ["Paid", "Refunded", "Failed", "Pending"] }
     };
 
     if (search) {
@@ -35,7 +34,12 @@ const loadorders = async (req, res) => {
       .sort({ createdAt: -1 })
 
     const user = await User.findById(userId);
-    res.render("orders", { orders, searchQuery: search || "", user })
+    res.render("orders", {
+      orders,
+      searchQuery: search || "",
+      user,
+      razorpayKey: process.env.RAZORPAY_KEY_ID
+    })
 
   } catch (error) {
     console.log(error)
@@ -45,14 +49,17 @@ const loadorders = async (req, res) => {
 
 const getOrderDetails = async (req, res) => {
   try {
-    const userId = req.session.user
-    if (!userId) return res.redirect("/login")
+    const userId = req.user._id;
 
     const order = await Order.findOne({ _id: req.params.id, userId }).populate("items.productId")
     if (!order) return res.redirect("/orders")
 
     const user = await User.findById(userId);
-    res.render("order-details", { order, user })
+    res.render("order-details", {
+      order,
+      user,
+      razorpayKey: process.env.RAZORPAY_KEY_ID
+    })
   } catch (error) {
     console.log(error)
     res.redirect("/orders")
@@ -363,8 +370,7 @@ const downloadInvoice = async (req, res) => {
 
 const loadTrackOrder = async (req, res) => {
   try {
-    const userId = req.session.user
-    if (!userId) return res.redirect("/login")
+    const userId = req.user._id;
 
     const { id: orderId, itemId } = req.params
     const order = await Order.findOne({ _id: orderId, userId }).populate("items.productId")

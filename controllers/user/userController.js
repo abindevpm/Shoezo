@@ -4,6 +4,7 @@ const Product = require("../../models/productSchema");
 const Order = require("../../models/orderSchema");
 const Coupon = require("../../models/couponSchema")
 const Category = require("../../models/categorySchema")
+const Brand = require("../../models/brandSchema")
 
 
 const env = require("dotenv").config()
@@ -14,12 +15,7 @@ const { removeFromWishlist } = require("./wishlistController");
 
 const loadHomepage = async (req, res) => {
   try {
-    const userId = req.session.user;
-    let userData = null;
-
-    if (userId) {
-      userData = await User.findById(userId);
-    }
+    const userData = res.locals.user;
 
 
     if (userData && userData.isBlocked) {
@@ -28,8 +24,18 @@ const loadHomepage = async (req, res) => {
     }
 
 
+    console.log(req.session.user)
 
-    const featuredProductsRaw = await Product.find({ isDeleted: false, isListed: true })
+
+    const activeCategories = await Category.find({ isListed: true, isDeleted: false }).distinct("_id");
+    const activeBrands = await Brand.find({ isListed: true, isDeleted: false }).distinct("_id");
+
+    const featuredProductsRaw = await Product.find({
+      isDeleted: false,
+      isListed: true,
+      category: { $in: activeCategories },
+      brand: { $in: activeBrands }
+    })
       .populate("category")
       .populate("brand")
       .populate("productOffer")
@@ -126,7 +132,7 @@ const loadSignup = async (req, res) => {
 const googleCallback = async (req, res) => {
   try {
 
-    req.session.user = req.user._id;
+    req.session.user = req.user._id.toString();
 
     if (req.user._isNewUser) {
       return res.redirect("/complete-profile");
@@ -194,64 +200,6 @@ const applyGoogleReferral = async (req, res) => {
     res.redirect("/");
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -524,7 +472,7 @@ const otp = async (req, res) => {
       phone: userData.phone,
       password: passwordHash,
       referalCode: newReferralCode,
-      addresses: [] 
+      addresses: []
     });
 
     log(`User object BEFORE save: ${JSON.stringify({
@@ -532,7 +480,7 @@ const otp = async (req, res) => {
       password: '[HASHED]'
     })}`);
 
-  
+
     try {
       if (userData.referalCode) {
         log(`Processing referral: ${userData.referalCode}`);
@@ -599,7 +547,13 @@ const otp = async (req, res) => {
     req.session.userOtp = null;
     req.session.otpExpiry = null;
     req.session.userData = null;
-    req.session.user = saveUserData._id;
+    // req.session.user = {
+    //   _id: saveUserData._id,
+    //   name: saveUserData.name,
+    //   email: saveUserData.email
+    // };
+    req.session.user = saveUserData._id
+
 
     log("Verification success. Redirecting...");
     res.json({ success: true, redirectUrl: "/" });
@@ -628,7 +582,7 @@ const loadlogin = async (req, res) => {
       message = "Your account has been blocked by admin"
     }
     if (req.session.user) {
-      return res.redirect("login")
+      return res.redirect("/")
     } else {
       res.render("login", { message })
     }
@@ -645,7 +599,6 @@ const loadlogin = async (req, res) => {
 const login = async (req, res) => {
 
   try {
-
     const { email, password } = req.body;
 
     const findUser = await User.findOne({ isAdmin: 0, email: email })
@@ -663,11 +616,13 @@ const login = async (req, res) => {
     if (!passwordMatch) {
       return res.render("login", { message: "Incorrect Password" })
     }
-    req.session.user = {
-      _id: findUser._id,
-      name: findUser.name,
-      email: findUser.email
-    }
+    // req.session.user = {
+    //   _id: findUser._id,
+    //   name: findUser.name,
+    //   email: findUser.email
+    // }
+
+    req.session.user = findUser._id.toString();
 
     await User.findByIdAndUpdate(findUser._id, {
       lastLogin: new Date()
@@ -707,14 +662,25 @@ const productlist = async (req, res) => {
 
 
   try {
+
+    const activeCategories = await Category.find({ isListed: true, isDeleted: false }).distinct("_id");
+    const activeBrands = await Brand.find({ isListed: true, isDeleted: false }).distinct("_id");
+
     const products = await Product.find({
       isListed: true,
-      isDeleted: false
-    }).populate("category")
+      isDeleted: false,
+      category: { $in: activeCategories },
+      brand: { $in: activeBrands }
+    })
+      .populate("category")
+      .populate("brand")
+      .populate("productOffer")
+
+    const filteredProducts = products.filter(p => p.category && p.brand);
 
     const today = new Date();
 
-    const updatedProducts = products.map(product => {
+    const updatedProducts = filteredProducts.map(product => {
       const variant = product.variants?.[0];
 
       if (!variant) return product
@@ -1008,27 +974,14 @@ const removeCoupon = (req, res) => {
 
 const loadReferralPage = async (req, res) => {
   try {
-    const user = await User.findById(req.session.user);
-
     res.render("referal", {
-      user
+      user: req.session.user
     });
   } catch (error) {
     console.log(error, "Referal page error");
     res.redirect("/profile");
   }
 };
-
-
-
-
-
-
-
-
-
-
-
 
 
 

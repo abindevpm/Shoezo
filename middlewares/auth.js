@@ -7,17 +7,18 @@ const userAuth = async (req, res, next) => {
       return res.redirect("/login");
     }
 
-    const user = await User.findById(req.session.user._id);
+    const userId = typeof req.session.user === 'object' ? req.session.user._id : req.session.user;
+    const user = await User.findById(userId);
 
     if (!user || user.isBlocked) {
-      req.session.destroy(() => {
+      req.session.destroy((err) => {
+        if (err) console.log("Session destroy error:", err);
         return res.redirect("/login");
       });
       return;
     }
 
-    req.session.user = user;
-    req.user = req.session.user;
+    req.user = user;
     next();
 
   } catch (error) {
@@ -29,9 +30,9 @@ const userAuth = async (req, res, next) => {
 
 const adminAuth = (req, res, next) => {
   if (req.session.admin) {
-    return next();                        
+    return next();
   }
-  return res.redirect("/admin/login");    
+  return res.redirect("/admin/login");
 };
 
 module.exports = {

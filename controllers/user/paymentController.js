@@ -112,34 +112,34 @@ const createOrder = async (req, res) => {
 
 
     let updatedOrderItems = [];
-let totalDistributed = 0;
+    let totalDistributed = 0;
 
-for (let i = 0; i < orderItems.length; i++) {
+    for (let i = 0; i < orderItems.length; i++) {
 
-  const item = orderItems[i];
-  const itemTotal = item.price * item.quantity;
+      const item = orderItems[i];
+      const itemTotal = item.price * item.quantity;
 
-  let couponShare = 0;
+      let couponShare = 0;
 
-  if (i === orderItems.length - 1) {
-    couponShare = discountAmount - totalDistributed;
-  } else {
-    couponShare = subtotal > 0
-      ? Math.round((itemTotal / subtotal) * discountAmount)
-      : 0;
+      if (i === orderItems.length - 1) {
+        couponShare = discountAmount - totalDistributed;
+      } else {
+        couponShare = subtotal > 0
+          ? Math.round((itemTotal / subtotal) * discountAmount)
+          : 0;
 
-    totalDistributed += couponShare;
-  }
+        totalDistributed += couponShare;
+      }
 
-  const finalPrice = itemTotal - couponShare;
+      const finalPrice = itemTotal - couponShare;
 
-  updatedOrderItems.push({
-    ...item,
-    offerDiscount: 0,
-    couponDiscount: couponShare,
-    finalPrice
-  });
-}
+      updatedOrderItems.push({
+        ...item,
+        offerDiscount: 0,
+        couponDiscount: couponShare,
+        finalPrice
+      });
+    }
 
 
 
@@ -157,7 +157,7 @@ for (let i = 0; i < orderItems.length; i++) {
     const newOrder = new Order({
       orderId: razorpayOrder.id,
       userId: userId,
-     items: updatedOrderItems,
+      items: updatedOrderItems,
       address: {
         fullName: selectedAddress.fullName,
         phone: selectedAddress.phone,
@@ -170,8 +170,8 @@ for (let i = 0; i < orderItems.length; i++) {
       paymentStatus: "Pending",
       totalAmount,
       subtotal: subtotal,
-totalOfferDiscount: baseSubtotal - subtotal,
-totalCouponDiscount: discountAmount,
+      totalOfferDiscount: baseSubtotal - subtotal,
+      totalCouponDiscount: discountAmount,
 
       couponCode: req.session.appliedCoupon || null,
       status: "Placed"
@@ -321,11 +321,11 @@ const retryPayment = async (req, res) => {
       return res.status(400).json({ success: false, message: "Only failed orders can be retried" });
     }
 
-    
+
     for (const item of order.items) {
       const product = await Product.findById(item.productId);
-      if (!product) {
-        return res.status(400).json({ success: false, message: `Product not found: ${item.productId}` });
+      if (!product || !product.variants) {
+        return res.status(400).json({ success: false, message: `Product data or variants missing for ${item.productId}` });
       }
 
       const variant = product.variants.find(v => Number(v.size) === Number(item.size));
@@ -334,15 +334,30 @@ const retryPayment = async (req, res) => {
       }
     }
 
+    if (!order.totalAmount || order.totalAmount <= 0) {
+      return res.status(400).json({ success: false, message: "Invalid order amount for retry" });
+    }
+
     const options = {
-      amount: order.totalAmount * 100,
+      amount: Math.round(order.totalAmount * 100),
       currency: "INR",
       receipt: "order_retry_" + Date.now(),
     };
 
-    const razorpayOrder = await razorpay.orders.create(options);
+    console.log(`Initiating Razorpay retry for order ${order._id}, amount: ${options.amount}`);
 
-    
+    let razorpayOrder;
+    try {
+      razorpayOrder = await razorpay.orders.create(options);
+    } catch (razorError) {
+      console.error("Razorpay order creation failed:", razorError);
+      return res.status(500).json({
+        success: false,
+        message: "Razorpay service error. Please try again later.",
+        details: razorError.message
+      });
+    }
+
     order.orderId = razorpayOrder.id;
     await order.save();
 
@@ -353,8 +368,11 @@ const retryPayment = async (req, res) => {
     });
 
   } catch (error) {
-    console.log("Retry Payment Error:", error);
-    res.status(500).json({ success: false, message: "Failed to initiate retry" });
+    console.error("Retry Payment Error:", error);
+    res.status(500).json({
+      success: false,
+      message: `Failed to initiate retry: ${error.message}`
+    });
   }
 };
 

@@ -70,17 +70,20 @@ const addToWishlist = async (req, res) => {
     const sessionUser = req.session.user;
     if (!sessionUser) {
       return res.json({ success: false, message: "Login required" });
-    }
 
+    }
+    
     const userId = sessionUser._id || sessionUser;
 
     if (!userId) {
       return res.json({ success: false, message: "User ID not found" });
+
     }
 
     const { productId } = req.body;
-
     let wishlist = await Wishlist.findOne({ userId });
+
+
 
     if (!wishlist) {
       wishlist = new Wishlist({

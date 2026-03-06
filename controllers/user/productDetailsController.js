@@ -15,7 +15,7 @@ const loadProductDetails = async (req, res) => {
       .populate("productOffer")
       .populate({ path: "category", populate: { path: "categoryOffer" } });
 
-    if (!product) {
+    if (!product || !product.category || !product.category.isListed || !product.brand || !product.brand.isListed) {
       return res.redirect("/productlist");
     }
 

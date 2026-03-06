@@ -81,9 +81,9 @@ router.post("/reset-password", userController.resetPassword);
 
 
 //  user profile
-router.get("/profile", profileController.loadProfile)
-router.get("/edit-profile", profileController.loadEditProfile)
-router.post("/edit-profile", profileController.editProfile)
+router.get("/profile", userAuth, profileController.loadProfile)
+router.get("/edit-profile", userAuth, profileController.loadEditProfile)
+router.post("/edit-profile", userAuth, profileController.editProfile)
 router.post("/upload-profile-image", userAuth, uploadProfile.single("profileImage"), profileController.uploadProfileImage)
 router.post("/change-password", userAuth, profileController.changePassword)
 
@@ -96,20 +96,20 @@ router.get("/remove-profile-image", userAuth, profileController.removeProfileIma
 
 
 //  address management
-router.get("/address", addressController.loadAddresses)
-router.get("/addAdress", addressController.loadaddAdresses)
-router.post("/addAdress", addressController.addAdress)
-router.get("/address/delete/:addressId", addressController.deleteAddress)
+router.get("/address", userAuth, addressController.loadAddresses)
+router.get("/addAdress", userAuth, addressController.loadaddAdresses)
+router.post("/addAdress", userAuth, addressController.addAdress)
+router.get("/address/delete/:addressId", userAuth, addressController.deleteAddress)
 router.get("/editAddress/:id", userAuth, addressController.loadEditAddress)
-router.post("/updateAddress/:id", addressController.updateAddress)
+router.post("/updateAddress/:id", userAuth, addressController.updateAddress)
 router.get("/address/set-default/:id", userAuth, addressController.setDefaultAddress)
 
 
 //  cart management
-router.get("/cart", cartController.loadCart)
-router.post("/cart/:id", cartController.addToCart);
-router.patch("/cart/update-qty", cartController.updateCartQty)
-router.delete("/cart/remove-item", cartController.removeCartItem);
+router.get("/cart", userAuth, cartController.loadCart)
+router.post("/cart/:id", userAuth, cartController.addToCart);
+router.patch("/cart/update-qty", userAuth, cartController.updateCartQty)
+router.delete("/cart/remove-item", userAuth, cartController.removeCartItem);
 
 
 
@@ -117,19 +117,17 @@ router.delete("/cart/remove-item", cartController.removeCartItem);
 
 
 //   checkout management
-
-
-router.get("/checkout", checkoutController.loadCheckout);
-router.post("/checkout/add-address", checkoutController.addAddressCheckout);
-router.post("/place-order", checkoutController.placeOrder);
-router.get("/order-success", checkoutController.loadOrderSuccess);
+router.get("/checkout", userAuth, checkoutController.loadCheckout);
+router.post("/checkout/add-address", userAuth, checkoutController.addAddressCheckout);
+router.post("/place-order", userAuth, checkoutController.placeOrder);
+router.get("/order-success", userAuth, checkoutController.loadOrderSuccess);
 
 
 
 
 //  order managemant
 
-router.get("/orders", orderController.loadorders)
+router.get("/orders", userAuth, orderController.loadorders)
 router.get("/orders/:id", userAuth, orderController.getOrderDetails)
 router.get("/orders/track/:id", userAuth, orderController.loadTrackOrder)
 router.get("/orders/track/:id/:itemId", userAuth, orderController.loadTrackOrder)
@@ -158,7 +156,7 @@ router.post("/wishlist/remove", userAuth, WishlistController.removeFromWishlist)
 router.post("/wishlist/move-to-cart", userAuth, WishlistController.moveToCart);
 
 // referal page
-router.get("/referal", userController.loadReferralPage)
+router.get("/referal", userAuth, userController.loadReferralPage)
 
 // wallet 
 

@@ -323,56 +323,73 @@
                                 <div class="order-items">
                                     <% order.items.forEach(item=> { %>
                                         <div class="item-row">
-                                            <img src="/uploads/product-images/<%= item.productId.images[0] %>"
-                                                alt="<%= item.productId.name %>">
-                                            <div class="item-info">
-                                                <div class="item-category">Category: <%= item.productId.category.name
-                                                        || 'FOOTWEAR' %>
+                                            <% if (item.productId) { %>
+                                                <img src="/uploads/product-images/<%= item.productId.images[0] %>"
+                                                    alt="<%= item.productId.name %>">
+                                                <div class="item-info">
+                                                    <div class="item-category">Category: <%= (item.productId.category &&
+                                                            item.productId.category.name) || 'FOOTWEAR' %>
+                                                    </div>
+                                                    <div class="item-name">
+                                                        <%= item.productId.name %> (Size: <%= item.size %>)
+                                                    </div>
                                                 </div>
-                                                <div class="item-name">
-                                                    <%= item.productId.name %> (Size: <%= item.size %>)
-                                                </div>
-                                            </div>
-
-                                            <div class="item-status-col">
-                                                <% let statusClass='status-' +
-                                                    item.itemStatus.toLowerCase().replace(' ', ' -'); let
-                                                    displayStatus=item.itemStatus; if(item.itemStatus==='Returned' )
-                                                    displayStatus='RETURNED' ; if(item.itemStatus==='Return Requested' )
-                                                    displayStatus='RETURN REQUESTED' ;
-                                                    if(item.itemStatus==='Return Rejected' )
-                                                    displayStatus='RETURN REJECTED' ; %>
-                                                    <span class="status-tag <%= statusClass %>">STATUS: <%=
-                                                            displayStatus %></span>
-                                                    <span class="status-date">Date: <%= new
-                                                            Date(order.createdAt).toLocaleDateString() %></span>
-                                            </div>
-
-                                            <div class="action-btns">
-                                                <a href="/orders/track/<%= order._id %>/<%= item._id %>"
-                                                    class="btn btn-track">Track Order</a>
-                                                <% if (order.status==='Failed' ) { %>
-                                                    <button onclick="retryPayment('<%= order._id %>')"
-                                                        class="btn btn-track"
-                                                        style="background-color: #28a745 !important;">Retry
-                                                        Payment</button>
+                                                <% } else { %>
+                                                    <div class="item-info">
+                                                        <div class="item-name">Product Unavailable (Size: <%= item.size
+                                                                %>)</div>
+                                                    </div>
                                                     <% } %>
 
-                                                        <% if (['Placed', 'Processing' ].includes(item.itemStatus)) { %>
-                                                            <% if (order.items.length> 1) { %>
-                                                                <button
-                                                                    onclick="cancelItem('<%= order._id %>', '<%= item._id %>')"
-                                                                    class="btn btn-cancel">Cancel Item</button>
-                                                                <% } %>
-                                                                    <% } else if (item.itemStatus==='Delivered' ) { %>
-                                                                        <button
-                                                                            onclick="returnItem('<%= order._id %>', '<%= item._id %>')"
-                                                                            class="btn btn-return">Return Item</button>
-                                                                        <% } %>
-                                            </div>
+                                                        <div class="item-status-col">
+                                                            <% let statusClass='status-' + (item.itemStatus || 'placed'
+                                                                ).toLowerCase().replace(/\s+/g, '-' ); let
+                                                                displayStatus=item.itemStatus;
+                                                                if(item.itemStatus==='Returned' )
+                                                                displayStatus='RETURNED' ;
+                                                                if(item.itemStatus==='Return Requested' )
+                                                                displayStatus='RETURN REQUESTED' ;
+                                                                if(item.itemStatus==='Return Rejected' )
+                                                                displayStatus='RETURN REJECTED' ; %>
+                                                                <span class="status-tag <%= statusClass %>">STATUS: <%=
+                                                                        displayStatus %></span>
+                                                                <span class="status-date">Date: <%= new
+                                                                        Date(order.createdAt).toLocaleDateString() %>
+                                                                </span>
+                                                        </div>
+
+
+
+                                                        <div class="action-btns">
+                                                            <a href="/orders/track/<%= order._id %>/<%= item._id %>"
+                                                                class="btn btn-track">Track Order</a>
+                                                         
+
+                                                                    <% if (['Placed', 'Processing'
+                                                                        ].includes(item.itemStatus)) { %>
+                                                                        <% if (order.items.length> 1) { %>
+                                                                            <button
+                                                                                onclick="cancelItem('<%= order._id %>', '<%= item._id %>')"
+                                                                                class="btn btn-cancel">Cancel
+                                                                                Item</button>
+                                                                            <% } %>
+                                                                                <% } else if
+                                                                                    (item.itemStatus==='Delivered' ) {
+                                                                                    %>
+                                                                                    <button
+                                                                                        onclick="returnItem('<%= order._id %>', '<%= item._id %>')"
+                                                                                        class="btn btn-return">Return
+                                                                                        Item</button>
+                                                                                    <% } %>
+                                                        </div>
                                         </div>
                                         <% }) %>
-
+                                                            <% if (order.status==='Failed' ) { %>
+                                                                <button onclick="retryPayment('<%= order._id %>')"
+                                                                    class="btn btn-track"
+                                                                    style="background-color: #28a745 !important;">Retry
+                                                                    Payment</button>
+                                                                <% } %>
                                             <div
                                                 style="display: flex; justify-content: flex-end; padding-top: 15px; border-top: 1px solid #f5f5f5; margin-top: 10px; gap: 10px; align-items: center;">
                                                 <a href="/orders/invoice/<%= order._id %>" class="btn btn-invoice"><i
@@ -413,9 +430,17 @@
                 async function cancelOrder(orderId) {
                     const { value: reason } = await Swal.fire({
                         title: 'Cancel Order',
-                        input: 'text',
+                        input: 'select',
                         inputLabel: 'Reason for cancellation (optional)',
-                        inputPlaceholder: 'Tell us why...',
+                        inputOptions: {
+    'Changed my mind': 'Changed my mind',
+    'Ordered by mistake': 'Ordered by mistake',
+    'Found cheaper elsewhere': 'Found cheaper elsewhere',
+    'Delivery taking too long': 'Delivery taking too long',
+    'Wrong address selected': 'Wrong address selected'
+},
+
+                        inputPlaceholder: 'Select Cancel Reason',
                         showCancelButton: true,
                         confirmButtonColor: '#000',
                         cancelButtonColor: '#d33',
@@ -446,11 +471,44 @@
                     }
                 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 async function cancelItem(orderId, itemId) {
                     const { value: reason } = await Swal.fire({
                         title: 'Cancel Item',
-                        input: 'text',
+                        input: 'select',
                         inputLabel: 'Reason for cancellation (optional)',
+                                           inputOptions: {
+    'Changed my mind': 'Changed my mind',
+    'Ordered by mistake': 'Ordered by mistake',
+    'Found cheaper elsewhere': 'Found cheaper elsewhere',
+    'Delivery taking too long': 'Delivery taking too long',
+    'Wrong address selected': 'Wrong address selected'
+},
+
                         inputPlaceholder: 'Tell us why...',
                         showCancelButton: true,
                         confirmButtonColor: '#000',
@@ -565,7 +623,7 @@
 
                         if (result.success) {
                             const options = {
-                                key: "<%= process.env.RAZORPAY_KEY_ID %>",
+                                key: "<%= razorpayKey %>",
                                 amount: result.order.amount,
                                 currency: result.order.currency,
                                 name: "SHOEZOO",
@@ -609,7 +667,9 @@
                             const rzp = new Razorpay(options);
                             rzp.open();
                         } else {
-                            Swal.fire('Error!', result.message || 'Failed to initiate payment', 'error');
+                            const errorMsg = result.message || 'Failed to initiate payment';
+                            const errorDetail = result.error || result.details || '';
+                            Swal.fire('Error!', `${errorMsg}${errorDetail ? ` (${errorDetail})` : ''}`, 'error');
                         }
                     } catch (error) {
                         Swal.fire('Error!', 'Something went wrong', 'error');

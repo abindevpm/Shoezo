@@ -31,6 +31,7 @@ const categoryInfo = async (req, res) => {
 
   } catch (error) {
     console.log("Category Info error", error)
+    return res.status(404)
 
   }
 }

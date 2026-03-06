@@ -3,7 +3,7 @@ const Product = require("../../models/productSchema")
 
 const loadCart = async (req, res) => {
   try {
-    const userId = req.session.user?._id || req.session.user;
+    const userId = req.user._id;
 
     if (!userId) {
       return res.redirect("/login");
@@ -99,15 +99,7 @@ const loadCart = async (req, res) => {
 const addToCart = async (req, res) => {
   try {
     const productId = req.params.id;
-    const userId = req.session.user?._id || req.session.user;
-
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: "Please login to add items to your cart",
-        loginRedirect: true
-      });
-    }
+    const userId = req.user._id;
 
     const { variant } = req.body;
     if (!variant) {
@@ -206,10 +198,8 @@ const addToCart = async (req, res) => {
 
 
 const updateCartQty = async (req, res) => {
-
   try {
-
-    const userId = req.session.user?._id || req.session.user;
+    const userId = req.user._id;
     const { itemId, action } = req.body;
 
     const cart = await Cart.findOne({ userId });
@@ -331,7 +321,7 @@ const updateCartQty = async (req, res) => {
 
 const removeCartItem = async (req, res) => {
   try {
-    const userId = req.session.user?._id || req.session.user;
+    const userId = req.user._id;
     const { itemId } = req.body;
 
     const cart = await Cart.findOne({ userId });

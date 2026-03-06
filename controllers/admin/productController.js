@@ -16,6 +16,10 @@ const loadProducts = async (req, res) => {
     const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : null;
 
 
+  
+
+
+
     let page = search ? 1 : parseInt(req.query.page) || 1;
     let limit = 5;
     let skip = (page - 1) * limit;
@@ -48,11 +52,15 @@ const loadProducts = async (req, res) => {
     const totalProducts = await Product.countDocuments(query);
     const totalPages = Math.ceil(totalProducts / limit);
 
+
+
     const products = await Product.find(query)
       .populate({
         path: "category",
         match: { isListed: true, isDeleted: false }
       })
+
+
       .populate("brand")
       .populate("productOffer")
       .sort({ createdAt: -1 })

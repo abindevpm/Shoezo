@@ -186,7 +186,26 @@
 }
 
 
+table{
+table-layout: fixed;
+width:100%;
+}
 
+.table td,
+.table th{
+word-wrap: break-word;
+overflow-wrap: break-word;
+}
+
+.table td:nth-child(1),
+.table th:nth-child(1){
+width:160px;
+}
+
+.table td:nth-child(3),
+.table th:nth-child(3){
+width:110px;
+}
 
 
 
@@ -376,15 +395,6 @@
 </div>
 
 
-
-
-
-
-
-
-
-
-
                     </div>
                 </div>
             </main>
@@ -405,6 +415,69 @@
                     const params = new URLSearchParams(new FormData(form)).toString();
                     window.location.href = `/admin/sales-report/download/${format}?${params}`;
                 }
+
+                document.getElementById("reportFilterForm").addEventListener("submit", function(e){
+
+    const reportType = document.querySelector("select[name='reportType']").value;
+    const fromDate = document.querySelector("input[name='fromDate']").value;
+    const toDate = document.querySelector("input[name='toDate']").value;
+
+    const errorBox = document.getElementById("errorMsg");
+
+    if(errorBox){
+        errorBox.innerText = "";
+    }
+
+    if(reportType === "custom"){
+
+        if(!fromDate || !toDate){
+            e.preventDefault();
+            showError("Please select both From Date and To Date");
+            return;
+        }
+
+        const start = new Date(fromDate);
+        const end = new Date(toDate);
+        const today = new Date();
+
+        if(start > end){
+            e.preventDefault();
+            showError("From Date cannot be greater than To Date");
+            return;
+        }
+
+        if(start > today || end > today){
+            e.preventDefault();
+            showError("Future dates are not allowed");
+            return;
+        }
+    }
+
+});
+
+
+function showError(message){
+
+    let errorBox = document.getElementById("errorMsg");
+
+    if(!errorBox){
+        errorBox = document.createElement("div");
+        errorBox.id = "errorMsg";
+        errorBox.className = "alert alert-danger mb-3";
+        document.querySelector(".filter-section").prepend(errorBox);
+    }
+
+    errorBox.innerText = message;
+
+}
+
+
+       
+
+
+
+
+
             </script>
 </body>
 

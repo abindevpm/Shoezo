@@ -338,24 +338,31 @@
                                     <tr>
                                         <td>
                                             <div class="product-cell">
-                                                <img src="/uploads/product-images/<%= item.productId.images[0] %>"
-                                                    alt="<%= item.productId.name %>">
-                                                <div>
-                                                    <div class="product-name">
-                                                        <%= item.productId.name %>
+                                                <% if (item.productId) { %>
+                                                    <img src="/uploads/product-images/<%= item.productId.images[0] %>"
+                                                        alt="<%= item.productId.name %>">
+                                                    <div>
+                                                        <div class="product-name">
+                                                            <%= item.productId.name %>
+                                                        </div>
+                                                        <div class="product-meta">Size: <%= item.size %> | Price: ₹<%=
+                                                                    item.price %>
+                                                        </div>
                                                     </div>
-                                                    <div class="product-meta">Size: <%= item.size %> | Price: ₹<%=
-                                                                item.price %>
-                                                    </div>
-                                                </div>
+                                                    <% } else { %>
+                                                        <div class="product-name">Product Unavailable</div>
+                                                        <div class="product-meta">Size: <%= item.size %> | Price: ₹<%=
+                                                                    item.price %>
+                                                        </div>
+                                                        <% } %>
                                             </div>
                                         </td>
                                         <td>
                                             <%= item.quantity %>
                                         </td>
                                         <td>
-                                            <% let statusClass='status-' + item.itemStatus.toLowerCase().replace(' ', '
-                                                -'); %>
+                                            <% let statusClass='status-' + (item.itemStatus || 'placed'
+                                                ).toLowerCase().replace(/\s+/g, '-' ); %>
                                                 <span class="status-badge <%= statusClass %>">
                                                     <%= item.itemStatus %>
                                                 </span>
@@ -364,9 +371,8 @@
                                                         <strong>Reason:</strong>
                                                         <%= item.cancelReason %>
                                                     </div>
-                                                    <% } else if (item.itemStatus==='Return Requested' ||
-                                                        item.itemStatus==='Returned' ||
-                                                        item.itemStatus==='Return Rejected' ) { %>
+                                                    <% } else if (['Return Requested', 'Returned' , 'Return Rejected'
+                                                        ].includes(item.itemStatus)) { %>
                                                         <% if (item.returnReason) { %>
                                                             <div
                                                                 style="font-size: 11px; color: #ff9900; margin-top: 5px;">
@@ -589,7 +595,7 @@
 
                         if (result.success) {
                             const options = {
-                                key: "<%= process.env.RAZORPAY_KEY_ID %>",
+                                key: "<%= razorpayKey %>",
                                 amount: result.order.amount,
                                 currency: result.order.currency,
                                 name: "SHOEZOO",
@@ -633,7 +639,9 @@
                             const rzp = new Razorpay(options);
                             rzp.open();
                         } else {
-                            Swal.fire('Error!', result.message || 'Failed to initiate payment', 'error');
+                            const errorMsg = result.message || 'Failed to initiate payment';
+                            const errorDetail = result.error || result.details || '';
+                            Swal.fire('Error!', `${errorMsg}${errorDetail ? ` (${errorDetail})` : ''}`, 'error');
                         }
                     } catch (error) {
                         Swal.fire('Error!', 'Something went wrong', 'error');

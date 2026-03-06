@@ -5,12 +5,7 @@ const transporter = require("../../config/nodemailer");
 
 const loadProfile = async (req, res) => {
   try {
-    if (!req.session.user) {
-      return res.redirect("login");
-    }
-
-    let user = await User.findById(req.session.user._id);
-    if (!user) return res.redirect("login");
+    const user = req.user;
 
     if (!user.referalCode) {
       const referral = "SH" + Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -19,7 +14,7 @@ const loadProfile = async (req, res) => {
         referalCode: referral
       });
 
-      user.referalCode = referral; 
+      user.referalCode = referral;
     }
 
     res.render("profile", { user });
@@ -35,8 +30,7 @@ const loadProfile = async (req, res) => {
 
 const loadEditProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.session.user._id)
-    if (!user) return res.redirect("login")
+    const user = req.user;
     res.render("edit-profile", { user })
 
   } catch (error) {
@@ -48,7 +42,7 @@ const loadEditProfile = async (req, res) => {
 const editProfile = async (req, res) => {
   try {
     const { name, phone } = req.body;
-    const userId = req.session.user._id;
+    const userId = req.user._id;
 
     if (!name || name.trim().length < 3) {
       return res.redirect("/user/edit-profile");
@@ -90,16 +84,13 @@ const uploadProfileImage = async (req, res) => {
     }
     const imagePath = "/uploads/profile-images/" + req.file.filename;
     const updatedUser = await User.findByIdAndUpdate(
-      req.session.user._id,
+      req.user._id,
       { profileImage: imagePath },
       { new: true }
-
     )
 
-    req.session.user = updatedUser;
-    req.session.user.profileImage = imagePath;
-
-    res.redirect("profile")
+    req.user.profileImage = imagePath;
+    res.redirect("/user/profile")
 
   } catch (error) {
     console.log(error, "Profile picture error")
@@ -115,7 +106,7 @@ const uploadProfileImage = async (req, res) => {
 const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword, confirmPassword } = req.body;
-    const userId = req.session.user._id;
+    const userId = req.user._id;
 
 
     if (!currentPassword || !newPassword || !confirmPassword) {
@@ -150,11 +141,11 @@ const changePassword = async (req, res) => {
     await user.save();
 
 
-    return res.redirect("profile");
+    return res.redirect("/profile");
 
   } catch (error) {
     console.log("Change password error:", error);
-    return res.redirect("edit-profile");
+    return res.redirect("/edit-profile");
   }
 };
 

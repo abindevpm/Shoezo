@@ -30,16 +30,31 @@ const getMatchCondition = (reportType, fromDate, toDate) => {
       startDate = new Date(now.getFullYear(), 0, 1);
       matchCondition.createdAt = { $gte: startDate, $lte: endDate };
       break;
-    case "custom":
-      if (fromDate && toDate) {
-        startDate = new Date(fromDate);
-        endDate = new Date(toDate);
-        endDate.setHours(23, 59, 59, 999);
-        matchCondition.createdAt = { $gte: startDate, $lte: endDate };
-      }
-      break;
+       case "custom":
+
+  if (!fromDate || !toDate) {
+    throw new Error("Please select both From Date and To Date");
+  }
+
+  startDate = new Date(fromDate);
+  endDate = new Date(toDate);
+  endDate.setHours(23, 59, 59, 999);
+
+  const today = new Date();
+
+  if (startDate > endDate) {
+    throw new Error("From Date cannot be greater than To Date");
+  }
+
+  if (startDate > today || endDate > today) {
+    throw new Error("Future dates are not allowed");
+  }
+
+  matchCondition.createdAt = { $gte: startDate, $lte: endDate };
+
+  break;
     default:
-      
+
       break;
   }
   return matchCondition;
@@ -48,7 +63,7 @@ const getMatchCondition = (reportType, fromDate, toDate) => {
 const loadSalesReport = async (req, res) => {
   try {
 
-   const page = parseInt(req.query.page) || 1;
+    const page = parseInt(req.query.page) || 1;
     const limit = 5;
     const skip = (page - 1) * limit;
 
@@ -56,7 +71,7 @@ const loadSalesReport = async (req, res) => {
     const { reportType, fromDate, toDate } = req.query;
     const matchCondition = getMatchCondition(reportType, fromDate, toDate);
 
-  const totalOrders = await Order.countDocuments(matchCondition);
+    const totalOrders = await Order.countDocuments(matchCondition);
 
     const orders = await Order.find(matchCondition)
       .populate("userId")
@@ -64,22 +79,22 @@ const loadSalesReport = async (req, res) => {
       .skip(skip)
       .limit(limit)
 
-          const allOrders = await Order.find(matchCondition);
+    const allOrders = await Order.find(matchCondition);
 
 
-   const totalSalesAmount = allOrders.reduce(
-  (acc, order) => acc + (order.totalAmount || 0), 0
-);
+    const totalSalesAmount = allOrders.reduce(
+      (acc, order) => acc + (order.totalAmount || 0), 0
+    );
 
-const totalCouponDiscount = allOrders.reduce(
-  (acc, order) => acc + (order.discountAmount || 0), 0
-);
+    const totalCouponDiscount = allOrders.reduce(
+      (acc, order) => acc + (order.discountAmount || 0), 0
+    );
 
-const totalOfferDiscount = allOrders.reduce(
-  (acc, order) => acc + (order.totalOfferDiscount || 0), 0
-);
+    const totalOfferDiscount = allOrders.reduce(
+      (acc, order) => acc + (order.totalOfferDiscount || 0), 0
+    );
 
-     const totalPages = Math.ceil(totalOrders / limit);
+    const totalPages = Math.ceil(totalOrders / limit);
 
     res.render("salesReport", {
       orders,
@@ -87,7 +102,7 @@ const totalOfferDiscount = allOrders.reduce(
       totalSalesAmount,
       totalCouponDiscount,
       totalOfferDiscount,
-        currentPage: page,
+      currentPage: page,
       totalPages,
       reportType: reportType || "all",
       fromDate: fromDate || "",
@@ -112,14 +127,14 @@ const SalesReportPDF = async (req, res) => {
 
     doc.pipe(res);
 
-  
+
     doc.fontSize(20).font("Helvetica-Bold").text("SHOEZO SALES REPORT", { align: "center" });
     doc.moveDown(0.5);
     doc.fontSize(10).font("Helvetica").text(`Report Period: ${reportType ? reportType.toUpperCase() : "ALL TIME"}`, { align: "center" });
     doc.text(`Generated On: ${new Date().toLocaleString()}`, { align: "center" });
     doc.moveDown(2);
 
-    
+
     const totalSales = orders.reduce((acc, o) => acc + (o.totalAmount || 0), 0);
     const totalCouponDiscount = orders.reduce((acc, o) => acc + (o.discountAmount || 0), 0);
     const totalOfferDiscount = orders.reduce((acc, o) => acc + (o.totalOfferDiscount || 0), 0);
@@ -132,28 +147,28 @@ const SalesReportPDF = async (req, res) => {
     doc.text(`Total Coupon Deduction: Rs. ${totalCouponDiscount.toLocaleString()}`);
     doc.moveDown(2);
 
-  
+
     const tableHeaderY = doc.y;
     doc.font("Helvetica-Bold");
     doc.text("Order ID", 30, tableHeaderY);
-    doc.text("Date", 130, tableHeaderY);
-    doc.text("Customer", 210, tableHeaderY);
-    doc.text("Offer", 330, tableHeaderY);
-    doc.text("Coupon", 400, tableHeaderY);
+    doc.text("Date", 165, tableHeaderY);
+    doc.text("Customer", 245, tableHeaderY);
+    doc.text("Offer", 355, tableHeaderY);
+    doc.text("Coupon", 425, tableHeaderY);
     doc.text("Final Amount", 480, tableHeaderY, { width: 80, align: "right" });
     doc.moveTo(30, tableHeaderY + 15).lineTo(560, tableHeaderY + 15).stroke();
     doc.moveDown(1.5);
 
-  
+
     doc.font("Helvetica");
     orders.forEach(order => {
       if (doc.y > 750) doc.addPage();
       const currentY = doc.y;
       doc.text(`#${order.orderId}`, 30, currentY);
-      doc.text(new Date(order.createdAt).toLocaleDateString(), 130, currentY);
-      doc.text(order.userId ? order.userId.name : "Guest", 210, currentY);
-      doc.text(`Rs. ${order.totalOfferDiscount || 0}`, 330, currentY);
-      doc.text(`Rs. ${order.discountAmount || 0}`, 400, currentY);
+      doc.text(new Date(order.createdAt).toLocaleDateString(), 165, currentY);
+      doc.text(order.userId ? order.userId.name : "Guest", 245, currentY);
+      doc.text(`Rs. ${order.totalOfferDiscount || 0}`, 355, currentY);
+      doc.text(`Rs. ${order.discountAmount || 0}`, 425, currentY);
       doc.text(`Rs. ${(order.totalAmount || 0).toLocaleString()}`, 480, currentY, { width: 80, align: "right" });
       doc.moveDown();
     });

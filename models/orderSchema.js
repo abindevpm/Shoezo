@@ -30,7 +30,7 @@ const orderSchema = new mongoose.Schema({
 
       price: {
         type: Number,
-        required: true  
+        required: true
       },
 
       offerDiscount: {
@@ -45,7 +45,7 @@ const orderSchema = new mongoose.Schema({
 
       finalPrice: {
         type: Number,
-        required: true   
+        required: true
       },
 
       itemStatus: {
@@ -59,7 +59,8 @@ const orderSchema = new mongoose.Schema({
           "Return Requested",
           "Return Approved",
           "Return Rejected",
-          "Returned"
+          "Returned",
+          "Failed"
         ],
         default: "Placed"
       },
@@ -95,11 +96,11 @@ const orderSchema = new mongoose.Schema({
     addressLine: String
   },
 
-paymentMethod: {
-  type: String,
-  enum: ["COD", "ONLINE", "WALLET"],
-  default: "COD"
-},
+  paymentMethod: {
+    type: String,
+    enum: ["COD", "ONLINE", "WALLET"],
+    default: "COD"
+  },
 
   paymentStatus: {
     type: String,
