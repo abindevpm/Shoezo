@@ -99,7 +99,7 @@
     </div>
     <div class="col-md-4">
       <select class="form-select form-select-sm" name="category" >
-        <option value="">Select Category</option>
+        <option value="" selected disabled >Select Category</option>
         <% categories.forEach(cat => { %>
           <option value="<%= cat._id %>"><%= cat.name %></option>
         <% }) %>

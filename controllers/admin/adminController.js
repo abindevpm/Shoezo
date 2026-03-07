@@ -1,13 +1,14 @@
- const User = require("../../models/userSchema")
- const mongoose = require("mongoose")
- const bcrypt = require('bcrypt')
+const User = require("../../models/userSchema")
+const mongoose = require("mongoose")
+const bcrypt = require('bcrypt')
+
 
 const loadlogin = (req, res) => {
   if (req.session.admin) {
 
     return res.redirect("/admin/dashboard");
   }
-  res.render("adminlogin");
+  res.render("adminlogin", { backendError: null });
 };
 
 
@@ -36,7 +37,7 @@ const login = async (req, res) => {
     return res.redirect("/admin/dashboard");
 
   } catch (err) {
-    console.log(err);
+    console.log(err, "Admin login Error");
     return res.render("adminlogin", {
       backendError: "Something went wrong"
     });
@@ -46,17 +47,17 @@ const login = async (req, res) => {
 
 
 
-  const dashboard = (req,res)=>{
+const dashboard = (req, res) => {
 
-      return res.render("dashboard")
-  }
+  return res.render("dashboard")
+}
 
 
-const logout = (req,res)=>{
+const logout = (req, res) => {
 
-  req.session.destroy(err=>{
-    if(err){
-      console.log(err,"Error in server")
+  req.session.destroy(err => {
+    if (err) {
+      console.log(err, "Error in server")
       return res.redirect("/pageNotFound")
     }
     res.redirect("/admin/login")
@@ -67,12 +68,12 @@ const logout = (req,res)=>{
 
 
 
- module.exports = {
+module.exports = {
 
   loadlogin,
   login,
   dashboard,
   logout,
-  
-    
- }
+
+
+}

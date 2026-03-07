@@ -4,6 +4,8 @@ const Cart = require("../../models/cartSchema");
 const Order = require("../../models/orderSchema");
 const Product = require("../../models/productSchema");
 const User = require("../../models/userSchema");
+const StatusCodes = require("../../routes/utils/statusCodes");
+
 
 
 
@@ -13,11 +15,11 @@ const createOrder = async (req, res) => {
     const { addressId } = req.body;
 
     if (!userId) {
-      return res.status(401).json({ success: false, message: "Login required" });
+      return res.status(StatusCodes.UNAUTHORIZED).json({ success: false, message: "Login required" });
     }
 
     if (!addressId) {
-      return res.status(400).json({ success: false, message: "Address is required" });
+      return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Address is required" });
     }
 
     const cart = await Cart.findOne({ userId }).populate({
@@ -29,13 +31,13 @@ const createOrder = async (req, res) => {
     });
 
     if (!cart || cart.items.length === 0) {
-      return res.status(400).json({ success: false, message: "Cart is empty" });
+      return res.status(StatusCodes.NOT_FOUND).json({ success: false, message: "Cart is empty" });
     }
 
     const user = await User.findById(userId);
     const selectedAddress = user.addresses.id(addressId);
     if (!selectedAddress) {
-      return res.status(400).json({ success: false, message: "Address not found" });
+      return res.status(StatusCodes.NOT_FOUND).json({ success: false, message: "Address not found" });
     }
 
     const today = new Date();
@@ -104,7 +106,7 @@ const createOrder = async (req, res) => {
       const Coupon = require("../../models/couponSchema");
       const coupon = await Coupon.findOne({ code: appliedCouponCode, isActive: true });
       if (!coupon || coupon.usedCount >= coupon.usageLimit) {
-        return res.status(400).json({ success: false, message: "Applied coupon is no longer available" });
+        return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Applied coupon is no longer available" });
       }
     }
 
@@ -187,7 +189,7 @@ const createOrder = async (req, res) => {
 
   } catch (error) {
     console.log("Create Order Error:", error);
-    res.status(500).json({ success: false });
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false });
   }
 };
 
@@ -224,12 +226,12 @@ const verifyPayment = async (req, res) => {
 
 
 
-      return res.status(400).json({ success: false, message: "Invalid signature" });
+      return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Invalid signature" });
     }
 
     const userId = req.session.user;
     if (!userId) {
-      return res.status(401).json({ success: false, message: "User not authenticated" });
+      return res.status(StatusCodes.UNAUTHORIZED).json({ success: false, message: "User not authenticated" });
     }
 
 
@@ -245,7 +247,7 @@ const verifyPayment = async (req, res) => {
     );
 
     if (!updatedOrder) {
-      return res.status(404).json({ success: false, message: "Order not found" });
+      return res.status(StatusCodes.NOT_FOUND).json({ success: false, message: "Order not found" });
     }
 
 
@@ -273,7 +275,7 @@ const verifyPayment = async (req, res) => {
 
   } catch (error) {
     console.log("Verify Payment Error:", error);
-    return res.status(500).json({ success: false });
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false });
   }
 };
 
@@ -298,7 +300,7 @@ const markOrderFailed = async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.log("Mark Order Failed Error:", error);
-    res.json({ success: false });
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false });
   }
 };
 
@@ -308,34 +310,34 @@ const retryPayment = async (req, res) => {
     const userId = req.session.user;
 
     if (!userId) {
-      return res.status(401).json({ success: false, message: "Login required" });
+      return res.status(StatusCodes.NOT_FOUND).json({ success: false, message: "Login required" });
     }
 
     const order = await Order.findOne({ _id: orderId, userId: userId });
 
     if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" });
+      return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Order not found" });
     }
 
     if (order.status !== "Failed") {
-      return res.status(400).json({ success: false, message: "Only failed orders can be retried" });
+      return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Only failed orders can be retried" });
     }
 
 
     for (const item of order.items) {
       const product = await Product.findById(item.productId);
       if (!product || !product.variants) {
-        return res.status(400).json({ success: false, message: `Product data or variants missing for ${item.productId}` });
+        return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: `Product data or variants missing for ${item.productId}` });
       }
 
       const variant = product.variants.find(v => Number(v.size) === Number(item.size));
       if (!variant || variant.stock < item.quantity) {
-        return res.status(400).json({ success: false, message: `Insufficient stock for ${product.name} (Size: ${item.size})` });
+        return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: `Insufficient stock for ${product.name} (Size: ${item.size})` });
       }
     }
 
     if (!order.totalAmount || order.totalAmount <= 0) {
-      return res.status(400).json({ success: false, message: "Invalid order amount for retry" });
+      return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Invalid order amount for retry" });
     }
 
     const options = {
@@ -369,7 +371,7 @@ const retryPayment = async (req, res) => {
 
   } catch (error) {
     console.error("Retry Payment Error:", error);
-    res.status(500).json({
+    res.status(StatusCodes.NOT_FOUND).json({
       success: false,
       message: `Failed to initiate retry: ${error.message}`
     });

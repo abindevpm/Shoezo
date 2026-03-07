@@ -1,5 +1,6 @@
 const coupon = require("../../models/couponSchema")
 const { find } = require("../../models/orderSchema")
+const StatusCodes = require("../../routes/utils/statusCodes")
 
 
 const loadCouponPage = async (req, res) => {
@@ -113,7 +114,7 @@ const createCoupon = async (req, res) => {
 
     } catch (error) {
         console.log(error, "Create Coupon Error")
-        res.status(500).json({ message: "Create Coupon error" })
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Create Coupon error" })
     }
 }
 

@@ -1,4 +1,5 @@
 const User = require("../../models/userSchema");
+const StatusCodes = require("../../routes/utils/statusCodes");
 
 
 const customerinfo = async (req, res) => {
@@ -31,7 +32,7 @@ const customerinfo = async (req, res) => {
 
   } catch (error) {
     console.log("Customer info error:", error);
-    res.status(500).send("Server Error");
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Customer Info Error");
   }
 };
 

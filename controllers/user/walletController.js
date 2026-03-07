@@ -1,9 +1,7 @@
 const User = require("../../models/userSchema")
-
+const StatusCodes = require("../../routes/utils/statusCodes")
 const loadWallet = async (req, res) => {
     try {
-
-
 
         const userId = req.session.user;
         const page = parseInt(req.query.page) || 1;
@@ -31,7 +29,7 @@ const loadWallet = async (req, res) => {
 
     } catch (error) {
         console.log("Wallet Error", error);
-        res.status(500).send("Internal Server Error");
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).redirect("/pageNotFound");
     }
 }
 

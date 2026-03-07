@@ -156,6 +156,9 @@ const orderSchema = new mongoose.Schema({
     default: "Placed"
   },
 
+  cancelReason: String,
+  returnReason: String,
+
   retryUntil: Date
 
 }, { timestamps: true });

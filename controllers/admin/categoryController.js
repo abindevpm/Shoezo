@@ -1,6 +1,7 @@
 const Category = require("../../models/categorySchema");
 const Product = require("../../models/productSchema");
-const Offer = require("../../models/offers")
+const Offer = require("../../models/offers");
+const StatusCodes = require("../../routes/utils/statusCodes");
 
 const categoryInfo = async (req, res) => {
   try {
@@ -31,7 +32,7 @@ const categoryInfo = async (req, res) => {
 
   } catch (error) {
     console.log("Category Info error", error)
-    return res.status(404)
+    return res.status(StatusCodes.BAD_REQUEST)
 
   }
 }
@@ -76,8 +77,8 @@ const addCategory = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ success: false });
+    console.log(error,"ADD category Error");
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false });
   }
 };
 
@@ -103,7 +104,7 @@ const toggleCategory = async (req, res) => {
 
   } catch (err) {
     console.log("Toggle Category Error:", err);
-    res.status(500).json({ success: false });
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false });
   }
 };
 
@@ -204,7 +205,7 @@ const manageCategoryOffer = async (req, res) => {
 
   } catch (error) {
     console.log(error, "Manage Category error")
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: "Manage Category Offer Error" });
   }
 }
 
@@ -245,7 +246,7 @@ const removeCategoryOffer = async (req, res) => {
 
   } catch (error) {
     console.error("Remove Category Offer Error:", error);
-    return res.status(500).json({ success: false, message: "Server error occurred" });
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: "Remove Category Error" });
   }
 }
 

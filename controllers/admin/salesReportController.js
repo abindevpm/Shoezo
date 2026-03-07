@@ -1,6 +1,8 @@
 const Order = require("../../models/orderSchema");
 const PDFDocument = require("pdfkit");
 const ExcelJS = require("exceljs");
+const StatusCodes = require("../../routes/utils/statusCodes")
+
 
 
 const getMatchCondition = (reportType, fromDate, toDate) => {
@@ -111,7 +113,7 @@ const loadSalesReport = async (req, res) => {
 
   } catch (error) {
     console.log("Load SalesReport Error", error);
-    res.status(500).send("Internal Server Error");
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internal Server Error");
   }
 };
 
@@ -177,7 +179,7 @@ const SalesReportPDF = async (req, res) => {
 
   } catch (error) {
     console.log("PDF Error", error);
-    res.status(500).send("Error generating PDF");
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Error generating PDF");
   }
 };
 
@@ -243,7 +245,7 @@ const downloadSalesReportExcel = async (req, res) => {
 
   } catch (error) {
     console.log("Excel Error:", error);
-    res.status(500).send("Error generating Excel file");
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Error generating Excel file");
   }
 };
 

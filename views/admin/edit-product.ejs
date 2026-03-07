@@ -89,14 +89,16 @@
         <div class="row mb-3">
   <div class="col-md-6">
     <label class="form-label">Category</label>
-    <select class="form-select" name="category">
-      <% categories.forEach(cat => { %>
-        <option value="<%= cat._id %>"
-          <%= String(product.category) === String(cat._id) ? "selected" : "" %>>
-          <%= cat.name %>
-        </option>
-      <% }) %>
-    </select>
+<select class="form-select" name="category">
+  <% categories.forEach(cat => { %>
+    <option value="<%= cat._id %>"
+      <%= String(product.category._id) === String(cat._id) ? "selected" : "" %>>
+      <%= cat.name %>
+    </option>
+  <% }) %>
+</select>
+
+
     <small class="text-danger" id="categoryError"></small>
   </div>
 
@@ -105,7 +107,7 @@
     <select class="form-select" name="brand">
       <% brands.forEach(brand => { %>
         <option value="<%= brand._id %>"
-          <%= String(product.brand) === String(brand._id) ? "selected" : "" %>>
+          <%= String(product.brand._id) === String(brand._id) ? "selected" : "" %>>
           <%= brand.name %>
         </option>
       <% }) %>

@@ -1,5 +1,6 @@
 
 const Product = require("../../models/productSchema");
+const StatusCodes = require("../../routes/utils/statusCodes")
 
 const loadProductDetails = async (req, res) => {
   try {
@@ -60,7 +61,7 @@ const loadProductDetails = async (req, res) => {
 
   } catch (error) {
     console.log("Product Details Error:", error);
-    return res.redirect("/productlist");
+    res.status(StatusCodes.NOT_FOUND).redirect("/productlist");
   }
 };
 

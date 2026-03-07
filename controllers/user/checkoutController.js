@@ -1,6 +1,7 @@
 const User = require("../../models/userSchema");
 const Cart = require("../../models/cartSchema");
 const Order = require("../../models/orderSchema")
+const StatusCodes = require("../../routes/utils/statusCodes")
 
 
 const loadCheckout = async (req, res) => {
@@ -74,9 +75,6 @@ const loadCheckout = async (req, res) => {
 
 
 
-
-
-
     res.render("checkout", {
       user,
       cartItems: cart.items,
@@ -94,11 +92,9 @@ const loadCheckout = async (req, res) => {
 
   } catch (error) {
     console.log("Checkout load error:", error);
-    res.redirect("/500");
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).redirect("pageNotFound")
   }
 };
-
-
 
 
 
@@ -310,7 +306,6 @@ const placeOrder = async (req, res) => {
       );
     }
 
-
     if (paymentMethod && paymentMethod.toUpperCase() === "WALLET") {
       const lastTransaction = user.wallet.transactions[user.wallet.transactions.length - 1];
       lastTransaction.orderId = order._id;
@@ -326,12 +321,9 @@ const placeOrder = async (req, res) => {
 
   } catch (err) {
     console.error("Order placement error:", err);
-    res.json({ success: false, message: "Internal Server Error" });
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: "Internal Server Error" });
   }
 };
-
-
-
 
 
 
@@ -395,7 +387,7 @@ const addAddressCheckout = async (req, res) => {
     });
   } catch (error) {
     console.error("Add address checkout error:", error);
-    res.status(500).json({ success: false, message: "Failed to add address" });
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: "Failed to add address" });
   }
 };
 

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,19 +19,21 @@
             background-image: url('/images/signup2.jpg');
             background-size: cover;
             background-position: center;
-            box-shadow: inset 0 0 0 1000px rgba(0,0,0,0.2);
+            box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.2);
         }
 
         .custom-input {
             height: 50px;
             border-radius: 10px;
-            background: #d1d5db;  /* gray-300 */
+            background: #d1d5db;
+            /* gray-300 */
             padding-left: 20px;
             border: none;
         }
 
         .custom-input::placeholder {
-            color: #6b7280; /* gray-500 */
+            color: #6b7280;
+            /* gray-500 */
         }
 
         .custom-input:focus {
@@ -53,104 +56,92 @@
 
 <body class="bg-white">
 
-<div class="container-fluid h-100">
-    <div class="row h-100">
+    <div class="container-fluid h-100">
+        <div class="row h-100">
 
-        <!-- LEFT SIDE -->
-        <div class="col-lg-6 d-flex flex-column justify-content-center p-4 p-sm-5 p-lg-5">
+            <!-- LEFT SIDE -->
+            <div class="col-lg-6 d-flex flex-column justify-content-center p-4 p-sm-5 p-lg-5">
 
-            <h1 class="brand mb-5">SHOEZO</h1>
+                <h1 class="brand mb-5">SHOEZO</h1>
 
-            <h2 class="admin-title mb-5">ADMIN LOGIN</h2>
+                <h2 class="admin-title mb-5">ADMIN LOGIN</h2>
 
-            <form action="/admin/login" method="POST" class="w-100" style="max-width: 350px;" novalidate>
+                <form action="/admin/login" method="POST" class="w-100" style="max-width: 350px;" novalidate>
 
-                <!-- Email -->
-                <div class="mb-4">
-                    <input 
-                        type="email"
-                        name="email"
-                        class="form-control custom-input"
-                        placeholder="email"
-                    
-                    >
-                </div>
+                    <!-- Email -->
+                    <div class="mb-4">
+                        <input type="email" name="email" class="form-control custom-input" placeholder="email">
+                    </div>
 
-                <!-- Password -->
-                <div class="mb-2">
-                    <input 
-                        type="password"
-                        name="password"
-                        class="form-control custom-input"
-                        placeholder="password"
-                        
-                    >
-                </div>
-                <% if (backendError) { %>
-<div class="error-text text-danger mt-1"><%= backendError %></div>
-<% } %>
+                    <!-- Password -->
+                    <div class="mb-2">
+                        <input type="password" name="password" class="form-control custom-input" placeholder="password">
+                    </div>
+                    <% if (locals.backendError) { %>
+                        <div class="error-text text-danger mt-1">
+                            <%= backendError %>
+                        </div>
+                        <% } %>
 
-               
-                <button 
-                    type="submit" 
-                    class="btn btn-dark fw-semibold shadow-sm px-4 py-2"
-                    style="width: 130px;">
-                    Login Now
-                </button>
 
-            </form>
+                            <button type="submit" class="btn btn-dark fw-semibold shadow-sm px-4 py-2"
+                                style="width: 130px;">
+                                Login Now
+                            </button>
+
+                </form>
+
+            </div>
+
+
+            <div class="col-lg-6 d-none d-lg-block image-side"></div>
 
         </div>
-
-
-        <div class="col-lg-6 d-none d-lg-block image-side"></div>
-
     </div>
-</div>
 
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-document.querySelector("form").addEventListener("submit", function (e) {
-    let email = document.querySelector("input[name='email']");
-    let password = document.querySelector("input[name='password']");
-    let valid = true;
+    <script>
+        document.querySelector("form").addEventListener("submit", function (e) {
+            let email = document.querySelector("input[name='email']");
+            let password = document.querySelector("input[name='password']");
+            let valid = true;
 
-    
-    document.querySelectorAll(".error-text").forEach(el => el.remove());
 
-    
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            document.querySelectorAll(".error-text").forEach(el => el.remove());
 
-    if (email.value.trim() === "") {
-        showError(email, "Email is required");
-        valid = false;
-    } else if (!emailPattern.test(email.value.trim())) {
-        showError(email, "Enter a valid email");
-        valid = false;
-    }
 
-    
-    if (password.value.trim() === "") {
-        showError(password, "Password is required");
-        valid = false;
-    } else if (password.value.length < 4) {
-        showError(password, "Password must be at least 4 characters");
-        valid = false;
-    }
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!valid) e.preventDefault();
-});
+            if (email.value.trim() === "") {
+                showError(email, "Email is required");
+                valid = false;
+            } else if (!emailPattern.test(email.value.trim())) {
+                showError(email, "Enter a valid email");
+                valid = false;
+            }
 
-function showError(input, message) {
-    let error = document.createElement("div");
-    error.className = "error-text text-danger mt-1";
-    error.style.fontSize = "14px";
-    error.textContent = message;
-    input.parentNode.appendChild(error);
-}
-</script>
+
+            if (password.value.trim() === "") {
+                showError(password, "Password is required");
+                valid = false;
+            } else if (password.value.length < 4) {
+                showError(password, "Password must be at least 4 characters");
+                valid = false;
+            }
+
+            if (!valid) e.preventDefault();
+        });
+
+        function showError(input, message) {
+            let error = document.createElement("div");
+            error.className = "error-text text-danger mt-1";
+            error.style.fontSize = "14px";
+            error.textContent = message;
+            input.parentNode.appendChild(error);
+        }
+    </script>
 
 
 
@@ -177,4 +168,5 @@ function showError(input, message) {
 
 
 </body>
+
 </html>

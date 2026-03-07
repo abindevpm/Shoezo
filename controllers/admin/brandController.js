@@ -1,5 +1,6 @@
 const Brand = require("../../models/brandSchema");
 const { search } = require("../../routes/adminRoute");
+const StatusCodes = require("../../routes/utils/statusCodes");
 
 
 const loadBrands = async (req, res) => {
@@ -33,7 +34,7 @@ const loadBrands = async (req, res) => {
 
   } catch (error) {
     console.log("Load Brands Error:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(StatusCodes.BAD_REQUEST).send("Load Brand Error");
   }
 };
 
@@ -133,9 +134,6 @@ const editBrand = async (req, res) => {
     }
 
   
-
-
-   
     const exists = await Brand.findOne({
       _id: { $ne: id },
       name: { $regex: `^${name}$`, $options: "i" },
@@ -161,7 +159,7 @@ const editBrand = async (req, res) => {
 
   } catch (error) {
     console.log("Edit Brand Error:", error);
-    return res.status(500).json({
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Server error"
     });
@@ -193,9 +191,9 @@ const toggleBrand = async (req, res) => {
 
   } catch (error) {
     console.log("Toggle brand error:", error);
-    res.status(500).json({
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "Server error"
+      message: "Toogle brand Error"
     });
   }
 };

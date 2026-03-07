@@ -1,6 +1,8 @@
 const Wishlist = require("../../models/wishlist")
 const Cart = require("../../models/cartSchema")
 const Product = require("../../models/productSchema")
+const StatusCodes = require("../../routes/utils/statusCodes")
+
 
 
 const getWishlist = async (req, res) => {
@@ -60,7 +62,7 @@ const getWishlist = async (req, res) => {
 
   } catch (error) {
     console.log("Wishlist Error", error)
-    res.redirect("/productlist");
+   return res.StatusCodes(StatusCodes.INTERNAL_SERVER_ERROR).res.redirect("/productlist");
   }
 }
 
@@ -72,7 +74,6 @@ const addToWishlist = async (req, res) => {
       return res.json({ success: false, message: "Login required" });
 
     }
-    
     const userId = sessionUser._id || sessionUser;
 
     if (!userId) {
@@ -183,13 +184,9 @@ const moveToCart = async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.log("Move to Cart Error:", error);
-    res.json({ success: false });
+   return res.status(StatusCodes.INTERNAL_SERVER_ERROR).res.json({ success: false });
   }
 };
-
-
-
-
 
 module.exports = {
   addToWishlist,

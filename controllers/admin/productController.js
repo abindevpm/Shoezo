@@ -7,6 +7,7 @@ const fs = require("fs")
 
 const sharp = require("sharp");
 const path = require("path");
+const StatusCodes = require("../../routes/utils/statusCodes");
 
 const loadProducts = async (req, res) => {
   try {
@@ -14,10 +15,6 @@ const loadProducts = async (req, res) => {
     const categoryFilter = req.query.category || "";
     const minPrice = req.query.minPrice ? Number(req.query.minPrice) : null;
     const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : null;
-
-
-  
-
 
 
     let page = search ? 1 : parseInt(req.query.page) || 1;
@@ -82,7 +79,7 @@ const loadProducts = async (req, res) => {
 
   } catch (error) {
     console.log("Load Products Error:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internal Server Error");
   }
 };
 
@@ -165,7 +162,7 @@ const loadAddProducts = async (req, res) => {
 
   } catch (error) {
     console.log("Load Add product Error:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Load Add product Error");
   }
 };
 
@@ -205,7 +202,7 @@ const loadEditProduct = async (req, res) => {
 
   } catch (error) {
     console.log("Edit product error:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internal Server Error");
   }
 };
 
@@ -259,7 +256,7 @@ const updateProduct = async (req, res) => {
 
   } catch (error) {
     console.log("Product Update Error:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internal Server Error");
   }
 };
 
@@ -277,7 +274,7 @@ const deleteProduct = async (req, res) => {
     res.json({ success: true });
 
   } catch (error) {
-    res.status(500).json({ success: false });
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false });
   }
 };
 
@@ -331,8 +328,8 @@ const toggleProduct = async (req, res) => {
     res.json({ success: true, isListed: product.isListed });
 
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ success: false });
+    console.log(err,"toggle Product Error Occured");
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false });
   }
 };
 
@@ -393,7 +390,7 @@ const manageProductOffer = async (req, res) => {
 
   } catch (error) {
     console.error("Product Offer Error:", error);
-    return res.status(500).json({ success: false, message: "Server error occurred" });
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: "Server error occurred" });
   }
 }
 
@@ -435,7 +432,7 @@ const removeProductOffer = async (req, res) => {
 
   } catch (error) {
     console.error("Remove Product Offer Error:", error);
-    return res.status(500).json({ success: false, message: "Server error occurred" });
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: "Server error occurred" });
   }
 }
 

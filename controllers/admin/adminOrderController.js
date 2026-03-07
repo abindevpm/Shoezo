@@ -1,6 +1,7 @@
 const Order = require("../../models/orderSchema");
 const Product = require("../../models/productSchema");
 const User = require("../../models/userSchema");
+const StatusCodes = require("../../routes/utils/statusCodes");
 
 const loadOrders = async (req, res) => {
     try {
@@ -47,7 +48,7 @@ const loadOrders = async (req, res) => {
         });
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internal Server Error");
     }
 };
 
@@ -60,7 +61,7 @@ const loadReturnRequests = async (req, res) => {
         res.render("return-requests", { orders });
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internal Server Error");
     }
 };
 
@@ -73,7 +74,7 @@ const getOrderDetailsAdmin = async (req, res) => {
         res.render("admin-order-details", { order });
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internal Server Error");
     }
 };
 
@@ -86,7 +87,7 @@ const getEditOrderAdmin = async (req, res) => {
         res.render("admin-order-edit", { order });
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internal Server Error");
     }
 };
 
@@ -181,7 +182,7 @@ const updateOrderStatus = async (req, res) => {
         res.json({ success: true, message: message });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, message: "Internal server error" });
+        res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Update orderstatus Error" });
     }
 };
 
@@ -196,7 +197,7 @@ const updatePaymentStatus = async (req, res) => {
         res.json({ success: true, message: "Payment status updated" });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, message: "Internal server error" });
+        res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "updatepayment status error" });
     }
 };
 
@@ -264,7 +265,7 @@ const approveItemReturn = async (req, res) => {
         res.json({ success: true, message: message });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, message: "Internal server error" });
+        res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Approve item return Error" });
     }
 };
 
@@ -284,7 +285,7 @@ const rejectItemReturn = async (req, res) => {
         res.json({ success: true, message: "Item return rejected" });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, message: "Internal server error" });
+        res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Reject Item Return Error" });
     }
 };
 
@@ -361,7 +362,7 @@ const cancelItemAdmin = async (req, res) => {
         res.json({ success: true, message: message });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, message: "Internal server error" });
+        res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Cancel Item Error" });
     }
 };
 
@@ -382,7 +383,7 @@ const updateItemStatusAdmin = async (req, res) => {
         res.json({ success: true, message: "Item status updated" });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, message: "Internal server error" });
+        res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "updateItem StatusError" });
     }
 };
 
@@ -411,7 +412,7 @@ const restockItem = async (req, res) => {
         res.json({ success: true, message: "Item added back to inventory" });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, message: "Internal server error" });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: "Restock item Error" });
     }
 };
 

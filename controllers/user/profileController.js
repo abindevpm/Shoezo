@@ -1,6 +1,7 @@
 const User = require("../../models/userSchema")
 const bcrypt = require("bcrypt");
 const transporter = require("../../config/nodemailer");
+const StatusCodes = require("../../routes/utils/statusCodes")
 
 
 const loadProfile = async (req, res) => {
@@ -16,12 +17,11 @@ const loadProfile = async (req, res) => {
 
       user.referalCode = referral;
     }
-
     res.render("profile", { user });
 
   } catch (error) {
     console.log(error);
-    res.status(500).send("Server error");
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Server error");
   }
 };
 

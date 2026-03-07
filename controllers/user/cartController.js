@@ -1,5 +1,6 @@
 const Cart = require("../../models/cartSchema")
 const Product = require("../../models/productSchema")
+const StatusCodes = require("../../routes/utils/statusCodes")
 
 const loadCart = async (req, res) => {
   try {
@@ -130,7 +131,7 @@ const addToCart = async (req, res) => {
 
     if (!matchedVariant) {
       console.log("Variant not found");
-      return res.status(404).json({
+      return res.status(StatusCodes.NOT_FOUND).json({
         success: false,
         message: "Selected size not found"
       });
@@ -182,14 +183,14 @@ const addToCart = async (req, res) => {
     }
 
     await cart.save();
-    return res.status(200).json({
+    return res.status(StatusCodes.OK).json({
       success: true,
       message: "Product successfully added to cart"
     });
 
   } catch (err) {
     console.log("Add to cart error:", err);
-    res.status(500).send("Server Error");
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Server Error");
   }
 };
 
@@ -311,7 +312,7 @@ const updateCartQty = async (req, res) => {
 
   } catch (err) {
     console.log(err, "UpdateCartQty has error");
-    res.json({ success: false });
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).res.json({ success: false });
   }
 
 
@@ -385,18 +386,9 @@ const removeCartItem = async (req, res) => {
 
   } catch (error) {
     console.log("Remove cart item error:", error);
-    res.json({ success: false });
+    res.status(StatusCodes.NOT_FOUND).json({ success: false });
   }
 };
-
-
-
-
-
-
-
-
-
 
 
 module.exports = {

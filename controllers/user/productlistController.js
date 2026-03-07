@@ -4,14 +4,8 @@ const Category = require("../../models/categorySchema");
 const User = require("../../models/userSchema");
 const Brand = require("../../models/brandSchema")
 const mongoose = require("mongoose")
-
-
-
+const StatusCodes = require("../../routes/utils/statusCodes")
 const AppError = require("../../routes/utils/AppError")
-
-
-// const path = require('path');
-// console.log(path.resolve(__dirname, '../../utils/AppError.js'));
 
 
 
@@ -85,14 +79,9 @@ const loadShopPage = async (req, res) => {
     console.log("FINAL FILTER OBJECT =>", JSON.stringify(filter, null, 2));
 
 
-
-
-
-
     const page = parseInt(req.query.page) || 1;
     const limit = 6;
     const skip = (page - 1) * limit;
-
 
     const today = new Date();
     const nameSort = req.query.nameSort;
@@ -286,11 +275,9 @@ const loadShopPage = async (req, res) => {
 
   } catch (err) {
     console.log("Filter Error:", err);
-    res.status(500).send("Internal Server Error");
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internal Server Error");
   }
 };
-
-
 
 
 const getProduct = async (req, res, next) => {

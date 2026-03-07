@@ -2,11 +2,11 @@ const Order = require("../../models/orderSchema")
 const Product = require("../../models/productSchema")
 const User = require("../../models/userSchema")
 const PDFDocument = require("pdfkit")
+const StatusCodes = require("../../routes/utils/statusCodes")
 
 const loadorders = async (req, res) => {
   try {
     const userId = req.user._id;
-
     const { search } = req.query
 
     let query = {
@@ -42,8 +42,8 @@ const loadorders = async (req, res) => {
     })
 
   } catch (error) {
-    console.log(error)
-    res.redirect("/")
+    console.log(error, "Error Occured in load Orders")
+    res.status(StatusCodes.NOT_FOUND).redirect("pageNotFound")
   }
 }
 
@@ -62,7 +62,7 @@ const getOrderDetails = async (req, res) => {
     })
   } catch (error) {
     console.log(error)
-    res.redirect("/orders")
+    res.status(StatusCodes.NOT_FOUND).redirect("/orders")
   }
 }
 
@@ -73,12 +73,12 @@ const cancelOrder = async (req, res) => {
     const { reason } = req.body
 
     if (!reason || reason.trim() === "") {
-      return res.status(400).json({ success: false, message: "Cancellation reason is mandatory" })
+      return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Cancellation reason is mandatory" })
     }
 
     const order = await Order.findOne({ _id: orderId, userId })
     if (!order || ["Cancelled", "Shipped", "Delivered", "Returned", "Return Requested"].includes(order.status)) {
-      return res.status(400).json({ success: false, message: "Order cannot be cancelled at its current stage" })
+      return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Order cannot be cancelled at its current stage" })
     }
 
 
@@ -93,7 +93,10 @@ const cancelOrder = async (req, res) => {
 
     order.status = "Cancelled"
     order.cancelReason = reason
-    order.items.forEach(item => item.itemStatus = "Cancelled")
+    order.items.forEach(item => {
+      item.itemStatus = "Cancelled"
+      item.cancelReason = reason
+    })
 
     const originalTotal = order.totalAmount;
     if (order.paymentStatus === "Paid" && order.totalAmount > 0) {
@@ -133,7 +136,7 @@ const cancelOrder = async (req, res) => {
 
   } catch (error) {
     console.log(error)
-    res.status(500).json({ success: false, message: "Internal server error" })
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: "Internal server error" })
   }
 }
 
@@ -144,21 +147,21 @@ const cancelOrderItem = async (req, res) => {
     const { reason } = req.body
 
     if (!reason || reason.trim() === "") {
-      return res.status(400).json({ success: false, message: "Cancellation reason is mandatory" })
+      return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Cancellation reason is mandatory" })
     }
 
     const order = await Order.findOne({ _id: orderId, userId }).populate("items.productId")
-    if (!order) return res.status(404).json({ success: false, message: "Order not found" })
+    if (!order) return res.status(StatusCodes.NOT_FOUND).json({ success: false, message: "Order not found" })
 
     const itemIndex = order.items.findIndex(item => item._id.toString() === itemId)
     if (itemIndex === -1) {
-      return res.status(404).json({ success: false, message: "Item not found in this order" })
+      return res.status(StatusCodes.NOT_FOUND).json({ success: false, message: "Item not found in this order" })
     }
 
     const item = order.items[itemIndex]
 
     if (["Shipped", "Delivered", "Returned", "Return Requested", "Cancelled"].includes(item.itemStatus)) {
-      return res.status(400).json({ success: false, message: "Item cannot be cancelled at its current stage" })
+      return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Item cannot be cancelled at its current stage" })
     }
 
 
@@ -213,7 +216,7 @@ const cancelOrderItem = async (req, res) => {
     res.json({ success: true, message: message })
   } catch (error) {
     console.log(error)
-    res.status(500).json({ success: false, message: "Internal server error" })
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: "Internal server error" })
   }
 }
 
@@ -224,16 +227,16 @@ const returnOrder = async (req, res) => {
     const { reason } = req.body
 
     if (!reason || reason.trim() === "") {
-      return res.status(400).json({ success: false, message: "Return reason is mandatory" })
+      return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Return reason is mandatory" })
     }
 
     const order = await Order.findOne({ _id: orderId, userId })
     if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" })
+      return res.status(StatusCodes.NOT_FOUND).json({ success: false, message: "Order not found" })
     }
 
     if (order.status !== "Delivered") {
-      return res.status(400).json({ success: false, message: "Only delivered orders can be returned" })
+      return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Only delivered orders can be returned" })
     }
 
     order.status = "Return Requested"
@@ -242,14 +245,15 @@ const returnOrder = async (req, res) => {
     order.items.forEach(item => {
       if (item.itemStatus === "Delivered") {
         item.itemStatus = "Return Requested"
+        item.returnReason = reason
       }
     })
 
     await order.save()
     res.json({ success: true, message: "Return request submitted successfully. Waiting for admin approval." })
   } catch (error) {
-    console.log(error)
-    res.status(500).json({ success: false, message: "Internal server error" })
+    console.log(error, "AN ERROR OCCURED IN RETURN ORDER")
+    res.status(StatusCodes.NOT_FOUND).json({ success: false, message: "Internal server error" })
   }
 }
 
@@ -260,22 +264,22 @@ const returnOrderItem = async (req, res) => {
     const { reason } = req.body
 
     if (!reason || reason.trim() === "") {
-      return res.status(400).json({ success: false, message: "Return reason is mandatory" })
+      return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Return reason is mandatory" })
     }
 
     const order = await Order.findOne({ _id: orderId, userId })
     if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" })
+      return res.status(StatusCodes.NOT_FOUND).json({ success: false, message: "Order not found" })
     }
 
     const itemIndex = order.items.findIndex(item => item._id.toString() === itemId)
     if (itemIndex === -1) {
-      return res.status(404).json({ success: false, message: "Item not found in this order" })
+      return res.status(StatusCodes.NOT_FOUND).json({ success: false, message: "Item not found in this order" })
     }
 
     const item = order.items[itemIndex]
     if (item.itemStatus !== "Delivered") {
-      return res.status(400).json({ success: false, message: "Only delivered items can be returned" })
+      return res.status(StatusCodes.NOT_FOUND).json({ success: false, message: "Only delivered items can be returned" })
     }
 
     item.itemStatus = "Return Requested"
@@ -289,8 +293,8 @@ const returnOrderItem = async (req, res) => {
     await order.save()
     res.json({ success: true, message: "Item return request submitted successfully." })
   } catch (error) {
-    console.log(error)
-    res.status(500).json({ success: false, message: "Internal server error" })
+    console.log(error, "ERROR OCCURED IN RETURN ITEM")
+    res.status(StatusCodes.NOT_FOUND).json({ success: false, message: "Return item error" })
   }
 }
 
@@ -364,7 +368,7 @@ const downloadInvoice = async (req, res) => {
 
   } catch (error) {
     console.log(error)
-    res.status(500).send("Error generating invoice")
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Error generating invoice")
   }
 }
 
@@ -388,8 +392,8 @@ const loadTrackOrder = async (req, res) => {
       focusedItem
     })
   } catch (error) {
-    console.log(error)
-    res.redirect("/orders")
+    console.log(error, "Load track order error occured")
+    res.status(StatusCodes.NOT_FOUND).redirect("/orders")
   }
 }
 

@@ -5,6 +5,7 @@ const Order = require("../../models/orderSchema");
 const Coupon = require("../../models/couponSchema")
 const Category = require("../../models/categorySchema")
 const Brand = require("../../models/brandSchema")
+const StatusCodes = require("../../routes/utils/statusCodes")
 
 
 const env = require("dotenv").config()
@@ -89,7 +90,7 @@ const loadHomepage = async (req, res) => {
 
   } catch (error) {
     console.log("Home page error:", error);
-    return res.status(500).send("Server error");
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Server error");
   }
 };
 
@@ -100,7 +101,7 @@ const landingpage = async (req, res) => {
     res.render("landingpage");
   } catch (error) {
     console.log("Landing page error", error);
-    res.status(500).send("Server side error");
+    res.status(StatusCodes).send("Server side error");
   }
 };
 
@@ -122,7 +123,7 @@ const loadSignup = async (req, res) => {
 
   } catch (error) {
     console.log("signup not found")
-    res.status(500).send("server error")
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("server error")
 
   }
 
@@ -318,7 +319,7 @@ const resendOtp = async (req, res) => {
     res.json({ success: true });
 
   } catch (err) {
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: "Server error" });
   }
 };
 
@@ -383,10 +384,6 @@ const securePassword = async (password) => {
 
   }
 }
-
-
-
-
 
 const otp = async (req, res) => {
   const fs = require('fs');
@@ -547,11 +544,7 @@ const otp = async (req, res) => {
     req.session.userOtp = null;
     req.session.otpExpiry = null;
     req.session.userData = null;
-    // req.session.user = {
-    //   _id: saveUserData._id,
-    //   name: saveUserData.name,
-    //   email: saveUserData.email
-    // };
+    
     req.session.user = saveUserData._id
 
 
@@ -565,7 +558,7 @@ const otp = async (req, res) => {
     }
     log(`Stack: ${error.stack}`);
 
-    res.status(500).json({
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Server Error: " + error.message
     });
@@ -591,10 +584,7 @@ const loadlogin = async (req, res) => {
     res.redirect("/pageNotFound")
 
   }
-
-
 }
-
 
 const login = async (req, res) => {
 
@@ -616,11 +606,7 @@ const login = async (req, res) => {
     if (!passwordMatch) {
       return res.render("login", { message: "Incorrect Password" })
     }
-    // req.session.user = {
-    //   _id: findUser._id,
-    //   name: findUser.name,
-    //   email: findUser.email
-    // }
+  
 
     req.session.user = findUser._id.toString();
 
@@ -655,8 +641,6 @@ const logout = async (req, res) => {
   })
 
 }
-
-
 
 const productlist = async (req, res) => {
 
@@ -729,7 +713,7 @@ const productlist = async (req, res) => {
 
   } catch (error) {
     console.log("Product List page error", error)
-    res.redirect("/pageNotFound")
+   return res.status(StatusCodes.INTERNAL_SERVER_ERROR). res.redirect("/pageNotFound")
 
   }
 }
@@ -954,7 +938,7 @@ const applyCoupon = async (req, res) => {
 
   } catch (error) {
     console.log("Apply coupon error:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: "Server error" });
   }
 };
 
@@ -983,7 +967,7 @@ const loadReferralPage = async (req, res) => {
 
   } catch (error) {
     console.log(error, "Referal page error");
-    res.redirect("/profile");
+   return res.status(StatusCodes.INTERNAL_SERVER_ERROR).res.redirect("/profile");
   }
 };
 
