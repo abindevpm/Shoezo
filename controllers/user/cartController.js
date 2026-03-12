@@ -38,7 +38,6 @@ const loadCart = async (req, res) => {
 
       let appliedDiscount = 0;
 
-
       if (product.productOffer &&
         product.productOffer.isActive &&
         product.productOffer.startDate <= today &&
@@ -77,6 +76,10 @@ const loadCart = async (req, res) => {
       0
     );
 
+    
+    
+
+
     const offerDiscount = baseSubtotal - actualSubtotal;
     const grandTotal = actualSubtotal;
 
@@ -87,7 +90,8 @@ const loadCart = async (req, res) => {
         subtotal: baseSubtotal,
         gst: 0,
         discount: offerDiscount,
-        grandTotal
+        grandTotal,
+      
       }
     });
 
@@ -95,6 +99,8 @@ const loadCart = async (req, res) => {
     console.log("Load cart have error", error);
   }
 };
+
+
 
 
 const addToCart = async (req, res) => {
@@ -193,9 +199,6 @@ const addToCart = async (req, res) => {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Server Error");
   }
 };
-
-
-
 
 
 const updateCartQty = async (req, res) => {
@@ -315,9 +318,8 @@ const updateCartQty = async (req, res) => {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).res.json({ success: false });
   }
 
-
-
 }
+
 
 
 const removeCartItem = async (req, res) => {

@@ -189,17 +189,17 @@ const updateOrderStatus = async (req, res) => {
 
 
 
-
 const updatePaymentStatus = async (req, res) => {
     try {
         const { orderId, paymentStatus } = req.body;
         await Order.findByIdAndUpdate(orderId, { paymentStatus });
         res.json({ success: true, message: "Payment status updated" });
     } catch (error) {
-        console.error(error);
+        console.error(error,"update payment Status error");
         res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "updatepayment status error" });
     }
 };
+
 
 const approveItemReturn = async (req, res) => {
     try {

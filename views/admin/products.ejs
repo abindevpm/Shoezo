@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,6 +10,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
 
   <style>
     body {
@@ -159,12 +162,19 @@
                         </td>
 
 
-
+                        
+                     
 
 
                         <td>
                           <%= product.variants ? product.variants.reduce((sum, v)=> sum + (v.stock || 0), 0) : 0 %>
                         </td>
+
+                        
+                      
+
+
+                      
 
                         <td>
                           <% if (product?.images && product.images.length> 0) { %>
@@ -251,6 +261,8 @@
             </ul>
           </nav>
         </div>
+   
+           <!-- <p>totalstock:<%= totalStock %></p> -->
 
 
         <div class="modal fade" id="productOfferModal">
@@ -309,7 +321,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-      // ── List / Unlist Toggle ──
+
       document.querySelectorAll(".toggle-delete").forEach(toggle => {
         toggle.addEventListener("change", async () => {
           const productId = toggle.dataset.id;
@@ -339,7 +351,7 @@
         });
       });
 
-      // ── Search Logic ──
+    
       const searchInput = document.getElementById("productSearch");
       if (searchInput) {
         const params = new URLSearchParams(window.location.search);
@@ -353,7 +365,7 @@
         });
       }
 
-      // ── Category Filter Logic (Defensive) ──
+      
       const categorySelect = document.getElementById("filterCategory");
       if (categorySelect) {
         const params = new URLSearchParams(window.location.search);
@@ -370,7 +382,7 @@
         });
       }
 
-      // ── Price Filter ──
+    
       function applyPriceFilter() {
         const min = document.getElementById("minPrice")?.value;
         const max = document.getElementById("maxPrice")?.value;
@@ -380,7 +392,7 @@
         window.location.href = url;
       }
 
-      // ── Modal Handling ──
+  
       function prepareOfferModal(btn) {
         const id = btn.getAttribute("data-id");
         const discount = btn.getAttribute("data-discount");
@@ -439,7 +451,7 @@
         }
       }
 
-      // ── Manage Product Offer (AJAX) ──
+      
       const productOfferForm = document.getElementById("productOfferForm");
       if (productOfferForm) {
         productOfferForm.addEventListener("submit", async (e) => {

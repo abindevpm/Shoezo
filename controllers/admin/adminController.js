@@ -66,8 +66,6 @@ const logout = (req, res) => {
 }
 
 
-
-
 module.exports = {
 
   loadlogin,

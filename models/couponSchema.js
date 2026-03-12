@@ -13,6 +13,10 @@ const couponSchema = new mongoose.Schema({
     enum: ["New user Join", "Above 1000 order", "Above 5000 order", "General"],
     default: "General"
   },
+  isReferralCoupon: {
+    type: Boolean,
+    default: false
+  },
 
   discountType: {
     type: String,
@@ -55,6 +59,11 @@ const couponSchema = new mongoose.Schema({
     default: 0
   },
 
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null
+  },
   isActive: {
     type: Boolean,
     default: true

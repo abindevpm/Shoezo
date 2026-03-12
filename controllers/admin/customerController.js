@@ -6,7 +6,7 @@ const customerinfo = async (req, res) => {
   try {
     const search = req.query.search || "";
     const page = parseInt(req.query.page) || 1;
-    const limit = 5;
+    const limit = 10;
 
     const searchQuery = {
       isAdmin: false,

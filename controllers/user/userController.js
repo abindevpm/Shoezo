@@ -69,6 +69,8 @@ const loadHomepage = async (req, res) => {
           appliedDiscount = Math.max(appliedDiscount, Number(productObj.category.categoryOffer.discountValue) || 0);
         }
 
+        productObj.appliedDiscount = appliedDiscount;
+
         productObj.price = v.price;
         if (appliedDiscount > 0) {
           const base = Number(v.salePrice || v.price);
@@ -430,6 +432,10 @@ const otp = async (req, res) => {
       });
     }
 
+    // IMMEDIATELY clear OTP session to prevent concurrent duplicate verification attempts
+    req.session.userOtp = null;
+    req.session.otpExpiry = null;
+
     const userData = req.session.userData;
     if (!userData) {
       log("ERROR: userData missing in session");
@@ -478,56 +484,74 @@ const otp = async (req, res) => {
     })}`);
 
 
+
+
     try {
       if (userData.referalCode) {
         log(`Processing referral: ${userData.referalCode}`);
         const referrer = await User.findOne({ referalCode: userData.referalCode });
+
         if (referrer) {
-          log(`Referrer found: ${referrer.email}`);
-          saveUserData.referredBy = referrer._id;
+          if (referrer.email === userData.email) {
+            log("User tried self referral");
+          } else {
+            log(`Referrer found: ${referrer.email}`);
+            saveUserData.referredBy = referrer._id;
 
-          const couponCode = "REF" + Math.random().toString(36).substring(2, 8).toUpperCase();
-          const expiry = new Date();
-          expiry.setDate(expiry.getDate() + 30);
+            const couponCode = "REF" + Math.random().toString(36).substring(2, 8).toUpperCase();
+            const expiry = new Date();
+            expiry.setDate(expiry.getDate() + 30);
 
-          const newCoupon = new Coupon({
-            code: couponCode,
-            discountType: "fixed",
-            discountValue: 100,
-            minPurchase: 500,
-            startDate: new Date(),
-            expiryDate: expiry,
-            usageLimit: 1,
-            couponType: "New user Join"
-          });
-
-          await newCoupon.save();
-
-          await User.updateOne(
-            { _id: referrer._id },
-            { $push: { redeemedUsers: saveUserData._id } }
-          );
-
-          log("Referral reward generated and referrer updated");
-
-          try {
-            const transporter = nodemailer.createTransport({
-              service: "gmail",
-              auth: {
-                user: process.env.NODEMAILER_EMAIL,
-                pass: process.env.NODEMAILER_PASSWORD.trim()
-              }
+            const newCoupon = new Coupon({
+              code: couponCode,
+              discountType: "fixed",
+              discountValue: 200,
+              minPurchase: 500,
+              startDate: new Date(),
+              expiryDate: expiry,
+              usageLimit: 1,
+              isReferralCoupon: true,
+              couponType: "New user Join",
+              userId: referrer._id
             });
 
-            await transporter.sendMail({
-              from: `"Shoezo 👟" <${process.env.NODEMAILER_EMAIL}>`,
-              to: referrer.email,
-              subject: "You've earned a Referral Reward! 🎁",
-              html: `<h2>Hello ${referrer.name}!</h2><p>Your friend joined Shoezo! Your voucher: <strong>${couponCode}</strong></p>`
-            });
-            log("Referral email sent");
-          } catch (emailErr) {
-            log(`WARNING: Referral email failed: ${emailErr.message}`);
+            await newCoupon.save();
+
+            await User.updateOne(
+              { _id: referrer._id },
+              { $push: { redeemedUsers: saveUserData._id } }
+            );
+
+            log("Referral reward generated and referrer updated");
+
+
+
+
+            try {
+              const transporter = nodemailer.createTransport({
+                service: "gmail",
+                auth: {
+                  user: process.env.NODEMAILER_EMAIL,
+                  pass: (process.env.NODEMAILER_PASSWORD || "").trim()
+                }
+              });
+
+              // Making email sending non-blocking to eliminate lag
+              transporter.sendMail({
+                from: `"Shoezo 👟" <${process.env.NODEMAILER_EMAIL}>`,
+                to: referrer.email,
+                subject: "You've earned a Referral Reward! 🎁",
+                html: `<h2>Hello ${referrer.name}!</h2>
+                       <p>Your friend joined Shoezo.</p>
+                       <p>Your coupon code is:</p>
+                       <h3>${couponCode}</h3>`
+              }).catch(emailErr => {
+                log(`WARNING: Referral email failed background send: ${emailErr.message}`);
+              });
+              log("Referral email initiated (non-blocking)");
+            } catch (emailErr) {
+              log(`WARNING: Referral email failed: ${emailErr.message}`);
+            }
           }
         } else {
           log(`Referrer not found for code: ${userData.referalCode}`);
@@ -541,10 +565,7 @@ const otp = async (req, res) => {
     await saveUserData.save();
     log("User saved successfully");
 
-    req.session.userOtp = null;
-    req.session.otpExpiry = null;
     req.session.userData = null;
-    
     req.session.user = saveUserData._id
 
 
@@ -606,7 +627,7 @@ const login = async (req, res) => {
     if (!passwordMatch) {
       return res.render("login", { message: "Incorrect Password" })
     }
-  
+
 
     req.session.user = findUser._id.toString();
 
@@ -713,7 +734,7 @@ const productlist = async (req, res) => {
 
   } catch (error) {
     console.log("Product List page error", error)
-   return res.status(StatusCodes.INTERNAL_SERVER_ERROR). res.redirect("/pageNotFound")
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).res.redirect("/pageNotFound")
 
   }
 }
@@ -866,13 +887,18 @@ const getAvailableCoupons = async (req, res) => {
     const today = new Date();
     const { subtotal } = req.query;
     const subtotalValue = subtotal ? Number(subtotal) : 0;
+    const userId = req.user._id;
 
     const query = {
       isActive: true,
       startDate: { $lte: today },
       expiryDate: { $gt: today },
       $expr: { $lt: ["$usedCount", "$usageLimit"] },
-      minPurchase: { $lte: subtotalValue }
+      minPurchase: { $lte: subtotalValue },
+      $or: [
+        { userId: null },
+        { userId: userId }
+      ]
     };
 
     const coupons = await Coupon.find(query)
@@ -961,13 +987,13 @@ const loadReferralPage = async (req, res) => {
     const userId = req.session.user
 
     const user = await User.findById(userId)
-    res.render("referal",{
-      user:user
+    res.render("referal", {
+      user: user
     })
 
   } catch (error) {
     console.log(error, "Referal page error");
-   return res.status(StatusCodes.INTERNAL_SERVER_ERROR).res.redirect("/profile");
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).res.redirect("/profile");
   }
 };
 

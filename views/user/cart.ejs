@@ -67,6 +67,8 @@
                           <%= item.quantity %>
                         </span>
 
+                     
+
                         <button id="inc-<%= item._id %>" class="qty-btn"
                           onclick="updateQty('<%= item._id %>', 'inc')">+</button>
 
@@ -110,6 +112,10 @@
                 <span id="subtotal">₹<%= summary.subtotal %></span>
 
               </div>
+
+        <!-- <span><%= summary.totalcart %> Items</span> -->
+
+
 
               <div class="summary-line">
                 <span>Delivery Charges</span>

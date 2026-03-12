@@ -2,7 +2,7 @@ const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const Brand = require("../../models/brandSchema");
 const Offer = require("../../models/offers")
-
+  
 const fs = require("fs")
 
 const sharp = require("sharp");
@@ -22,7 +22,9 @@ const loadProducts = async (req, res) => {
     let skip = (page - 1) * limit;
 
 
-    let query = { isDeleted: false };
+    let query = { isDeleted: false,
+  
+    };
 
 
     if (search) {
@@ -56,13 +58,17 @@ const loadProducts = async (req, res) => {
         path: "category",
         match: { isListed: true, isDeleted: false }
       })
-
-
       .populate("brand")
       .populate("productOffer")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
+
+      let totalStock = 0;
+   
+         
+
+
 
     const categories = await Category.find({ isDeleted: false, isListed: true });
 
@@ -74,14 +80,20 @@ const loadProducts = async (req, res) => {
       search,
       categoryFilter,
       minPrice: req.query.minPrice || "",
-      maxPrice: req.query.maxPrice || ""
+      maxPrice: req.query.maxPrice || "",
+    totalStock
     });
 
   } catch (error) {
     console.log("Load Products Error:", error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internal Server Error");
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Load Product Error");
   }
 };
+
+
+
+
+
 
 
 

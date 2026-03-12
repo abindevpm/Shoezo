@@ -11,11 +11,14 @@ const loadCouponPage = async (req, res) => {
 
         let query = {}
 
+        query.isReferralCoupon = false
+
         if(search){
             query.code = {$regex:search,$options:"i"}
         }
+        
 
-
+        
   const today = new Date();
 
 if (status === "Active") {
@@ -31,9 +34,6 @@ else if (status === "Expired") {
   query.expiryDate = { $lt: today };
 }
 
-
-
-     
         if(type){
             query.couponType = type
         }

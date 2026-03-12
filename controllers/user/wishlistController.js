@@ -66,6 +66,8 @@ const getWishlist = async (req, res) => {
   }
 }
 
+
+
 const addToWishlist = async (req, res) => {
   try {
 
@@ -83,8 +85,6 @@ const addToWishlist = async (req, res) => {
 
     const { productId } = req.body;
     let wishlist = await Wishlist.findOne({ userId });
-
-
 
     if (!wishlist) {
       wishlist = new Wishlist({
@@ -106,6 +106,7 @@ const addToWishlist = async (req, res) => {
     res.json({ success: false });
   }
 };
+
 
 
 
