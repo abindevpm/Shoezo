@@ -81,6 +81,7 @@ const loadSalesReport = async (req, res) => {
       .skip(skip)
       .limit(limit)
 
+      
     const allOrders = await Order.find(matchCondition);
 
 

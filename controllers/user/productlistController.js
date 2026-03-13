@@ -176,7 +176,8 @@ const loadShopPage = async (req, res) => {
             }
           }
         }
-      }
+      },
+
     ];
 
     if (nameSort === "name_asc") {

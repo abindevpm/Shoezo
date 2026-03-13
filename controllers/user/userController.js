@@ -192,9 +192,59 @@ const applyGoogleReferral = async (req, res) => {
       return res.send("Cannot refer yourself");
     }
 
+  
     currentUser.referredBy = refUser._id;
-
     await currentUser.save();
+
+    
+    const couponCode = "REF" + Math.random().toString(36).substring(2, 8).toUpperCase();
+    const expiry = new Date();
+    expiry.setDate(expiry.getDate() + 30);
+
+    const newCoupon = new Coupon({
+      code: couponCode,
+      discountType: "fixed",
+      discountValue: 200,
+      minPurchase: 500,
+      startDate: new Date(),
+      expiryDate: expiry,
+      usageLimit: 1,
+      isReferralCoupon: true,
+      couponType: "New user Join",
+      userId: refUser._id
+    });
+
+    await newCoupon.save();
+
+    await User.updateOne(
+      { _id: refUser._id },
+      { $push: { redeemedUsers: currentUser._id } }
+    );
+
+  
+    try {
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.NODEMAILER_EMAIL,
+          pass: (process.env.NODEMAILER_PASSWORD || "").trim()
+        }
+      });
+
+      transporter.sendMail({
+        from: `"Shoezo 👟" <${process.env.NODEMAILER_EMAIL}>`,
+        to: refUser.email,
+        subject: "You've earned a Referral Reward! 🎁",
+        html: `<h2>Hello ${refUser.name}!</h2>
+               <p>Your friend joined Shoezo using your referral code.</p>
+               <p>Your coupon code is:</p>
+               <h3>${couponCode}</h3>`
+      }).catch(emailErr => {
+        console.log(`WARNING: Referral email failed background send: ${emailErr.message}`);
+      });
+    } catch (emailErr) {
+      console.log(`WARNING: Referral email setup failed: ${emailErr.message}`);
+    }
 
     res.redirect("/");
 
@@ -432,7 +482,7 @@ const otp = async (req, res) => {
       });
     }
 
-    // IMMEDIATELY clear OTP session to prevent concurrent duplicate verification attempts
+
     req.session.userOtp = null;
     req.session.otpExpiry = null;
 
@@ -536,7 +586,7 @@ const otp = async (req, res) => {
                 }
               });
 
-              // Making email sending non-blocking to eliminate lag
+
               transporter.sendMail({
                 from: `"Shoezo 👟" <${process.env.NODEMAILER_EMAIL}>`,
                 to: referrer.email,

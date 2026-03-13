@@ -10,6 +10,7 @@ const loadBrands = async (req, res) => {
     let page = parseInt(req.query.page) || 1;
     let limit = 3; 
     let skip = (page - 1) * limit;
+    
 
 
     const query = {

@@ -2,9 +2,7 @@ const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const Brand = require("../../models/brandSchema");
 const Offer = require("../../models/offers")
-  
 const fs = require("fs")
-
 const sharp = require("sharp");
 const path = require("path");
 const StatusCodes = require("../../routes/utils/statusCodes");
@@ -23,7 +21,7 @@ const loadProducts = async (req, res) => {
 
 
     let query = { isDeleted: false,
-  
+
     };
 
 
@@ -89,11 +87,6 @@ const loadProducts = async (req, res) => {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Load Product Error");
   }
 };
-
-
-
-
-
 
 
 
