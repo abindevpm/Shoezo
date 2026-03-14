@@ -21,7 +21,7 @@ const loadProducts = async (req, res) => {
 
 
     let query = { isDeleted: false,
-
+    
     };
 
 
@@ -62,8 +62,9 @@ const loadProducts = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-      let totalStock = 0;
-   
+
+  let totalStock = 0;
+      
          
 
 
@@ -79,7 +80,7 @@ const loadProducts = async (req, res) => {
       categoryFilter,
       minPrice: req.query.minPrice || "",
       maxPrice: req.query.maxPrice || "",
-    totalStock
+      totalStock
     });
 
   } catch (error) {

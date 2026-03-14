@@ -102,6 +102,7 @@
         /* force new line */
       }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
 
   <body>
@@ -388,7 +389,7 @@
 
 
         document.querySelectorAll(".wishlist-btn").forEach(button => {
-          button.addEventListener("click", async function () {
+            button.addEventListener("click", async function () {
 
             const productId = this.dataset.id;
 
@@ -402,17 +403,27 @@
             const data = await response.json();
 
             if (data.success) {
-              window.location.href = "/wishlist";
+              Swal.fire({
+                title: "Added!",
+                text: "Product added to wishlist.",
+                icon: "success",
+                showCancelButton: true,
+                confirmButtonText: "Go to Wishlist",
+                cancelButtonText: "Continue Shopping",
+                confirmButtonColor: "#000",
+                cancelButtonColor: "#6c757d"
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  window.location.href = "/wishlist";
+                }
+              });
+            } else {
+              Swal.fire("Error", data.message || "Failed to add to wishlist", "error");
             }
 
 
           })
         })
-
-
-
-
-
 
 
 

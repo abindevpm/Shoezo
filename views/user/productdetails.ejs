@@ -429,11 +429,6 @@
 
 
 
-
-
-
-
-
           </main>
 
           <%- include("../partials/userpartial/footer") %>
@@ -457,7 +452,6 @@
                 });
 
 
-
                 const zoomContainer = document.querySelector('.zoom-container');
                 const zoomImage = document.querySelector('.zoom-image');
 
@@ -477,8 +471,6 @@
                     zoomContainer.classList.remove('zoomed');
                   });
                 }
-
-
 
                 const variantButtons = document.querySelectorAll(".variant-btn");
                 const variantInput = document.getElementById("selectedVariant");
@@ -574,9 +566,22 @@
                       });
                       const data = await response.json();
                       if (data.success) {
-                        window.location.href = "/wishlist";
+                        Swal.fire({
+                          title: "Added to Wishlist!",
+                          text: "The product has been added to your wishlist.",
+                          icon: "success",
+                          showCancelButton: true,
+                          confirmButtonText: "Go to Wishlist",
+                          cancelButtonText: "Continue Shopping",
+                          confirmButtonColor: "#000",
+                          cancelButtonColor: "#6c757d"
+                        }).then((result) => {
+                          if (result.isConfirmed) {
+                            window.location.href = "/wishlist";
+                          }
+                        });
                       } else {
-                        Swal.fire("Error", "Could not add to wishlist", "error");
+                        Swal.fire("Error", data.message || "Could not add to wishlist", "error");
                       }
                     } catch (error) {
                       console.error("Wishlist Error:", error);
@@ -618,7 +623,7 @@
                           if (result.isConfirmed) {
                             window.location.href = "/cart";
                           } else {
-                            // Update cart count if exists
+                            
                             const cartCountBadge = document.getElementById("cartCount");
                             if (cartCountBadge) {
                               cartCountBadge.innerText = parseInt(cartCountBadge.innerText) + 1;

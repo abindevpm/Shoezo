@@ -76,10 +76,6 @@ const loadCart = async (req, res) => {
       0
     );
 
-    
-    
-
-
     const offerDiscount = baseSubtotal - actualSubtotal;
     const grandTotal = actualSubtotal;
 
@@ -123,7 +119,23 @@ const addToCart = async (req, res) => {
 
 
 
-    const product = await Product.findById(productId);
+    const product = await Product.findById(productId)
+       .populate("category")
+       .populate("brand")
+
+       if(
+        !product.isListed || 
+        !product.category?.isListed ||
+        !product.brand?.isListed
+       ){
+        return res.status(400).json({
+          success:false,
+          message:"Product not Available"
+        })
+       }
+      
+
+
     if (!product) {
       return res.status(404).json({
         success: false,
