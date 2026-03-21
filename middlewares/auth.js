@@ -32,6 +32,10 @@ const adminAuth = (req, res, next) => {
   if (req.session.admin) {
     return next();
   }
+  console.log("Admin authentication failed. Session:", req.session);
+  if (req.xhr || (req.headers.accept && req.headers.accept.includes('application/json'))) {
+    return res.status(401).json({ success: false, message: "Unauthorized. Please login again." });
+  }
   return res.redirect("/admin/login");
 };
 

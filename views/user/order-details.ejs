@@ -288,16 +288,21 @@
                                 <span class="status-badge status-<%= order.status.toLowerCase().replace(' ', '-') %>">
                                     <%= order.status %>
                                 </span>
-                                <% if (order.status==='Delivered' ) { %>
-                                    <button onclick="returnFullOrder('<%= order._id %>')" class="btn btn-return">Return
-                                        Whole Order</button>
-                                    <% } else if (['Placed', 'Processing' ].includes(order.status)) { %>
-                                        <button onclick="cancelOrder('<%= order._id %>')" class="btn btn-cancel">Cancel
-                                            Order</button>
-                                        <% } else if (order.status==='Failed' ) { %>
-                                            <button onclick="retryPayment('<%= order._id %>')" class="btn btn-track"
-                                                style="background-color: #28a745 !important;">Retry Payment</button>
-                                            <% } %>
+                                <% if (order.status==='Delivered' ) { 
+                                    const deliveryDate = order.deliveredAt || order.updatedAt;
+                                    const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+                                    const isWithinReturnWindow = (new Date() - new Date(deliveryDate)) <= sevenDaysInMs;
+                                %>
+                                    <% if (isWithinReturnWindow) { %>
+                                        <button onclick="returnFullOrder('<%= order._id %>')" class="btn btn-return">Return Whole Order</button>
+                                    <% } else { %>
+                                        <span class="text-muted small">Return window expired</span>
+                                    <% } %>
+                                <% } else if (['Placed', 'Processing' ].includes(order.status)) { %>
+                                    <button onclick="cancelOrder('<%= order._id %>')" class="btn btn-cancel">Cancel Order</button>
+                                <% } else if (order.status==='Failed' ) { %>
+                                    <button onclick="retryPayment('<%= order._id %>')" class="btn btn-track" style="background-color: #28a745 !important;">Retry Payment</button>
+                                <% } %>
                             </div>
                         </div>
 
@@ -392,11 +397,15 @@
                                                     if (order.items.length> 1) { %>
                                                     <button onclick="cancelItem('<%= order._id %>', '<%= item._id %>')"
                                                         class="btn btn-cancel">Cancel Item</button>
-                                                    <% } } else if (item.itemStatus==='Delivered' ) { %>
-                                                        <button
-                                                            onclick="returnItem('<%= order._id %>', '<%= item._id %>')"
-                                                            class="btn btn-return">Return Item</button>
-                                                        <% } %>
+                                                    <% } } else if (item.itemStatus==='Delivered' ) { 
+                                                    const deliveryDate = order.deliveredAt || order.updatedAt;
+                                                    const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+                                                    const isWithinReturnWindow = (new Date() - new Date(deliveryDate)) <= sevenDaysInMs;
+                                                %>
+                                                    <% if (isWithinReturnWindow) { %>
+                                                        <button onclick="returnItem('<%= order._id %>', '<%= item._id %>')" class="btn btn-return">Return Item</button>
+                                                    <% } %>
+                                                <% } %>
                                             </div>
                                         </td>
                                     </tr>
@@ -422,10 +431,10 @@
                                     <span>-₹ <%= order.offerDiscount.toLocaleString() %></span>
                                 </div>
                                 <% } %>
-                                    <% if (order.discountAmount> 0) { %>
+                                    <% if (order.totalCouponDiscount> 0) { %>
                                         <div class="summary-row" style="color: #d32f2f;">
                                             <span>Coupon Discount (<%= order.couponCode %>)</span>
-                                            <span>-₹ <%= order.discountAmount.toLocaleString() %></span>
+                                            <span>-₹ <%= order.totalCouponDiscount.toLocaleString() %></span>
                                         </div>
                                         <% } %>
                                             <div class="summary-row grand-total">
@@ -460,7 +469,7 @@
                     if (reason !== undefined) {
                         try {
                             const response = await fetch(`/orders/cancel/${orderId}`, {
-                                method: 'POST',
+                                method: 'PATCH',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ reason })
                             });
@@ -496,7 +505,7 @@
                     if (reason !== undefined) {
                         try {
                             const response = await fetch(`/orders/cancel-item/${orderId}/${itemId}`, {
-                                method: 'POST',
+                                method: 'PATCH',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ reason })
                             });
@@ -532,7 +541,7 @@
                     if (reason) {
                         try {
                             const response = await fetch(`/orders/return-item/${orderId}/${itemId}`, {
-                                method: 'POST',
+                                method: 'PATCH',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ reason })
                             });
@@ -568,7 +577,7 @@
                     if (reason) {
                         try {
                             const response = await fetch(`/orders/return/${orderId}`, {
-                                method: 'POST',
+                                method: 'PATCH',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ reason })
                             });

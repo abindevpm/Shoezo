@@ -270,7 +270,7 @@
                 if (result.isConfirmed) {
                     try {
                         const response = await fetch('/admin/orders/update-status', {
-                            method: 'POST',
+                            method: 'PATCH',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ orderId, status })
                         });

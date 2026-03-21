@@ -358,7 +358,7 @@
             Fill in the below details to add new address
           </p>
 
-          <form action="/updateAddress/<%= address._id %>" method="POST" style="max-width:520px; margin:0 auto;"
+          <form action="/updateAddress/<%= address._id %>?_method=PUT" method="POST" style="max-width:520px; margin:0 auto;"
             onsubmit="return validateAddAddressForm()">
 
 
@@ -503,9 +503,6 @@
       confirmButtonColor: "#000"
     });
   }
-
-
-
 
 
 </script>

@@ -2,6 +2,7 @@ const Order = require("../../models/orderSchema");
 const Product = require("../../models/productSchema");
 const User = require("../../models/userSchema");
 const StatusCodes = require("../../routes/utils/statusCodes");
+const { markOrderFailed } = require("../user/paymentController");
 
 const loadOrders = async (req, res) => {
     try {
@@ -9,7 +10,10 @@ const loadOrders = async (req, res) => {
         const limit = 10;
         const skip = (page - 1) * limit;
 
-        let query = {};
+        let query = { };
+
+        
+
 
         if (search) {
             if (search.startsWith('ORD-')) {
@@ -37,6 +41,7 @@ const loadOrders = async (req, res) => {
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
+        
 
         res.render("orderlist", {
             orders,
@@ -45,12 +50,17 @@ const loadOrders = async (req, res) => {
             search: search || '',
             statusFilter: status || 'All Status',
             paymentFilter: paymentStatus || 'All Payments'
+            
+            
         });
     } catch (error) {
         console.error(error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internal Server Error");
     }
 };
+
+
+
 
 const loadReturnRequests = async (req, res) => {
     try {
@@ -95,10 +105,19 @@ const getEditOrderAdmin = async (req, res) => {
 
 const updateOrderStatus = async (req, res) => {
     try {
-        const { orderId, status } = req.body;
+        const { orderId, status, paymentStatus: newPaymentStatus } = req.body;
         const order = await Order.findById(orderId);
 
         if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+
+        if (order.status === "Failed") {
+            return res.status(400).json({ success: false, message: "Failed orders cannot be modified." });
+        }
+
+        if (newPaymentStatus) {
+            order.paymentStatus = newPaymentStatus;
+        }
+
         if (order.paymentStatus === "Refunded" && (status === "Returned" || status === "Cancelled")) {
             return res.status(400).json({ success: false, message: "Order already refunded" });
         }
@@ -106,7 +125,7 @@ const updateOrderStatus = async (req, res) => {
         const oldStatus = order.status;
 
 
-        if (["Placed", "Processing", "Shipped", "Delivered", "Cancelled"].includes(status)) {
+        if (["Placed", "Processing", "Shipped", "Delivered", "Cancelled", "Failed"].includes(status)) {
             order.items.forEach(item => {
                 if (item.itemStatus !== "Cancelled" && item.itemStatus !== "Returned") {
                     item.itemStatus = status;
@@ -117,7 +136,8 @@ const updateOrderStatus = async (req, res) => {
         if (status === "Returned" || status === "Cancelled") {
 
             for (const item of order.items) {
-                if (!item.isRestocked && !["Cancelled", "Returned"].includes(item.itemStatus)) {
+                
+                if (oldStatus !== "Failed" && !item.isRestocked && !["Cancelled", "Returned"].includes(item.itemStatus)) {
                     await Product.updateOne(
                         { _id: item.productId, "variants.size": item.size },
                         { $inc: { "variants.$.stock": item.quantity } }
@@ -147,20 +167,6 @@ const updateOrderStatus = async (req, res) => {
                 await user.save({ validateBeforeSave: false });
             }
             order.totalAmount = 0;
-        } else if (status === "Returned" && oldStatus === "Return Requested") {
-
-            for (const item of order.items) {
-                if (item.itemStatus === "Return Requested" || item.itemStatus === "Delivered") {
-                    if (!item.isRestocked) {
-                        await Product.updateOne(
-                            { _id: item.productId, "variants.size": item.size },
-                            { $inc: { "variants.$.stock": item.quantity } }
-                        );
-                        item.isRestocked = true;
-                    }
-                    item.itemStatus = "Returned";
-                }
-            }
         } else if (status === "Return Rejected" && oldStatus === "Return Requested") {
             order.items.forEach(item => {
                 if (item.itemStatus === "Return Requested") {
@@ -170,7 +176,21 @@ const updateOrderStatus = async (req, res) => {
         }
 
         order.status = status;
-        if (status === "Delivered") order.paymentStatus = "Paid";
+        if (status === "Delivered") {
+            order.paymentStatus = "Paid";
+            order.deliveredAt = new Date();
+        }
+
+        
+        if (oldStatus === "Failed" && ["Placed", "Processing", "Shipped", "Delivered"].includes(status)) {
+            for (const item of order.items) {
+                await Product.updateOne(
+                    { _id: item.productId, "variants.size": item.size },
+                    { $inc: { "variants.$.stock": -item.quantity } }
+                );
+                item.isRestocked = false; 
+            }
+        }
 
         await order.save();
 
@@ -206,6 +226,10 @@ const approveItemReturn = async (req, res) => {
         const { orderId, itemId } = req.params;
         const order = await Order.findById(orderId).populate("items.productId");
         if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+
+        if (order.status === "Failed") {
+            return res.status(400).json({ success: false, message: "Failed orders cannot be modified." });
+        }
 
         const item = order.items.id(itemId);
         if (!item || item.itemStatus !== "Return Requested") {

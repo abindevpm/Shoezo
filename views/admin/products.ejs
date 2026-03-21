@@ -327,12 +327,23 @@
           const productId = toggle.dataset.id;
           try {
             const res = await fetch(`/admin/toggle-product/${productId}`, {
-              method: "PATCH"
+              method: "PATCH",
+              headers: {
+                'Accept': 'application/json'
+              }
             });
+
+            const contentType = res.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+              const text = await res.text();
+              console.error("Non-JSON response:", text);
+              throw new Error("Unexpected server response. Please try again or re-login.");
+            }
+
             const data = await res.json();
 
             if (!data.success) {
-              Swal.fire("Error", "Something went wrong", "error");
+              Swal.fire("Error", data.message || "Something went wrong", "error");
               toggle.checked = !toggle.checked;
               return;
             }
@@ -340,13 +351,14 @@
             Swal.fire({
               icon: "success",
               title: data.isListed ? "Product Listed" : "Product Unlisted",
-              text: data.isListed ? "Product is now visible" : "Product is now hidden",
+              text: data.message || (data.isListed ? "Product is now visible" : "Product is now hidden"),
               timer: 1500,
               showConfirmButton: false
             });
           } catch (err) {
             console.error(err);
-            Swal.fire("Error", "Network error occurred", "error");
+            Swal.fire("Error", err.message || "Network error occurred", "error");
+            toggle.checked = !toggle.checked;
           }
         });
       });
@@ -427,10 +439,18 @@
 
         try {
           const res = await fetch("/admin/remove-product-offer", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
+            method: "DELETE",
+            headers: { 
+              "Content-Type": "application/json",
+              "Accept": "application/json"
+            },
             body: JSON.stringify({ productId })
           });
+
+          const contentType = res.headers.get("content-type");
+          if (!contentType || !contentType.includes("application/json")) {
+            throw new Error("Unexpected server response format");
+          }
 
           const result = await res.json();
           if (result.success) {
@@ -462,9 +482,17 @@
           try {
             const res = await fetch("/admin/manage-product-offer", {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: { 
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+              },
               body: JSON.stringify(data)
             });
+
+            const contentType = res.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+              throw new Error("Unexpected server response format");
+            }
 
             const result = await res.json();
             if (result.success) {

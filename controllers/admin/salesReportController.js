@@ -6,7 +6,8 @@ const StatusCodes = require("../../routes/utils/statusCodes")
 
 
 const getMatchCondition = (reportType, fromDate, toDate) => {
-  let matchCondition = { status: "Delivered" };
+  
+  let matchCondition = { "items.itemStatus": "Delivered" };
   const now = new Date();
   let startDate;
   let endDate = new Date();
@@ -62,13 +63,44 @@ const getMatchCondition = (reportType, fromDate, toDate) => {
   return matchCondition;
 };
 
+const getDeliveredTotals = (order) => {
+  const deliveredItems = (order.items || []).filter(
+    item => item.itemStatus === "Delivered"
+  );
+  const totalItems = order.items ? order.items.length : 0;
+  const deliveredCount = deliveredItems.length;
+
+  
+  if (deliveredCount === totalItems && totalItems > 0) {
+    return {
+      salesAmount: order.totalAmount || 0,
+      couponDiscount: order.totalCouponDiscount || 0,
+      offerDiscount: order.totalOfferDiscount || 0,
+      deliveredCount
+    };
+  }
+
+  
+  const salesAmount = deliveredItems.reduce(
+    (sum, item) => sum + (item.finalPrice || (item.price * item.quantity) || 0), 0
+  );
+  const couponDiscount = deliveredItems.reduce(
+    (sum, item) => sum + (item.couponDiscount || 0), 0
+  );
+  const offerDiscount = deliveredItems.reduce(
+    (sum, item) => sum + (item.offerDiscount || 0), 0
+  );
+
+  return { salesAmount, couponDiscount, offerDiscount, deliveredCount };
+};
+
+
 const loadSalesReport = async (req, res) => {
   try {
 
     const page = parseInt(req.query.page) || 1;
     const limit = 5;
     const skip = (page - 1) * limit;
-
 
     const { reportType, fromDate, toDate } = req.query;
     const matchCondition = getMatchCondition(reportType, fromDate, toDate);
@@ -81,21 +113,20 @@ const loadSalesReport = async (req, res) => {
       .skip(skip)
       .limit(limit)
 
+
       
-    const allOrders = await Order.find(matchCondition);
+    const allOrders = await Order.find(matchCondition).lean();
 
+    let totalSalesAmount = 0;
+    let totalCouponDiscount = 0;
+    let totalOfferDiscount = 0;
 
-    const totalSalesAmount = allOrders.reduce(
-      (acc, order) => acc + (order.totalAmount || 0), 0
-    );
-
-    const totalCouponDiscount = allOrders.reduce(
-      (acc, order) => acc + (order.discountAmount || 0), 0
-    );
-
-    const totalOfferDiscount = allOrders.reduce(
-      (acc, order) => acc + (order.totalOfferDiscount || 0), 0
-    );
+    allOrders.forEach(order => {
+      const totals = getDeliveredTotals(order);
+      totalSalesAmount += totals.salesAmount;
+      totalCouponDiscount += totals.couponDiscount;
+      totalOfferDiscount += totals.offerDiscount;
+    });
 
     const totalPages = Math.ceil(totalOrders / limit);
 
@@ -137,17 +168,23 @@ const SalesReportPDF = async (req, res) => {
     doc.text(`Generated On: ${new Date().toLocaleString()}`, { align: "center" });
     doc.moveDown(2);
 
+    let totalSales = 0;
+    let totalCouponDisc = 0;
+    let totalOfferDisc = 0;
 
-    const totalSales = orders.reduce((acc, o) => acc + (o.totalAmount || 0), 0);
-    const totalCouponDiscount = orders.reduce((acc, o) => acc + (o.discountAmount || 0), 0);
-    const totalOfferDiscount = orders.reduce((acc, o) => acc + (o.totalOfferDiscount || 0), 0);
+    orders.forEach(order => {
+      const totals = getDeliveredTotals(order);
+      totalSales += totals.salesAmount;
+      totalCouponDisc += totals.couponDiscount;
+      totalOfferDisc += totals.offerDiscount;
+    });
 
     doc.fontSize(12).font("Helvetica-Bold").text("Summary Statistics:");
     doc.fontSize(10).font("Helvetica");
     doc.text(`Total Orders: ${orders.length}`);
     doc.text(`Total Sales: Rs. ${totalSales.toLocaleString()}`);
-    doc.text(`Total Offer Discount: Rs. ${totalOfferDiscount.toLocaleString()}`);
-    doc.text(`Total Coupon Deduction: Rs. ${totalCouponDiscount.toLocaleString()}`);
+    doc.text(`Total Offer Discount: Rs. ${totalOfferDisc.toLocaleString()}`);
+    doc.text(`Total Coupon Deduction: Rs. ${totalCouponDisc.toLocaleString()}`);
     doc.moveDown(2);
 
 
@@ -166,13 +203,14 @@ const SalesReportPDF = async (req, res) => {
     doc.font("Helvetica");
     orders.forEach(order => {
       if (doc.y > 750) doc.addPage();
+      const totals = getDeliveredTotals(order);
       const currentY = doc.y;
       doc.text(`#${order.orderId}`, 30, currentY);
       doc.text(new Date(order.createdAt).toLocaleDateString(), 165, currentY);
       doc.text(order.userId ? order.userId.name : "Guest", 245, currentY);
-      doc.text(`Rs. ${order.totalOfferDiscount || 0}`, 355, currentY);
-      doc.text(`Rs. ${order.discountAmount || 0}`, 425, currentY);
-      doc.text(`Rs. ${(order.totalAmount || 0).toLocaleString()}`, 480, currentY, { width: 80, align: "right" });
+      doc.text(`Rs. ${totals.offerDiscount}`, 355, currentY);
+      doc.text(`Rs. ${totals.couponDiscount}`, 425, currentY);
+      doc.text(`Rs. ${totals.salesAmount.toLocaleString()}`, 480, currentY, { width: 80, align: "right" });
       doc.moveDown();
     });
 
@@ -207,17 +245,18 @@ const downloadSalesReportExcel = async (req, res) => {
     let totalOfferDiscount = 0;
 
     orders.forEach(order => {
-      totalSales += order.totalAmount || 0;
-      totalCouponDiscount += order.discountAmount || 0;
-      totalOfferDiscount += order.totalOfferDiscount || 0;
+      const totals = getDeliveredTotals(order);
+      totalSales += totals.salesAmount;
+      totalCouponDiscount += totals.couponDiscount;
+      totalOfferDiscount += totals.offerDiscount;
 
       worksheet.addRow({
         orderId: order.orderId.toString(),
         user: order.userId?.name || "N/A",
         date: order.createdAt.toDateString(),
-        offerDiscount: order.totalOfferDiscount || 0,
-        discount: order.discountAmount || 0,
-        amount: order.totalAmount
+        offerDiscount: totals.offerDiscount,
+        discount: totals.couponDiscount,
+        amount: totals.salesAmount
       });
     });
 

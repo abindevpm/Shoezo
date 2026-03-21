@@ -63,11 +63,7 @@ const loadProducts = async (req, res) => {
       .limit(limit);
 
 
-  let totalStock = 0;
-      
-         
-
-
+let totalStock = 0;
 
     const categories = await Category.find({ isDeleted: false, isListed: true });
 
@@ -325,17 +321,24 @@ const toggleProduct = async (req, res) => {
 
     const product = await Product.findById(id);
     if (!product) {
-      return res.json({ success: false });
+      return res.json({ success: false, message: "Product not found" });
     }
 
     product.isListed = !product.isListed;
     await product.save();
 
-    res.json({ success: true, isListed: product.isListed });
+    res.json({ 
+      success: true, 
+      isListed: product.isListed, 
+      message: product.isListed ? "Product listed successfully" : "Product unlisted successfully" 
+    });
 
   } catch (err) {
-    console.log(err,"toggle Product Error Occured");
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false });
+    console.log(err, "toggle Product Error Occurred");
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
+      success: false, 
+      message: "Server error occurred while toggling product status" 
+    });
   }
 };
 

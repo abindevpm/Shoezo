@@ -322,7 +322,19 @@ width:110px;
                             </thead>
                             <tbody>
                                 <% if (orders && orders.length> 0) { %>
-                                    <% orders.forEach(order=> { %>
+                                    <% orders.forEach(order=> {
+                                        const deliveredItems = order.items.filter(i => i.itemStatus === 'Delivered');
+                                        const allDelivered = deliveredItems.length === order.items.length;
+                                        const rowAmount = allDelivered
+                                            ? (order.totalAmount || 0)
+                                            : deliveredItems.reduce((s, i) => s + (i.finalPrice || (i.price * i.quantity) || 0), 0);
+                                        const rowCoupon = allDelivered
+                                            ? (order.totalCouponDiscount || 0)
+                                            : deliveredItems.reduce((s, i) => s + (i.couponDiscount || 0), 0);
+                                        const rowOffer = allDelivered
+                                            ? (order.totalOfferDiscount || 0)
+                                            : deliveredItems.reduce((s, i) => s + (i.offerDiscount || 0), 0);
+                                    %>
                                         <tr>
                                             <td class="fw-bold text-muted small">#<%= order.orderId %>
                                             </td>
@@ -343,16 +355,14 @@ width:110px;
                                                     day: 'numeric' , month: 'short' , year: 'numeric' }) %>
                                             </td>
                                             <td>
-                                                <%= order.items.length %> items
+                                                <%= deliveredItems.length %>/<%= order.items.length %> items
                                             </td>
                                             <td><span class="badge-delivered">Delivered</span></td>
-                                            <td class="text-warning">₹<%= (order.totalOfferDiscount ||
-                                                    0).toLocaleString() %>
+                                            <td class="text-warning">₹<%= rowOffer.toLocaleString() %>
                                             </td>
-                                            <td class="text-danger">₹<%= (order.discountAmount || 0).toLocaleString() %>
+                                            <td class="text-danger">₹<%= rowCoupon.toLocaleString() %>
                                             </td>
-                                            <td class="text-end fw-bold">₹<%= (order.totalAmount || 0).toLocaleString()
-                                                    %>
+                                            <td class="text-end fw-bold">₹<%= rowAmount.toLocaleString() %>
                                             </td>
                                         </tr>
                                         <% }) %>

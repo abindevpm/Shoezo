@@ -12,9 +12,11 @@ const loadCheckout = async (req, res) => {
       path: "items.productId",
       populate: [
         { path: "productOffer" },
+        { path: "brand" },
         { path: "category", populate: { path: "categoryOffer" } }
       ]
     });
+
 
     if (!cart || cart.items.length === 0) {
       return res.redirect("/cart");
@@ -27,6 +29,21 @@ const loadCheckout = async (req, res) => {
 
     cart.items.forEach(item => {
       const product = item.productId;
+      const brand = product.brand;
+      const category = product.category;
+
+      if (
+        !product ||
+        !product.isListed ||
+        product.isDeleted ||
+        !category ||
+        !category.isListed ||
+        category.isDeleted ||
+        (brand && (!brand.isListed || brand.isDeleted))
+      ) {
+        item.notAvailable = true;
+      }
+
       const variant = product.variants.find(
         v => Number(v.size) === Number(item.size)
       );
@@ -55,12 +72,21 @@ const loadCheckout = async (req, res) => {
         ? variant.offerPrice
         : variant.price;
 
-
+      const saleBase = variant.salePrice || variant.offerPrice || variant.price;
       const quantity = Number(item.quantity);
+      
+      
+      item.price = currentPrice;
+      
       subtotal += currentPrice * quantity;
-      baseSubtotal += Number(variant.price) * quantity;
+      baseSubtotal += Number(saleBase) * quantity;
       totalItems += quantity;
     });
+
+    const hasUnavailable = cart.items.some(item => item.notAvailable);
+    if (hasUnavailable) {
+      return res.redirect("/cart");
+    }
 
 
     const discountAmount = req.session.discountAmount || 0;
@@ -86,6 +112,7 @@ const loadCheckout = async (req, res) => {
       deliveryCharge,
       totalPrice,
       addresses,
+      appliedCoupon: req.session.appliedCoupon || null,
       razorpayKey: process.env.RAZORPAY_KEY_ID
     });
 
@@ -108,6 +135,7 @@ const placeOrder = async (req, res) => {
       path: "items.productId",
       populate: [
         { path: "productOffer" },
+        { path: "brand" },
         { path: "category", populate: { path: "categoryOffer" } }
       ]
     });
@@ -125,6 +153,24 @@ const placeOrder = async (req, res) => {
 
     for (const item of cart.items) {
       const product = item.productId;
+      const brand = product.brand;
+      const category = product.category;
+
+      if (
+        !product ||
+        !product.isListed ||
+        product.isDeleted ||
+        !category ||
+        !category.isListed ||
+        category.isDeleted ||
+        (brand && (!brand.isListed || brand.isDeleted))
+      ) {
+        return res.json({
+          success: false,
+          message: `Product ${product ? product.name : 'Unknown'} is currently unavailable.`
+        });
+      }
+
       const variant = product.variants.find(
         v => Number(v.size) === Number(item.size)
       );
@@ -298,6 +344,8 @@ const placeOrder = async (req, res) => {
 
     await order.save();
 
+    await Cart.deleteOne({ userId });
+
     if (req.session.appliedCoupon) {
       const Coupon = require("../../models/couponSchema");
       await Coupon.updateOne(
@@ -312,10 +360,19 @@ const placeOrder = async (req, res) => {
       await user.save({ validateBeforeSave: false });
     }
 
-    await Cart.deleteOne({ userId });
+
 
     req.session.discountAmount = 0;
     req.session.appliedCoupon = null;
+
+  
+    // await Cart.deleteOne({ userId });
+
+
+ 
+
+
+
 
     return res.json({ success: true });
 

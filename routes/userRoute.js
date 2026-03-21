@@ -83,15 +83,15 @@ router.post("/reset-password", userController.resetPassword);
 //  user profile
 router.get("/profile", userAuth, profileController.loadProfile)
 router.get("/edit-profile", userAuth, profileController.loadEditProfile)
-router.post("/edit-profile", userAuth, profileController.editProfile)
+router.put("/edit-profile", userAuth, profileController.editProfile)
 router.post("/upload-profile-image", userAuth, uploadProfile.single("profileImage"), profileController.uploadProfileImage)
-router.post("/change-password", userAuth, profileController.changePassword)
+router.patch("/change-password", userAuth, profileController.changePassword)
 
 router.post("/send-email-otp", userAuth, profileController.sendEmailOtp);
 router.get("/verify-email-otp", profileController.loadVerifyEmailOtp);
 router.post("/verify-email-otp", userAuth, profileController.verifyEmailOtp);
 router.post("/resend-email-otp", userAuth, profileController.resendEmailOtp)
-router.get("/remove-profile-image", userAuth, profileController.removeProfileImage);
+router.delete("/remove-profile-image", userAuth, profileController.removeProfileImage);
 
 
 
@@ -99,10 +99,10 @@ router.get("/remove-profile-image", userAuth, profileController.removeProfileIma
 router.get("/address", userAuth, addressController.loadAddresses)
 router.get("/addAdress", userAuth, addressController.loadaddAdresses)
 router.post("/addAdress", userAuth, addressController.addAdress)
-router.get("/address/delete/:addressId", userAuth, addressController.deleteAddress)
+router.delete("/address/delete/:addressId", userAuth, addressController.deleteAddress)
 router.get("/editAddress/:id", userAuth, addressController.loadEditAddress)
-router.post("/updateAddress/:id", userAuth, addressController.updateAddress)
-router.get("/address/set-default/:id", userAuth, addressController.setDefaultAddress)
+router.put("/updateAddress/:id", userAuth, addressController.updateAddress)
+router.patch("/address/set-default/:id", userAuth, addressController.setDefaultAddress)
 
 
 //  cart management
@@ -110,10 +110,6 @@ router.get("/cart", userAuth, cartController.loadCart)
 router.post("/cart/:id", userAuth, cartController.addToCart);
 router.patch("/cart/update-qty", userAuth, cartController.updateCartQty)
 router.delete("/cart/remove-item", userAuth, cartController.removeCartItem);
-
-
-
-
 
 
 //   checkout management
@@ -131,10 +127,10 @@ router.get("/orders", userAuth, orderController.loadorders)
 router.get("/orders/:id", userAuth, orderController.getOrderDetails)
 router.get("/orders/track/:id", userAuth, orderController.loadTrackOrder)
 router.get("/orders/track/:id/:itemId", userAuth, orderController.loadTrackOrder)
-router.post("/orders/cancel/:orderId", userAuth, orderController.cancelOrder)
-router.post("/orders/cancel-item/:orderId/:itemId", userAuth, orderController.cancelOrderItem)
-router.post("/orders/return/:orderId", userAuth, orderController.returnOrder)
-router.post("/orders/return-item/:orderId/:itemId", userAuth, orderController.returnOrderItem)
+router.patch("/orders/cancel/:orderId", userAuth, orderController.cancelOrder)
+router.patch("/orders/cancel-item/:orderId/:itemId", userAuth, orderController.cancelOrderItem)
+router.patch("/orders/return/:orderId", userAuth, orderController.returnOrder)
+router.patch("/orders/return-item/:orderId/:itemId", userAuth, orderController.returnOrderItem)
 router.get("/orders/invoice/:orderId", userAuth, orderController.downloadInvoice)
 
 // order-failure
@@ -152,7 +148,7 @@ router.post("/orders/retry-payment/:orderId", userAuth, paymentController.retryP
 // Wishlist
 router.get("/wishlist", userAuth, WishlistController.getWishlist)
 router.post("/wishlist/add", userAuth, WishlistController.addToWishlist)
-router.post("/wishlist/remove", userAuth, WishlistController.removeFromWishlist)
+router.delete("/wishlist/remove", userAuth, WishlistController.removeFromWishlist)
 router.post("/wishlist/move-to-cart", userAuth, WishlistController.moveToCart);
 
 // referal page
@@ -165,7 +161,7 @@ router.get("/wallet", userAuth, WalletController.loadWallet)
 // coupon
 router.get("/available-coupons", userAuth, userController.getAvailableCoupons);
 router.post("/apply-coupon", userAuth, userController.applyCoupon);
-router.post("/remove-coupon", userAuth, userController.removeCoupon);
+router.delete("/remove-coupon", userAuth, userController.removeCoupon);
 
 
 

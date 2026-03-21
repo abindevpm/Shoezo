@@ -47,14 +47,26 @@ const getWishlist = async (req, res) => {
           appliedDiscount = Math.max(appliedDiscount, Number(productObj.category.categoryOffer.discountValue) || 0);
         }
 
-        productObj.displayPrice = appliedDiscount > 0
-          ? Math.floor(v.price * (1 - appliedDiscount / 100))
-          : v.price;
+        const basePrice = Number(v.salePrice || v.price);
+        const originalPrice = Number(v.price);
+
+        productObj.finalPrice = appliedDiscount > 0
+          ? Math.floor(basePrice * (1 - appliedDiscount / 100))
+          : basePrice;
+        
+        productObj.originalPrice = originalPrice;
+        productObj.appliedDiscount = appliedDiscount;
+        productObj.displayPrice = productObj.finalPrice; 
       } else {
+        productObj.finalPrice = 0;
+        productObj.originalPrice = 0;
+        productObj.appliedDiscount = 0;
         productObj.displayPrice = 0;
       }
       return productObj;
     });
+
+    
 
     res.render("wishlist", {
       wishlistItems: processedProducts
@@ -62,7 +74,7 @@ const getWishlist = async (req, res) => {
 
   } catch (error) {
     console.log("Wishlist Error", error)
-   return res.StatusCodes(StatusCodes.INTERNAL_SERVER_ERROR).res.redirect("/productlist");
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).redirect("/productlist");
   }
 }
 
@@ -144,7 +156,30 @@ const moveToCart = async (req, res) => {
     const userId = sessionUser._id || sessionUser;
     const { productId } = req.body;
 
-    const product = await Product.findById(productId);
+    const product = await Product.findById(productId)
+      .populate("brand")
+      .populate("category")
+
+      if(
+        !product ||
+        !product.isListed ||
+        product.isDeleted ||
+        !product.category ||
+        !product.category.isListed ||
+        product.category.isDeleted ||
+        (product.brand && (!product.brand.isListed || product.brand.isDeleted))
+      ){
+        return res.json({
+          success:false,
+          message:"Product is not Available"
+        })
+      }
+
+
+
+
+
+
     if (!product || product.variants.length === 0) {
       return res.json({ success: false, message: "Product not found" });
     }
@@ -185,7 +220,7 @@ const moveToCart = async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.log("Move to Cart Error:", error);
-   return res.status(StatusCodes.INTERNAL_SERVER_ERROR).res.json({ success: false });
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false });
   }
 };
 

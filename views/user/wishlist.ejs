@@ -45,18 +45,15 @@
               </div>
 
               <div class="product-action">
-                <span class="price">
-                  ₹ <%= (item.displayPrice || 0).toLocaleString() %>
-                </span>
+                <div class="price-container">
+                  <span class="price">
+                    ₹ <%= (item.finalPrice || 0).toLocaleString() %>
+                  </span>
+                </div>
 
                 <button class="add-to-cart-btn" onclick="moveToCart('<%= item._id %>')">
                   Add to Cart
                 </button>
-
-
-
-
-
               </div>
             </div>
             <% }) %>
@@ -163,13 +160,23 @@
 
   .product-action {
     display: flex;
-    align-items: center;
-    gap: 40px;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 15px;
+    min-width: 150px;
+  }
+
+  .price-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
   }
 
   .price {
     font-weight: bold;
-    font-size: 1rem;
+    font-size: 1.25rem;
+    color: var(--text-main);
   }
 
   .add-to-cart-btn,
@@ -232,7 +239,7 @@
       if (result.isConfirmed) {
         try {
           const response = await fetch("/wishlist/remove", {
-            method: "POST",
+            method: "DELETE",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
             body: JSON.stringify({ productId })
@@ -310,7 +317,7 @@
         }, 1000);
 
       } else {
-        Swal.fire("Error", "Could not move to cart", "error");
+        Swal.fire("Error", "Product is not Available", "error");
       }
 
     } catch (error) {
@@ -319,6 +326,7 @@
     }
   }
 
+  
 
 
 

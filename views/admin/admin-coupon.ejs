@@ -409,7 +409,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Discount Type</label>
-                                        <select name="discountType" class="form-select" required
+                                        <select id="addDiscountType" name="discountType" class="form-select" required
                                             style="border-radius: 10px;">
                                             <option value="percentage">Percentage (%)</option>
                                             <option value="fixed">Fixed Amount (₹)</option>
@@ -425,9 +425,9 @@
                                         <input type="number" name="minPurchase" class="form-control" value="0"
                                             style="border-radius: 10px;">
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-6" id="addMaxDiscountRow">
                                         <label class="form-label">Max Discount Amount (₹)</label>
-                                        <input type="number" name="maxDiscount" class="form-control"
+                                          <input type="number" id="addMaxDiscount" name="maxDiscount" class="form-control"
                                             placeholder="Optional" style="border-radius: 10px;">
                                     </div>
                                     <div class="col-md-6">
@@ -504,7 +504,7 @@
                                         <input type="number" id="editMinPurchase" name="minPurchase"
                                             class="form-control" style="border-radius: 10px;">
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-6" id="editMaxDiscountRow">
                                         <label class="form-label">Max Discount Amount (₹)</label>
                                         <input type="number" id="editMaxDiscount" name="maxDiscount"
                                             class="form-control" placeholder="Optional" style="border-radius: 10px;">
@@ -591,7 +591,7 @@
                     }
                 });
 
-                // Attach event listeners for edit buttons
+                
                 document.querySelectorAll('.edit-coupon-btn').forEach(btn => {
                     btn.addEventListener('click', function () {
                         try {
@@ -603,6 +603,9 @@
                             document.getElementById('editDiscountValue').value = coupon.discountValue;
                             document.getElementById('editMinPurchase').value = coupon.minPurchase;
                             document.getElementById('editMaxDiscount').value = coupon.maxDiscount || '';
+                            
+                            // Toggle max discount field visibility on edit
+                            toggleMaxDiscount('edit');
                             document.getElementById('editUsageLimit').value = coupon.usageLimit;
 
                             const startDate = new Date(coupon.startDate).toISOString().split('T')[0];
@@ -708,7 +711,7 @@ async function deleteCoupon(id) {
   if (result.isConfirmed) {
 
     const response = await fetch(`/admin/delete-coupon/${id}`, {
-      method: "POST"
+      method: "DELETE"
     });
 
     const data = await response.json();
@@ -728,6 +731,26 @@ async function deleteCoupon(id) {
 
 
 
+function toggleMaxDiscount(mode) {
+    const typeSelect = mode === 'add' ? document.getElementById("addDiscountType") : document.getElementById("editDiscountType");
+    const maxDiscountRow = mode === 'add' ? document.getElementById("addMaxDiscountRow") : document.getElementById("editMaxDiscountRow");
+    const maxDiscountInput = mode === 'add' ? document.getElementById("addMaxDiscount") : document.getElementById("editMaxDiscount");
+
+    if (typeSelect.value === "percentage") {
+        maxDiscountRow.style.display = "block";
+        maxDiscountInput.disabled = false;
+    } else {
+        maxDiscountRow.style.display = "none";
+        maxDiscountInput.disabled = true;
+        maxDiscountInput.value = "";
+    }
+}
+
+document.getElementById("addDiscountType").addEventListener("change", () => toggleMaxDiscount('add'));
+document.getElementById("editDiscountType").addEventListener("change", () => toggleMaxDiscount('edit'));
+
+
+toggleMaxDiscount('add');
 
 
 

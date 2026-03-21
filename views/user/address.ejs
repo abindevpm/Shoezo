@@ -340,8 +340,9 @@
 
                       <div class="card-actions">
                         <% if (!address.isDefault) { %>
-                          <a href="/address/set-default/<%= address._id %>" style="color: #000; font-weight: bold;">Set
-                            as Default</a>
+                          <form action="/address/set-default/<%= address._id %>?_method=PATCH" method="POST" style="display:inline;">
+                            <button type="submit" style="background:none; border:none; color:#000; font-weight:bold; font-size:12px; cursor:pointer; padding:0;">Set as Default</button>
+                          </form>
                           <% } %>
                             <a href="/editAddress/<%= address._id %>">Edit</a>
                             <a href="javascript:void(0)" onclick="confirmDelete('<%= address._id %>')">
@@ -377,8 +378,30 @@
       cancelButtonText: "Cancel"
     }).then((result) => {
       if (result.isConfirmed) {
-        window.location.href = `/address/delete/${addressId}`;
+        fetch(`/address/delete/${addressId}`, { method: 'DELETE' })
+        .then(res=>res.json())
+        .then(data=>{
+
+          if(data.success){
+
+            Swal.fire({
+              icon:"success",
+              title:"Address Deleted"
+            })
+            .then(()=>{
+              window.location.reload();
+
+            })
+          
+          }else{
+            Swal.fire('Error',data.message ||  "Failed to delete Address",'error')
+          }
+        })
+        
+
+          
       }
     });
+  
   }
 </script>

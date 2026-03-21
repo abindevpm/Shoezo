@@ -155,6 +155,9 @@ const orderSchema = new mongoose.Schema({
     ],
     default: "Placed"
   },
+  deliveredAt: {
+  type: Date
+},
 
   cancelReason: String,
   returnReason: String,

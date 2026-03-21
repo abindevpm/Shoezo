@@ -207,11 +207,11 @@
   </div>
 
   <script>
-   // Block and Ublock
+   
    
    document.addEventListener("DOMContentLoaded",()=>{
 
-    //  Blocking user confirmation
+    
     document.querySelectorAll(".block-btn").forEach(btn=>{
       btn.addEventListener("click",function(){
         const url = this.dataset.link;
@@ -228,7 +228,9 @@
         })
         .then((result)=>{
           if(result.isConfirmed){
-            window.location.href = url;
+            fetch(url, { method: 'PATCH' })
+              .then(() => window.location.reload())
+              .catch(err => console.error(err));
           }
         })
 
@@ -236,7 +238,7 @@
     })
    })
 
-    //  Unblock User Confirmation
+    
 
     document.querySelectorAll(".unblock-btn").forEach(btn=>{
       btn.addEventListener("click",function(){
@@ -251,7 +253,9 @@
            })
           .then((result)=>{
             if(result.isConfirmed){
-              window.location.href = url
+              fetch(url, { method: 'PATCH' })
+                .then(() => window.location.reload())
+                .catch(err => console.error(err));
             }
           })
 

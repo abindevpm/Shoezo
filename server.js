@@ -6,11 +6,13 @@ require("dotenv").config();
 const userRoute = require("./routes/userRoute")
 const adminRoute = require("./routes/adminRoute");
 const session = require("express-session")
+const MongoStore = require("connect-mongo").default
 const passport = require("./config/passport")
 const { userAuth, adminAuth } = require("./middlewares/auth");
 const cartCountMiddleware = require("./middlewares/cartCount");
 const errorHandler = require("./middlewares/errorHandler")
 const User = require("./models/userSchema");
+const methodOverride = require('method-override');
 
 
 const AppError = require('./routes/utils/AppError');
@@ -38,20 +40,27 @@ app.use("/uploads", express.static("public/uploads"));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride('_method'));
+
+
 
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: true,
+
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URI
+  }),
+
   cookie: {
     secure: false,
     httpOnly: true,
     maxAge: 72 * 60 * 60 * 1000
-
   }
 
-
 }))
+
 
 
 
@@ -67,7 +76,7 @@ app.use(async (req, res, next) => {
       const userId = typeof req.session.user === 'object' ? req.session.user._id : req.session.user;
       user = await User.findById(userId);
     }
-
+ 
     if (user && user.isBlocked) {
       req.session.user = null;
       req.logout && req.logout(() => {}); 
@@ -87,9 +96,7 @@ app.use(async (req, res, next) => {
 
 app.use(cartCountMiddleware);
 
-// err-handling middleware
 
-// app.use(errorHandler)
 
 
 // Routes

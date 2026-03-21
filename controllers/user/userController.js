@@ -103,7 +103,7 @@ const landingpage = async (req, res) => {
     res.render("landingpage");
   } catch (error) {
     console.log("Landing page error", error);
-    res.status(StatusCodes).send("Server side error");
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Server side error");
   }
 };
 
@@ -642,6 +642,8 @@ const loadlogin = async (req, res) => {
   try {
     let message = "";
 
+     console.log(req.session)
+
     if (req.query.isBlocked === "true") {
       message = "Your account has been blocked by admin"
     }
@@ -784,7 +786,7 @@ const productlist = async (req, res) => {
 
   } catch (error) {
     console.log("Product List page error", error)
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).res.redirect("/pageNotFound")
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).redirect("/pageNotFound")
 
   }
 }
@@ -992,13 +994,20 @@ const applyCoupon = async (req, res) => {
       });
     }
 
+    
     let discount = 0;
 
-    if (coupon.discountType === "percentage") {
-      discount = Math.round((subtotal * coupon.discountValue) / 100);
-    } else {
-      discount = coupon.discountValue;
+    if(coupon.discountType === "percentage"){
+      discount = Math.round((subtotal * coupon.discountValue)/100);
+
+       if(coupon.maxDiscount && discount > coupon.maxDiscount){
+        discount = coupon.maxDiscount
+       }
+    }else{
+        discount = coupon.discountValue
     }
+
+
 
     const finalTotal = subtotal - discount;
 

@@ -4,6 +4,8 @@ const loadAddresses = async (req, res) => {
   try {
     const user = req.user;
 
+  
+
     res.render("address", {
       user,
       addresses: user.addresses || [],
@@ -78,7 +80,6 @@ const addAdress = async (req, res) => {
 
 }
 
-
 const deleteAddress = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -90,10 +91,18 @@ const deleteAddress = async (req, res) => {
       }
     });
 
-    res.redirect("/address");
+    res.json({
+      success: true,
+      message: "Address deleted successfully"
+    });
+
   } catch (error) {
     console.log("Delete address error:", error);
-    res.redirect("/address");
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete address"
+    });
   }
 };
 

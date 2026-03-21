@@ -94,7 +94,7 @@
                       </p>
                     </div>
 
-                    <button class="btn-black-sm" id="changeAddressBtn">
+                    <button type="button" class="btn-black-sm" id="changeAddressBtn">
                       Select Address
                     </button>
                   </div>
@@ -140,13 +140,13 @@
                           </label>
                           <% }) %>
 
-                            <button class="btn-black" id="confirmAddressBtn">
+                            <button type="button" class="btn-black" id="confirmAddressBtn">
                               Deliver Here
                             </button>
 
                             <hr>
 
-                            <button class="btn-black-sm" id="showAddAddressFormBtn" style="background:#444;">
+                            <button type="button" class="btn-black-sm" id="showAddAddressFormBtn" style="background:#444;">
                               + Add New Address
                             </button>
 
@@ -187,7 +187,7 @@
                                 <label for="newIsDefault" style="margin:0; font-size:13px; color:#444;">Set as default
                                   address</label>
                               </div>
-                              <button class="btn-black-sm" id="saveNewAddressBtn" style="margin-top:15px;">Save &
+                              <button type="button" class="btn-black-sm" id="saveNewAddressBtn" style="margin-top:15px;">Save &
                                 Deliver Here</button>
                             </div>
                       </div>
@@ -301,7 +301,7 @@
               </div>
               <% } %>
 
-                <div class="summary-line discount" id="couponDiscountRow" style="display:none;">
+                <div class="summary-line discount" id="couponDiscountRow" style="display: <%= discountAmount > 0 ? 'flex' : 'none' %>;">
                   <span>
                     Coupon Discount
                     <button onclick="removeCoupon()" id="removeCouponBtn" style="
@@ -309,7 +309,7 @@
                   cursor:pointer; text-decoration:underline; padding:0; margin-left:6px;
                 ">Remove</button>
                   </span>
-                  <span style="color:#d32f2f;">-₹<span id="couponDiscountAmount">0</span></span>
+                  <span style="color:#d32f2f;">-₹<span id="couponDiscountAmount"><%= discountAmount %></span></span>
                 </div>
 
                 <hr>
@@ -324,7 +324,7 @@
           </div>
 
           <div class="coupon-row">
-            <input type="text" id="couponCode" placeholder="Enter coupon code">
+            <input type="text" id="couponCode" placeholder="Enter coupon code" value="<%= typeof appliedCoupon !== 'undefined' && appliedCoupon ? appliedCoupon : '' %>">
             <button type="button" onclick="applyCoupon()">Apply</button>
           </div>
 
@@ -886,7 +886,8 @@
       isDefault: document.getElementById("newIsDefault").checked
     };
 
-    if (Object.values(data).some(val => !val.trim())) {
+    const requiredFields = ['fullName', 'phone', 'addressLine', 'city', 'state', 'pincode'];
+    if (requiredFields.some(field => typeof data[field] === 'string' && !data[field].trim())) {
       return Swal.fire("Required", "Please fill all fields", "warning");
     }
 
@@ -957,7 +958,11 @@
   }
 
 
+  let isRzpProcessing = false;
   document.getElementById("rzp-button").addEventListener("click", async function (e) {
+    if (isRzpProcessing) return;
+    isRzpProcessing = true;
+    this.disabled = true;
     const addressId = document.getElementById("addressIdInput") ? document.getElementById("addressIdInput").value : "";
 
     if (!addressId) {
@@ -1050,6 +1055,8 @@
       rzp.open();
 
     } catch (error) {
+      isRzpProcessing = false;
+      document.getElementById("rzp-button").disabled = false;
       console.error("Payment Error:", error);
       Swal.fire("Error", "Something went wrong", "error");
     }
@@ -1084,13 +1091,23 @@
   toggleButtons();
 
 
+  let isOrderSubmitting = false;
+
   async function submitOrder() {
+    if (isOrderSubmitting) return;
+    isOrderSubmitting = true;
+
     const addressId = document.getElementById("addressIdInput")?.value;
     const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
 
     if (!addressId) {
+      isOrderSubmitting = false;
       return Swal.fire("Warning", "Please select a delivery address", "warning");
     }
+
+    // Disable the place order button
+    if (placeOrderBtn) placeOrderBtn.disabled = true;
+    if (walletPayBtn) walletPayBtn.disabled = true;
 
     try {
       const response = await fetch("/place-order", {
@@ -1103,9 +1120,15 @@
       if (result.success) {
         window.location.href = "/order-success";
       } else {
+        isOrderSubmitting = false;
+        if (placeOrderBtn) placeOrderBtn.disabled = false;
+        if (walletPayBtn) walletPayBtn.disabled = false;
         Swal.fire("Error", result.message || "Something went wrong", "error");
       }
     } catch (error) {
+      isOrderSubmitting = false;
+      if (placeOrderBtn) placeOrderBtn.disabled = false;
+      if (walletPayBtn) walletPayBtn.disabled = false;
       console.error("Order error:", error);
       Swal.fire("Error", "Internal Server Error", "error");
     }
@@ -1192,7 +1215,7 @@
 
   async function removeCoupon() {
     try {
-      const res = await fetch("/remove-coupon", { method: "POST" });
+      const res = await fetch("/remove-coupon", { method: "DELETE" });
       const data = await res.json();
 
       if (data.success) {

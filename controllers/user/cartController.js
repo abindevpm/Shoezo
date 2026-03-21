@@ -15,9 +15,36 @@ const loadCart = async (req, res) => {
         path: "items.productId",
         populate: [
           { path: "productOffer" },
+          { path: "brand" },
           { path: "category", populate: { path: "categoryOffer" } }
         ]
       });
+
+  if(cart){
+
+      cart.items.forEach(item => {
+
+        const product = item.productId;
+
+        if(
+          !product ||
+          !product.isListed ||
+          !product.category?.isListed ||
+          !product.brand?.isListed
+        ){
+          item.notAvailable = true;
+        }else{
+          item.notAvailable = false;
+        }
+
+      });
+
+    }
+
+
+
+
+
 
     if (!cart || cart.items.length === 0) {
       return res.render("cart", {
@@ -67,7 +94,8 @@ const loadCart = async (req, res) => {
         size: item.size,
         quantity: item.quantity,
         price: currentPrice,
-        total: item.quantity * currentPrice
+        total: item.quantity * currentPrice,
+        notAvailable: item.notAvailable
       };
     }).filter(Boolean);
 
@@ -115,9 +143,6 @@ const addToCart = async (req, res) => {
     const parsedVariant = JSON.parse(variant);
     const size = String(parsedVariant.size);
     console.log("ADDING SIZE:", typeof size, size);
-
-
-
 
     const product = await Product.findById(productId)
        .populate("category")
@@ -218,13 +243,30 @@ const updateCartQty = async (req, res) => {
     const userId = req.user._id;
     const { itemId, action } = req.body;
 
-    const cart = await Cart.findOne({ userId });
+    const cart = await Cart.findOne({ userId }).populate({
+      path: "items.productId",
+      populate: [
+        { path: "brand" },
+        { path: "category" }
+      ]
+    });
     if (!cart) return res.json({ success: false });
-
-
 
     const item = cart.items.id(itemId);
     if (!item) return res.json({ success: false });
+
+    // Check availability
+    const product = item.productId;
+    const isAvailable = product && product.isListed && 
+                       product.category?.isListed && 
+                       product.brand?.isListed;
+    
+    if (!isAvailable) {
+      return res.json({ 
+        success: false, 
+        message: "This product is no longer available" 
+      });
+    }
 
     if (action === "inc") {
 
@@ -265,6 +307,8 @@ const updateCartQty = async (req, res) => {
         { path: "category", populate: { path: "categoryOffer" } }
       ]
     });
+
+
 
     const today = new Date();
     let baseSubtotal = 0;
@@ -327,7 +371,7 @@ const updateCartQty = async (req, res) => {
 
   } catch (err) {
     console.log(err, "UpdateCartQty has error");
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).res.json({ success: false });
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false });
   }
 
 }

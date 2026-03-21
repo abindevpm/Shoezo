@@ -239,6 +239,12 @@ const returnOrder = async (req, res) => {
       return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Only delivered orders can be returned" })
     }
 
+    const deliveryDate = order.deliveredAt || order.updatedAt;
+    const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+    if (new Date() - new Date(deliveryDate) > sevenDaysInMs) {
+      return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Return window has expired (7 days from delivery)" })
+    }
+
     order.status = "Return Requested"
     order.returnReason = reason
 
@@ -279,7 +285,13 @@ const returnOrderItem = async (req, res) => {
 
     const item = order.items[itemIndex]
     if (item.itemStatus !== "Delivered") {
-      return res.status(StatusCodes.NOT_FOUND).json({ success: false, message: "Only delivered items can be returned" })
+      return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Only delivered items can be returned" })
+    }
+
+    const deliveryDate = order.deliveredAt || order.updatedAt;
+    const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+    if (new Date() - new Date(deliveryDate) > sevenDaysInMs) {
+      return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Return window has expired (7 days from delivery)" })
     }
 
     item.itemStatus = "Return Requested"
@@ -313,7 +325,8 @@ const downloadInvoice = async (req, res) => {
     doc.pipe(res)
 
 
-    doc.fontSize(25).text("SHOEZO INVOICE", { align: "center" }).moveDown()
+    const title = order.status === "Failed" ? "SHOEZO INVOICE (FAILED)" : "SHOEZO INVOICE";
+    doc.fontSize(25).text(title, { align: "center" }).moveDown()
     doc.fontSize(12).text(`Order ID: ${order.orderId}`)
     doc.text(`Order Date: ${new Date(order.createdAt).toLocaleDateString()}`)
     doc.text(`Payment Method: ${order.paymentMethod}`).moveDown()
@@ -356,9 +369,14 @@ const downloadInvoice = async (req, res) => {
       doc.text(`Offers Discount: -₹${order.offerDiscount.toFixed(2)}`, 400, y)
     }
 
-    if (order.discountAmount > 0) {
+    if (order.totalCouponDiscount > 0) {
       y += 15
-      doc.text(`Coupon Discount: -₹${order.discountAmount.toFixed(2)}`, 400, y)
+      doc.text(`Coupon Discount: -₹${order.totalCouponDiscount.toFixed(2)}`, 400, y)
+    }
+
+    if (order.status === "Failed") {
+      y += 20;
+      doc.fillColor("red").fontSize(16).text("PAYMENT STATUS: FAILED", 350, y).fillColor("black");
     }
 
     y += 20

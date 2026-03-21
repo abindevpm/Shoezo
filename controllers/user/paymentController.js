@@ -266,10 +266,13 @@ const verifyPayment = async (req, res) => {
       );
     }
 
-    await Cart.deleteOne({ userId });
+
 
     req.session.discountAmount = 0;
     req.session.appliedCoupon = null;
+
+  
+    await Cart.deleteOne({ userId });
 
     return res.json({ success: true });
 

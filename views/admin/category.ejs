@@ -445,7 +445,7 @@
 
           try {
             const res = await fetch("/admin/remove-category-offer", {
-              method: "POST",
+              method: "DELETE",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ categoryId })
             });
@@ -535,7 +535,7 @@
           const id = editForm.dataset.id;
 
           const res = await fetch(`/admin/edit-category/${id}`, {
-            method: "POST",
+            method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               name: editForm.name.value,

@@ -384,12 +384,12 @@
                                                         </div>
                                         </div>
                                         <% }) %>
-                                                            <% if (order.status==='Failed' ) { %>
+                                                            <!-- <% if (order.status==='Failed' ) { %>
                                                                 <button onclick="retryPayment('<%= order._id %>')"
                                                                     class="btn btn-track"
                                                                     style="background-color: #28a745 !important;">Retry
                                                                     Payment</button>
-                                                                <% } %>
+                                                                <% } %> -->
                                             <div
                                                 style="display: flex; justify-content: flex-end; padding-top: 15px; border-top: 1px solid #f5f5f5; margin-top: 10px; gap: 10px; align-items: center;">
                                                 <a href="/orders/invoice/<%= order._id %>" class="btn btn-invoice"><i
@@ -455,7 +455,7 @@
                     if (reason !== undefined) {
                         try {
                             const response = await fetch(`/orders/cancel/${orderId}`, {
-                                method: 'POST',
+                                method: 'PATCH',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ reason })
                             });
@@ -524,7 +524,7 @@
                     if (reason !== undefined) {
                         try {
                             const response = await fetch(`/orders/cancel-item/${orderId}/${itemId}`, {
-                                method: 'POST',
+                                method: 'PATCH',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ reason })
                             });
@@ -560,7 +560,7 @@
                     if (reason) {
                         try {
                             const response = await fetch(`/orders/return/${orderId}`, {
-                                method: 'POST',
+                                method: 'PATCH',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ reason })
                             });
@@ -596,7 +596,7 @@
                     if (reason) {
                         try {
                             const response = await fetch(`/orders/return-item/${orderId}/${itemId}`, {
-                                method: 'POST',
+                                method: 'PATCH',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ reason })
                             });

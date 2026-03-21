@@ -250,7 +250,7 @@
             <div class="form-inputs">
 
               <!-- PROFILE UPDATE FORM -->
-              <form action="/user/edit-profile" method="POST" onsubmit="validateForm('profile')">
+              <form action="/user/edit-profile?_method=PUT" method="POST" onsubmit="validateForm('profile')">
 
                 <div class="input-group">
                   <label>Full name</label>
@@ -326,7 +326,7 @@
 
           </div>
 
-          <form action="/user/change-password" method="POST" onsubmit="return validatePasswordForm()">
+          <form action="/user/change-password?_method=PATCH" method="POST" onsubmit="return validatePasswordForm()">
 
             <div class="input-group">
               <label>Current Password</label>

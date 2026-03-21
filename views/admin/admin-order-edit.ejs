@@ -241,6 +241,17 @@
                         </nav>
                         <h2 class="fw-bold m-0" style="font-family: 'Outfit', sans-serif;">Edit Order <span
                                 class="text-muted">#<%= order.orderId %></span></h2>
+                        <% if (order.status === 'Failed') { %>
+                            <div class="alert alert-danger mt-3 mb-0 rounded-4 border-0 shadow-sm d-flex align-items-center gap-3">
+                                <div class="bg-danger bg-opacity-10 p-2 rounded-circle">
+                                    <i class="fas fa-exclamation-triangle text-danger"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-danger">Access Restricted</div>
+                                    <div class="small">Failed orders cannot be modified. The customer must retry payment first.</div>
+                                </div>
+                            </div>
+                        <% } %>
                     </div>
                 </div>
 
@@ -272,6 +283,8 @@
                                                 >Return Requested</option>
                                             <option value="Returned" <%=order.status==='Returned' ? 'selected' : '' %>
                                                 >Returned</option>
+                                            <option value="Failed" <%=order.status==='Failed' ? 'selected' : '' %>
+                                                >Failed</option>
                                         </select>
                                         <div class="form-text mt-2" style="font-size: 0.8rem;">Controls overall status
                                             visibility for the customer.</div>
@@ -290,19 +303,20 @@
                                             <div class="col-md-6">
                                                 <label class="form-label">Payment Status</label>
                                                 <select id="paymentStatus" class="form-select form-select-custom w-100">
-                                                    <option value="Pending" <%=order.paymentStatus==='Pending'
-                                                        ? 'selected' : '' %>>UNPAID / PENDING</option>
-                                                    <option value="Paid" <%=order.paymentStatus==='Paid' ? 'selected'
-                                                        : '' %>
-                                                        >PAID</option>
-                                                    <option value="Refunded" <%=order.paymentStatus==='Refunded'
-                                                        ? 'selected' : '' %>>REFUNDED</option>
+                                                    <option value="Pending" <%=order.paymentStatus==='Pending' ? 'selected' : '' %>
+                                                >Pending</option>
+                                            <option value="Paid" <%=order.paymentStatus==='Paid' ? 'selected' : '' %>
+                                                >Paid</option>
+                                            <option value="Failed" <%=order.paymentStatus==='Failed' ? 'selected' : '' %>
+                                                >Failed</option>
+                                            <option value="Refunded" <%=order.paymentStatus==='Refunded' ? 'selected' : '' %>
+                                                >Refunded</option>
                                                 </select>
                                             </div>
                                 </div>
 
                                 <div class="mt-5 pt-3 border-top d-flex gap-3">
-                                    <button type="button" class="btn-modern btn-primary-modern" onclick="saveChanges()">
+                                    <button type="button" class="btn-modern btn-primary-modern" onclick="saveChanges()" <%= order.status === 'Failed' ? 'disabled' : '' %>>
                                         <i class="fas fa-check-circle"></i> Save All Changes
                                     </button>
                                     <a href="/admin/orders/details/<%= order._id %>"
@@ -366,7 +380,7 @@
                                                                         <% } %>
                                                     </td>
                                                     <td class="text-end py-3">
-                                                        <% if (!['Cancelled', 'Shipped' , 'Delivered' , 'Returned'
+                                                        <% if (order.status !== 'Failed' && !['Cancelled', 'Shipped' , 'Delivered' , 'Returned'
                                                             , 'Return Requested' , 'Return Rejected'
                                                             ].includes(item.itemStatus)) { %>
                                                             <div
@@ -397,7 +411,7 @@
                                                             </div>
                                                             <% } %>
 
-                                                                <% if (item.itemStatus==='Return Requested' ) { %>
+                                                                <% if (order.status !== 'Failed' && item.itemStatus==='Return Requested' ) { %>
                                                                     <div class="d-flex gap-1 justify-content-end">
                                                                         <button
                                                                             onclick="approveItemReturn('<%= order._id %>', '<%= item._id %>')"
@@ -410,7 +424,7 @@
                                                                     </div>
                                                                     <% } %>
 
-                                                                        <% if (['Cancelled', 'Returned'
+                                                                        <% if (order.status !== 'Failed' && ['Cancelled', 'Returned'
                                                                             ].includes(item.itemStatus) &&
                                                                             !item.isRestocked) { %>
                                                                             <div class="d-flex justify-content-end">
@@ -516,7 +530,7 @@
 
                 if (result.isConfirmed) {
                     try {
-                        const response = await fetch(`/admin/orders/approve-item-return/${orderId}/${itemId}`, { method: 'POST' });
+                        const response = await fetch(`/admin/orders/approve-item-return/${orderId}/${itemId}`, { method: 'PATCH' });
                         const data = await response.json();
                         if (data.success) {
                             Swal.fire({ icon: 'success', title: 'Approved!', text: data.message, timer: 1500, showConfirmButton: false }).then(() => location.reload());
@@ -542,7 +556,7 @@
 
                 if (result.isConfirmed) {
                     try {
-                        const response = await fetch(`/admin/orders/reject-item-return/${orderId}/${itemId}`, { method: 'POST' });
+                        const response = await fetch(`/admin/orders/reject-item-return/${orderId}/${itemId}`, { method: 'PATCH' });
                         const data = await response.json();
                         if (data.success) {
                             Swal.fire({ icon: 'info', title: 'Rejected', text: data.message, timer: 1500, showConfirmButton: false }).then(() => location.reload());
@@ -569,7 +583,7 @@
                 if (reason) {
                     try {
                         const response = await fetch(`/admin/orders/cancel-item/${orderId}/${itemId}`, {
-                            method: 'POST',
+                            method: 'PATCH',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ reason })
                         });
@@ -588,7 +602,7 @@
             async function updateItemStatus(orderId, itemId, status) {
                 try {
                     const response = await fetch('/admin/orders/update-item-status', {
-                        method: 'POST',
+                        method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ orderId, itemId, status })
                     });
@@ -616,7 +630,7 @@
 
                 if (result.isConfirmed) {
                     try {
-                        const response = await fetch(`/admin/orders/restock-item/${orderId}/${itemId}`, { method: 'POST' });
+                        const response = await fetch(`/admin/orders/restock-item/${orderId}/${itemId}`, { method: 'PATCH' });
                         const data = await response.json();
                         if (data.success) {
                             Swal.fire({ icon: 'success', title: 'Restocked!', text: data.message, timer: 1500, showConfirmButton: false }).then(() => location.reload());
@@ -641,33 +655,30 @@
                 });
 
                 try {
-                    const resStatus = await fetch('/admin/orders/update-status', {
-                        method: 'POST',
+                    const response = await fetch('/admin/orders/update-status', {
+                        method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ orderId, status: orderStatus })
+                        body: JSON.stringify({ 
+                            orderId, 
+                            status: orderStatus,
+                            paymentStatus: paymentStatus
+                        })
                     });
 
-                    const resPayment = await fetch('/admin/orders/update-payment', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ orderId, paymentStatus })
-                    });
+                    const data = await response.json();
 
-                    const data1 = await resStatus.json();
-                    const data2 = await resPayment.json();
-
-                    if (data1.success && data2.success) {
+                    if (data.success) {
                         Swal.fire({
                             icon: 'success',
-                            title: 'Perfect!',
-                            text: 'Order status and payment updated',
+                            title: 'Updated!',
+                            text: data.message,
                             showConfirmButton: false,
                             timer: 1500
                         }).then(() => {
                             window.location.href = '/admin/orders/details/' + orderId;
                         });
                     } else {
-                        Swal.fire('Partial Update', 'Some changes might not have been applied.', 'warning');
+                        Swal.fire('Update Failed', data.message || 'Details could not be updated.', 'error');
                     }
                 } catch (error) {
                     Swal.fire('Connection Error', 'Failed to communicate with the server.', 'error');
