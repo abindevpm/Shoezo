@@ -16,7 +16,7 @@
     <div class="wishlist-container">
       <div class="wishlist-header">
         <span class="heart-icon">❤️</span>
-        <h1>My Wishlist (<span id="wishlist-count">
+        <h1>My Wishlist (<span id="wishlist-page-count">
             <%= wishlistItems.length %>
           </span>)</h1>
       </div>
@@ -258,10 +258,14 @@
 
             if (currentCard) {
               currentCard.remove();
-              const countElement = document.getElementById("wishlist-count");
+              const countElement = document.getElementById("wishlist-page-count");
               let count = parseInt(countElement.innerText);
               count = Math.max(0, count - 1);
               countElement.innerText = count;
+
+              if (typeof loadWishlistCount === 'function') {
+                loadWishlistCount();
+              }
 
 
               if (count === 0) {
@@ -326,7 +330,8 @@
     }
   }
 
-  
+
+
 
 
 

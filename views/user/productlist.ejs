@@ -417,6 +417,10 @@
                   window.location.href = "/wishlist";
                 }
               });
+
+              if (typeof loadWishlistCount === 'function') {
+                loadWishlistCount();
+              }
             } else {
               Swal.fire("Error", data.message || "Failed to add to wishlist", "error");
             }

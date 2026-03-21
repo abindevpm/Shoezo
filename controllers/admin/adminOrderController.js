@@ -17,7 +17,7 @@ const loadOrders = async (req, res) => {
 
         if (search) {
             if (search.startsWith('ORD-')) {
-                query.orderId = { $regex: search, $options: 'i' };
+                query.orderId = { $regex: search, $options: 'i' };  
             } else if (!isNaN(search)) {
                 query.totalAmount = Number(search);
             } else {

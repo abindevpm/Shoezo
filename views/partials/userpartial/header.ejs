@@ -27,13 +27,14 @@
       <div class="nav-right">
         <!-- ACTION ICONS -->
 
+    <a href="/wishlist" class="nav-icon">
+  <i class="fa-solid fa-heart"></i>
+  <span id="wishlist-count" class="nav-badge">0</span>
+</a>
+
+           
 
 
-
-        <div class="action-icons">
-          <a href="/wishlist" class="icon-link" title="Wishlist">
-            <i class="fa-regular fa-heart"></i>
-          </a>
 
           <a href="/cart" class="icon-link" title="Cart">
             <i class="fa fa-shopping-cart"></i>
@@ -271,4 +272,89 @@
     justify-content: center;
     border: 2px solid #fff;
   }
+
+
+  .nav-icon {
+  position: relative;
+  display: inline-block;
+  font-size: 22px;
+  color: #555;
+}
+
+/* icon */
+.nav-icon i {
+  font-size: 22px;
+}
+
+/* 🔴 perfect badge */
+.nav-badge {
+  position: absolute;
+  top: -5px;
+  right: -6px;
+  background: #e74c3c;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 50%;
+  padding: 2px 5px;
+  min-width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
 </style>
+
+
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    loadWishlistCount();
+  });
+
+  async function loadWishlistCount() {
+    try {
+      const res = await fetch("/wishlist/count");
+      const data = await res.json();
+
+      const badge = document.getElementById("wishlist-count");
+
+      if (!badge) return;
+
+      if (data.count > 0) {
+        badge.style.display = "flex";
+        badge.innerText = data.count;
+      } else {
+        badge.style.display = "none";
+      }
+
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  
+  async function addToWishlist(productId) {
+    try {
+      const res = await fetch("/wishlist/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ productId })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        loadWishlistCount(); 
+      }
+
+    } catch (err) {
+      console.log(err);
+    }
+  }
+</script>

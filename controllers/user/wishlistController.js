@@ -175,11 +175,6 @@ const moveToCart = async (req, res) => {
         })
       }
 
-
-
-
-
-
     if (!product || product.variants.length === 0) {
       return res.json({ success: false, message: "Product not found" });
     }
@@ -224,9 +219,48 @@ const moveToCart = async (req, res) => {
   }
 };
 
+const getWishlistCount = async(req,res)=>{
+    try {
+
+      const sessionUser = req.session.user
+      if(!sessionUser){
+        return res.json({count:0});
+      }
+
+       const userId = sessionUser._id || sessionUser;
+
+       const wishlist = await Wishlist.findOne({userId})
+
+      const count = wishlist ? wishlist.products.length : 0;
+
+      res.json({count});
+
+
+
+
+      
+    } catch (error) {
+      console.log(error,"wishlist Count Error")
+      res.status(StatusCodes.BAD_REQUEST).json({count:0})
+      
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 module.exports = {
   addToWishlist,
   removeFromWishlist,
   getWishlist,
-  moveToCart
+  moveToCart,
+  getWishlistCount
 }

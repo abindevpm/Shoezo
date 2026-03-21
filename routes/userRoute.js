@@ -147,6 +147,7 @@ router.post("/orders/retry-payment/:orderId", userAuth, paymentController.retryP
 
 // Wishlist
 router.get("/wishlist", userAuth, WishlistController.getWishlist)
+router.get("/wishlist/count",userAuth,WishlistController.getWishlistCount)
 router.post("/wishlist/add", userAuth, WishlistController.addToWishlist)
 router.delete("/wishlist/remove", userAuth, WishlistController.removeFromWishlist)
 router.post("/wishlist/move-to-cart", userAuth, WishlistController.moveToCart);
