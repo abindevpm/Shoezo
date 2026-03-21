@@ -43,10 +43,11 @@
     }
 
     .form-row {
-      display: flex;
-      gap: 40px;
-      margin-bottom: 40px;
-    }
+  display: flex;
+  align-items: flex-start; 
+  justify-content: space-between;
+  gap: 60px;
+}
 
     .form-inputs {
       flex: 1;
@@ -75,7 +76,18 @@
 
     .profile-pic-side {
       width: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       text-align: center;
+    }
+
+    .profile-pic-side form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
     }
 
     .profile-pic-side img {
@@ -97,12 +109,19 @@
     }
 
     .choose-img-btn {
+      width: 130px;
       border: 1px solid #000;
       background: #fff;
-      padding: 8px 20px;
+      padding: 8px 15px;
       border-radius: 20px;
       font-size: 12px;
       cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .choose-img-btn:hover {
+      background: #f5f5f5;
+      transform: translateY(-1px);
     }
 
     /* CHANGE PASSWORD SECTION */
@@ -303,7 +322,7 @@
 
               <form action="/upload-profile-image" method="POST" enctype="multipart/form-data" id="profileForm">
                 <input type="file" name="profileImage" id="profileImageInput" hidden accept="image/*"
-                  onchange="document.getElementById('profileForm').submit()">
+              >
 
                 <button type="button" class="choose-img-btn"
                   onclick="document.getElementById('profileImageInput').click()">
@@ -561,6 +580,25 @@
   });
 
 
+   const fileInput = document.getElementById("profileImageInput");
+
+     fileInput.addEventListener("change",function(){
+       const file = this.files[0];
+
+         if(!file) return ;
+
+         const allowedTypes = ["image/jpeg","image/png","image/webp"];
+
+           if(!allowedTypes.includes(file.type)){
+            alert("Only JPG,PNG,WEBP images are allowed!");
+             this.value = "";
+             return ;
+           }
+
+           document.getElementById("profileForm").submit()
+
+
+     })
 
 
 

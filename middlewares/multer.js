@@ -1,7 +1,7 @@
 const multer = require("multer");
 const path = require("path");
 
-/* ========= PRODUCT IMAGE STORAGE ========= */
+
 const productStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, path.join(__dirname, "../public/uploads/product-images"));
@@ -11,7 +11,7 @@ const productStorage = multer.diskStorage({
   }
 });
 
-/* ========= PROFILE IMAGE STORAGE ========= */
+
 const profileStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, path.join(__dirname, "../public/uploads/profile-images"));
@@ -27,7 +27,7 @@ const profileStorage = multer.diskStorage({
   }
 });
 
-/* ========= FILE FILTER ========= */
+
 const fileFilter = (req, file, cb) => {
   const allowed = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
   if (allowed.includes(file.mimetype)) {
@@ -37,7 +37,7 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-/* ========= MULTER INSTANCES ========= */
+
 const uploadProduct = multer({
   storage: productStorage,
   fileFilter,

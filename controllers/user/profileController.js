@@ -282,7 +282,7 @@ const removeProfileImage = async (req, res) => {
   await User.findByIdAndUpdate(req.user._id, {
     profileImage: ""
   });
-  res.redirect("profile");
+  res.redirect("/profile");
 };
 
 
