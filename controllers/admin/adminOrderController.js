@@ -13,8 +13,6 @@ const loadOrders = async (req, res) => {
         let query = { };
 
         
-
-
         if (search) {
             if (search.startsWith('ORD-')) {
                 query.orderId = { $regex: search, $options: 'i' };  

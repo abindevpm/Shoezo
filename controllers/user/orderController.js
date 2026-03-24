@@ -312,81 +312,136 @@ const returnOrderItem = async (req, res) => {
 
 const downloadInvoice = async (req, res) => {
   try {
-    const userId = req.session.user
-    const order = await Order.findOne({ _id: req.params.orderId, userId }).populate("items.productId")
-    if (!order) return res.status(404).send("Order not found")
+    const userId = req.session.user;
+    const order = await Order.findOne({ _id: req.params.orderId, userId }).populate("items.productId");
+    if (!order) return res.status(StatusCodes.NOT_FOUND).send("Order not found");
 
-    const doc = new PDFDocument({ margin: 50 })
-    const filename = `Invoice-${order.orderId}.pdf`
+    const doc = new PDFDocument({ margin: 50 });
+    const filename = `Invoice-${order.orderId}.pdf`;
 
-    res.setHeader("Content-Type", "application/pdf")
-    res.setHeader("Content-Disposition", `attachment; filename=${filename}`)
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
 
-    doc.pipe(res)
+    doc.pipe(res);    
+    doc.fillColor("#444444")
+       .fontSize(20)
+       .text("SHOEZO", 50, 50)
+       .fontSize(10)
+       .text("High-Quality Footwear", 50, 75)
+       .text("123 Shoe Street, Footwear City, CA 90210", 50, 90)
+       .text("support@shoezo.com | (555) 123-SHOE", 50, 105)
+       .moveDown();
 
+    doc.fillColor("#000000")
+       .fontSize(25)
+       .text("INVOICE", 50, 130, { align: "right" });
+    
+    doc.fontSize(10)
+       .text(`Invoice Number: INV-${order.orderId}`, 50, 160, { align: "right" })
+       .text(`Order Date: ${new Date(order.createdAt).toLocaleDateString()}`, 50, 175, { align: "right" })
+       .text(`Payment Method: ${order.paymentMethod}`, 50, 190, { align: "right" })
+       .moveDown();
 
-    const title = order.status === "Failed" ? "SHOEZO INVOICE (FAILED)" : "SHOEZO INVOICE";
-    doc.fontSize(25).text(title, { align: "center" }).moveDown()
-    doc.fontSize(12).text(`Order ID: ${order.orderId}`)
-    doc.text(`Order Date: ${new Date(order.createdAt).toLocaleDateString()}`)
-    doc.text(`Payment Method: ${order.paymentMethod}`).moveDown()
+    
+    const top = 220;
+    doc.fontSize(12).text("Bill To:", 50, top, { underline: true });
+    doc.fontSize(10)
+       .text(order.address.fullName, 50, top + 20)
+       .text(order.address.addressLine, 50, top + 35)
+       .text(`${order.address.city}, ${order.address.state} - ${order.address.pincode}`, 50, top + 50)
+       .text(`Phone: ${order.address.phone}`, 50, top + 65)
+       .moveDown();
 
+    
+    let statusColor = "#3b82f6"; 
+    if (order.status === "Delivered") statusColor = "#10b981"; 
+    if (order.status === "Cancelled" || order.status === "Failed") statusColor = "#ef4444"; 
+    
+    doc.rect(400, top, 150, 25).fill(statusColor);
+    doc.fillColor("#FFFFFF").fontSize(10).text(`STATUS: ${order.status.toUpperCase()}`, 400, top + 8, { align: "center", width: 150 });
+    doc.fillColor("#000000");
 
-    doc.fontSize(14).text("Shipping Address:", { underline: true })
-    doc.fontSize(10).text(`${order.address.fullName}`)
-    doc.text(`${order.address.addressLine}`)
-    doc.text(`${order.address.city}, ${order.address.state}`)
-    doc.text(`Phone: ${order.address.phone}`)
-    doc.text(`Pincode: ${order.address.pincode}`).moveDown()
+    
+    const tableTop = 320;
+    doc.fontSize(10).font("Helvetica-Bold");
+    doc.text("Sl", 50, tableTop);
+    doc.text("Product Name", 80, tableTop);
+    doc.text("Size", 280, tableTop);
+    doc.text("Qty", 320, tableTop);
+    doc.text("Price", 360, tableTop);
+    doc.text("Status", 430, tableTop);
+    doc.text("Total", 500, tableTop, { align: "right" });
 
+    doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
+    doc.font("Helvetica");
 
-    const tableTop = 250
-    doc.fontSize(12).text("Product", 50, tableTop)
-    doc.text("Size", 250, tableTop)
-    doc.text("Qty", 300, tableTop)
-    doc.text("Price", 350, tableTop)
-    doc.text("Total", 450, tableTop)
+    let y = tableTop + 30;
+    order.items.forEach((item, index) => {
+      const isCancelled = ["Cancelled", "Returned", "Failed", "Return Requested"].includes(item.itemStatus);
+      const rowTotal = isCancelled ? 0 : (item.price * item.quantity);
+      
+      doc.fontSize(9)
+         .text(index + 1, 50, y)
+         .text(item.productId.name, 80, y, { width: 190 })
+         .text(item.size.toString(), 280, y)
+         .text(item.quantity.toString(), 320, y)
+         .text(`₹${item.price.toLocaleString()}`, 360, y)
+         .fillColor(isCancelled ? "#ef4444" : "#444444")
+         .text(item.itemStatus, 430, y)
+         .fillColor("#000000")
+         .text(`₹${rowTotal.toLocaleString()}`, 500, y, { align: "right" });
+      
+      y += 25;
+      if (y > 700) { doc.addPage(); y = 50; } 
+    });
 
-    doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke()
+    
+    doc.moveTo(50, y).lineTo(550, y).stroke();
+    y += 20;
 
-    let y = tableTop + 30
-    order.items.forEach(item => {
-      doc.fontSize(10).text(item.productId.name, 50, y)
-      doc.text(item.size.toString(), 250, y)
-      doc.text(item.quantity.toString(), 300, y)
-      doc.text(`₹${item.price.toFixed(2)}`, 350, y)
-      doc.text(`₹${(item.price * item.quantity).toFixed(2)}`, 450, y)
-      y += 20
-    })
+    const summaryX = 350;
+    doc.fontSize(10).text("Subtotal:", summaryX, y);
+    doc.text(`₹${order.subtotal.toLocaleString()}`, 500, y, { align: "right" });
 
-    doc.moveTo(50, y).lineTo(550, y).stroke().moveDown()
-
-    y += 20
-    doc.fontSize(10).text(`Subtotal: ₹${order.subtotal.toFixed(2)}`, 400, y)
-
-    if (order.offerDiscount > 0) {
-      y += 15
-      doc.text(`Offers Discount: -₹${order.offerDiscount.toFixed(2)}`, 400, y)
+    if (order.totalOfferDiscount > 0) {
+      y += 15;
+      doc.text("Offer Discount:", summaryX, y);
+      doc.text(`-₹${order.totalOfferDiscount.toLocaleString()}`, 500, y, { align: "right" });
     }
 
     if (order.totalCouponDiscount > 0) {
-      y += 15
-      doc.text(`Coupon Discount: -₹${order.totalCouponDiscount.toFixed(2)}`, 400, y)
+      y += 15;
+      doc.text("Coupon Discount:", summaryX, y);
+      doc.text(`-₹${order.totalCouponDiscount.toLocaleString()}`, 500, y, { align: "right" });
     }
 
-    if (order.status === "Failed") {
-      y += 20;
-      doc.fillColor("red").fontSize(16).text("PAYMENT STATUS: FAILED", 350, y).fillColor("black");
-    }
+    y += 25;
+    doc.rect(340, y - 5, 210, 30).fill("#f9f9f9");
+    doc.fillColor("#000000")
+       .font("Helvetica-Bold")
+       .fontSize(12)
+       .text("GRAND TOTAL:", 350, y)
+       .text(`₹${order.totalAmount.toLocaleString()}`, 500, y, { align: "right" });
 
-    y += 20
-    doc.fontSize(14).text(`GRAND TOTAL: ₹${order.totalAmount.toFixed(2)}`, 350, y)
+    
+    y += 60;
+    doc.font("Helvetica").fontSize(10).text("Payment Status:", 50, y);
+    let payStatusColor = "#10b981"; 
+    if (order.paymentStatus === "Pending") payStatusColor = "#f59e0b"; 
+    if (order.paymentStatus === "Failed" || order.paymentStatus === "Refunded") payStatusColor = "#ef4444"; 
+    
+    doc.fillColor(payStatusColor).text(order.paymentStatus.toUpperCase(), 150, y);
+    doc.fillColor("#000000");
 
-    doc.end()
+    doc.fontSize(8)
+       .text("Thank you for shopping with SHOEZO!", 50, 750, { align: "center", width: 500 })
+       .text("This is a computer-generated invoice.", 50, 765, { align: "center", width: 500 });
+
+    doc.end();
 
   } catch (error) {
-    console.log(error)
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Error generating invoice")
+    console.log(error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Error generating invoice");
   }
 }
 
