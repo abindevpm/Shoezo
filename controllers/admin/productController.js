@@ -25,6 +25,10 @@ const loadProducts = async (req, res) => {
     };
 
 
+
+
+
+
     if (search) {
       query.name = { $regex: search, $options: "i" };
     }
@@ -50,8 +54,8 @@ const loadProducts = async (req, res) => {
     const totalPages = Math.ceil(totalProducts / limit);
 
 
-
     const products = await Product.find(query)
+  
       .populate({
         path: "category",
         match: { isListed: true, isDeleted: false }
@@ -64,6 +68,19 @@ const loadProducts = async (req, res) => {
 
 
 let totalStock = 0;
+
+//  let sum = products.reduce((acc,curr)=>{
+//   return acc+ Number( curr.totalStock) 
+//  },0)
+
+//   console.log(Number(sum))
+
+   
+
+
+
+
+ 
 
     const categories = await Category.find({ isDeleted: false, isListed: true });
 

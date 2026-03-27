@@ -47,6 +47,53 @@ const addAdress = async (req, res) => {
       isDefault
     } = req.body;
 
+   if(!fullName || !phone || !addressLine || !city || !state || !pincode){
+    return res.status(400).json({
+      success:false,
+      message:"All fields are Required"
+    })
+   }
+
+     if(!/^[A-Za-z ]+$/.test(fullName)){
+      return res.status(400).json({
+        success:false,
+        message:"Invalid Name"
+
+      })
+     }
+
+     if (!/^\d{10}$/.test(phone)) {
+  return res.status(400).json({
+    success: false,
+    message: "Invalid phone number"
+  });
+}
+
+if (!/^\d{6}$/.test(pincode)) {
+  return res.status(400).json({
+    success: false,
+    message: "Invalid pincode"
+  });
+}
+
+
+if (!/^[A-Za-z ]+$/.test(city)) {
+  return res.status(400).json({
+    success: false,
+    message: "Invalid city"
+  });
+}
+
+if (!/^[A-Za-z ]+$/.test(state)) {
+  return res.status(400).json({
+    success: false,
+    message: "Invalid state"
+  });
+}
+
+
+
+
     const defaultStatus = isDefault === "on" || isDefault === true;
 
     if (defaultStatus) {

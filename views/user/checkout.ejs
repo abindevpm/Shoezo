@@ -71,26 +71,24 @@
                 : null;
                 %>
 
-                <% if (defaultAddress) { %>
-
-                  <div class="address-row" id="selectedAddressBox">
+                  <div class="address-row" id="selectedAddressBox" style="<%= defaultAddress ? '' : 'display:none;' %>">
                     <div class="address-info">
-                      <span class="addr-label">Default</span>
+                      <span class="addr-label">Delivery Address</span>
 
                       <p class="addr-name">
                         <strong>
-                          <%= defaultAddress.fullName %>,<br>
-                            <%= defaultAddress.addressLine %>,<br>
-                              <%= defaultAddress.pincode %>
+                          <%= defaultAddress ? defaultAddress.fullName : '' %>,<br>
+                          <%= defaultAddress ? defaultAddress.addressLine : '' %>,<br>
+                          <%= defaultAddress ? defaultAddress.pincode : '' %>
                         </strong>
                       </p>
 
                       <p class="addr-desc">
-                        <%= formatAddress(defaultAddress) %>
+                        <%= defaultAddress ? formatAddress(defaultAddress) : '' %>
                       </p>
 
                       <p class="addr-phone">
-                        Mobile: +91 <%= defaultAddress.phone %>
+                        Mobile: +91 <%= defaultAddress ? defaultAddress.phone : '' %>
                       </p>
                     </div>
 
@@ -99,13 +97,12 @@
                     </button>
                   </div>
 
-                  <% } else { %>
-
-                    <div style="padding:20px; border:1px dashed #ccc;">
-                      No address found. Please add address in profile.
-                    </div>
-
-                    <% } %>
+                  <div id="noAddressContainer" style="padding:20px; border:1px dashed #ccc; text-align: center; <%= defaultAddress ? 'display:none;' : '' %>">
+                      <p style="margin-bottom: 15px;">No address found.</p>
+                      <button type="button" class="btn-black-sm" id="checkoutAddAddressBtn">
+                        + Add New Address
+                      </button>
+                  </div>
 
 
 
@@ -157,28 +154,34 @@
                                 <div class="form-group">
                                   <label>Full Name</label>
                                   <input type="text" id="newFullName" placeholder="Full Name">
+                                  <small class="error-msg" id="error-fullName"></small>
                                 </div>
                                 <div class="form-group">
                                   <label>Phone Number</label>
                                   <input type="text" id="newPhone" placeholder="10-digit mobile number">
+                                  <small class="error-msg" id="error-phone"></small>
                                 </div>
                               </div>
                               <div class="form-group">
                                 <label>Address Line</label>
                                 <input type="text" id="newAddressLine" placeholder="House No., Building, Street, Area">
+                                <small class="error-msg" id="error-addressLine"></small>
                               </div>
                               <div class="form-row-three">
                                 <div class="form-group">
                                   <label>City</label>
                                   <input type="text" id="newCity" placeholder="City">
+                                  <small class="error-msg" id="error-city"></small>
                                 </div>
                                 <div class="form-group">
                                   <label>State</label>
                                   <input type="text" id="newState" placeholder="State">
+                                  <small class="error-msg" id="error-state"></small>
                                 </div>
                                 <div class="form-group">
                                   <label>Pincode</label>
                                   <input type="text" id="newPincode" placeholder="6-digit Pincode">
+                                  <small class="error-msg" id="error-pincode"></small>
                                 </div>
                               </div>
                               <div class="form-group"
@@ -850,6 +853,26 @@
     content: '🎟️';
     font-size: 20px;
   }
+
+  #couponList {
+    margin-top: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 5px;
+  }
+
+  .error-msg {
+    color: #d32f2f;
+    font-size: 11px;
+    margin-top: 4px;
+    display: block;
+    font-weight: 500;
+  }
+
+  .input-error {
+    border-color: #d32f2f !important;
+    background-color: #fff8f8 !important;
+  }
 </style>
 
 <script>
@@ -862,6 +885,17 @@
   if (changeBtn) {
     changeBtn.onclick = () => {
       addressList.style.display = "block";
+    };
+  }
+
+  const checkoutAddAddressBtn = document.getElementById("checkoutAddAddressBtn");
+  const noAddressContainer = document.getElementById("noAddressContainer");
+
+  if (checkoutAddAddressBtn) {
+    checkoutAddAddressBtn.onclick = () => {
+      addressList.style.display = "block";
+      newAddressForm.style.display = "block";
+      showAddBtn.innerText = "Cancel";
     };
   }
 
@@ -886,10 +920,31 @@
       isDefault: document.getElementById("newIsDefault").checked
     };
 
-    const requiredFields = ['fullName', 'phone', 'addressLine', 'city', 'state', 'pincode'];
-    if (requiredFields.some(field => typeof data[field] === 'string' && !data[field].trim())) {
-      return Swal.fire("Required", "Please fill all fields", "warning");
+  
+    document.querySelectorAll(".error-msg").forEach(el => el.innerText = "");
+    document.querySelectorAll(".form-group input").forEach(el => el.classList.remove("input-error"));
+
+    let isValid = true;
+    function setError(id, message) {
+      document.getElementById("error-" + id).innerText = message;
+      document.getElementById("new" + id.charAt(0).toUpperCase() + id.slice(1)).classList.add("input-error");
+      isValid = false;
     }
+
+    if (!data.fullName.trim()) setError("fullName", "Name is required");
+    else if (!/^[A-Za-z ]+$/.test(data.fullName)) setError("fullName", "Name must contain only letters");
+
+    if (!data.phone.trim()) setError("phone", "Phone is required");
+    else if (!/^\d{10}$/.test(data.phone)) setError("phone", "Enter valid 10-digit phone");
+
+    if (!data.addressLine.trim()) setError("addressLine", "Address line is required");
+    if (!data.city.trim()) setError("city", "City is required");
+    if (!data.state.trim()) setError("state", "State is required");
+
+    if (!data.pincode.trim()) setError("pincode", "Pincode is required");
+    else if (!/^\d{6}$/.test(data.pincode)) setError("pincode", "Enter valid 6-digit pincode");
+
+    if (!isValid) return;
 
     try {
       const response = await fetch("/checkout/add-address", {
@@ -917,6 +972,9 @@
         document.getElementById("addressList").insertBefore(option, document.getElementById("confirmAddressBtn").previousSibling.previousSibling);
 
 
+        if (selectedBox) selectedBox.style.display = "flex";
+        if (noAddressContainer) noAddressContainer.style.display = "none";
+
         selectedBox.querySelector(".addr-name strong").innerHTML = `${addr.fullName},<br>${addr.addressLine},<br>${addr.pincode}`;
         selectedBox.querySelector(".addr-desc").innerText = `${addr.city}, ${addr.state}`;
         selectedBox.querySelector(".addr-phone").innerText = `Mobile: +91 ${addr.phone}`;
@@ -942,6 +1000,9 @@
     confirmBtn.onclick = () => {
       const selected = document.querySelector("input[name='addressRadio']:checked");
       if (!selected) return;
+
+      if (selectedBox) selectedBox.style.display = "flex";
+      if (noAddressContainer) noAddressContainer.style.display = "none";
 
       const label = selected.closest(".address-option");
       const nameLine = label.querySelector("strong").innerText;
@@ -1105,7 +1166,7 @@
       return Swal.fire("Warning", "Please select a delivery address", "warning");
     }
 
-    // Disable the place order button
+    
     if (placeOrderBtn) placeOrderBtn.disabled = true;
     if (walletPayBtn) walletPayBtn.disabled = true;
 
@@ -1298,6 +1359,27 @@
   }
 
   document.addEventListener("DOMContentLoaded", loadCoupons);
+
+
+
+  document.querySelectorAll("#newAddressForm input").forEach(input => {
+  input.addEventListener("input", () => {
+    input.classList.remove("input-error");
+
+    const id = input.id.replace("new", "");
+    const errorEl = document.getElementById("error-" + id.charAt(0).toLowerCase() + id.slice(1));
+    
+    if (errorEl) errorEl.innerText = "";
+  });
+});
+
+
+
+
+
+
+
+
 
 
 

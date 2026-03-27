@@ -112,6 +112,28 @@ const updateOrderStatus = async (req, res) => {
             return res.status(400).json({ success: false, message: "Failed orders cannot be modified." });
         }
 
+
+        const oldStatus = order.status;
+
+
+       const allowedTransactions = {
+        Placed:["Processing","Cancelled","Failed"],
+        Processing:["Shipped","Cancelled"],
+        Shipped:["Delivered"],
+        Delivered:[],
+       }
+
+        if(
+            allowedTransactions[oldStatus] &&   
+            !allowedTransactions[oldStatus].includes(status)
+        ){
+            return res.status(400).json({
+                success:false,
+                message:`Cannot change status from ${oldStatus} to ${status}`
+            })
+        }
+
+
         if (newPaymentStatus) {
             order.paymentStatus = newPaymentStatus;
         }
@@ -120,9 +142,7 @@ const updateOrderStatus = async (req, res) => {
             return res.status(400).json({ success: false, message: "Order already refunded" });
         }
 
-        const oldStatus = order.status;
-
-
+     
         if (["Placed", "Processing", "Shipped", "Delivered", "Cancelled", "Failed"].includes(status)) {
             order.items.forEach(item => {
                 if (item.itemStatus !== "Cancelled" && item.itemStatus !== "Returned") {
