@@ -1,18 +1,23 @@
+
 const Order = require("../../models/orderSchema");
 const Product = require("../../models/productSchema");
 const User = require("../../models/userSchema");
 const StatusCodes = require("../../routes/utils/statusCodes");
 const { markOrderFailed } = require("../user/paymentController");
-
+ 
 const loadOrders = async (req, res) => {
     try {
         const { search, status, paymentStatus, page = 1 } = req.query;
         const limit = 10;
         const skip = (page - 1) * limit;
 
-        let query = { };
+        let query = {   
 
-        
+          
+        };
+
+     
+
         if (search) {
             if (search.startsWith('ORD-')) {
                 query.orderId = { $regex: search, $options: 'i' };  
@@ -459,6 +464,7 @@ const restockItem = async (req, res) => {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: "Restock item Error" });
     }
 };
+
 
 module.exports = {
     loadOrders,

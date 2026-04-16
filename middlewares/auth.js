@@ -11,12 +11,10 @@ const userAuth = async (req, res, next) => {
     const user = await User.findById(userId);
 
     if (!user || user.isBlocked) {
-      req.session.destroy((err) => {
-        if (err) console.log("Session destroy error:", err);
-        return res.redirect("/login");
-      });
-      return;
+      delete req.session.user;
+      return res.redirect("/login");
     }
+
 
     req.user = user;
     next();
@@ -26,6 +24,8 @@ const userAuth = async (req, res, next) => {
     return res.redirect("/login");
   }
 };
+
+
 
 
 const adminAuth = (req, res, next) => {
@@ -43,5 +43,4 @@ module.exports = {
   userAuth,
   adminAuth
 };
-
 

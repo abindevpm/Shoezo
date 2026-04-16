@@ -299,15 +299,6 @@ const getProduct = async (req, res, next) => {
 
 
 
-
-
-
-
-
-
-
-
-
 module.exports = {
   loadShopPage,
 

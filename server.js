@@ -69,6 +69,9 @@ app.use(passport.session())
 
 app.use(async (req, res, next) => {
   try {
+    if (req.path.startsWith('/admin')) {
+      return next();
+    }
     
     let user = req.user;
 
@@ -78,8 +81,9 @@ app.use(async (req, res, next) => {
     }
  
     if (user && user.isBlocked) {
-      req.session.user = null;
-      req.logout && req.logout(() => {}); 
+      delete req.session.user;
+      // req.logout && req.logout(() => {}); 
+      req.session.user = null;   
       res.locals.user = null;
     } else {
       res.locals.user = user || null;

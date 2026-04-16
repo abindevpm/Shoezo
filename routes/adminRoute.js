@@ -24,8 +24,7 @@ router.get("/dashboard", adminAuth, adminController.dashboard)
 
 //  admin logout
 router.get("/logout", adminController.logout)
-
-
+    
 // customer management
 router.get("/customers", adminAuth, customerController.customerinfo)
 router.patch("/blockcustomer", adminAuth, customerController.blockUser)

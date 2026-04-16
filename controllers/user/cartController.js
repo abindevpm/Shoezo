@@ -18,7 +18,9 @@ const loadCart = async (req, res) => {
           { path: "brand" },
           { path: "category", populate: { path: "categoryOffer" } }
         ]
+
       });
+
 
   if(cart){
 
@@ -40,10 +42,6 @@ const loadCart = async (req, res) => {
       });
 
     }
-
-
-
-
 
 
     if (!cart || cart.items.length === 0) {
@@ -103,6 +101,7 @@ const loadCart = async (req, res) => {
       (sum, item) => sum + item.total,
       0
     );
+
 
     const offerDiscount = baseSubtotal - actualSubtotal;
     const grandTotal = actualSubtotal;
@@ -255,7 +254,7 @@ const updateCartQty = async (req, res) => {
     const item = cart.items.id(itemId);
     if (!item) return res.json({ success: false });
 
-    // Check availability
+  
     const product = item.productId;
     const isAvailable = product && product.isListed && 
                        product.category?.isListed && 
@@ -264,7 +263,7 @@ const updateCartQty = async (req, res) => {
     if (!isAvailable) {
       return res.json({ 
         success: false, 
-        message: "This product is no longer available" 
+        message: "This product is no longer available"  
       });
     }
 
@@ -307,8 +306,6 @@ const updateCartQty = async (req, res) => {
         { path: "category", populate: { path: "categoryOffer" } }
       ]
     });
-
-
 
     const today = new Date();
     let baseSubtotal = 0;
@@ -377,7 +374,6 @@ const updateCartQty = async (req, res) => {
 }
 
 
-
 const removeCartItem = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -405,7 +401,7 @@ const removeCartItem = async (req, res) => {
 
     const today = new Date();
     let baseSubtotal = 0;
-    const actualSubtotal = populatedCart.items.reduce((sum, i) => {
+    const actualSubtotal = populatedCart.items.reduce((sum, i) => { 
       const product = i.productId;
       const variant = product.variants.find(v => String(v.size) === String(i.size));
       if (!variant) return sum;

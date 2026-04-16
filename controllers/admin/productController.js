@@ -20,15 +20,13 @@ const loadProducts = async (req, res) => {
     let skip = (page - 1) * limit;
 
 
-    let query = { isDeleted: false,
-    
+    let query = { 
+      isDeleted: false,
+      
+      
     };
 
-
-
-
-
-
+  
     if (search) {
       query.name = { $regex: search, $options: "i" };
     }
@@ -44,6 +42,7 @@ const loadProducts = async (req, res) => {
       }
     }
 
+    
     if (minPrice !== null || maxPrice !== null) {
       query.price = {};
       if (minPrice !== null) query.price.$gte = minPrice;
@@ -67,20 +66,10 @@ const loadProducts = async (req, res) => {
       .limit(limit);
 
 
+
 let totalStock = 0;
 
-//  let sum = products.reduce((acc,curr)=>{
-//   return acc+ Number( curr.totalStock) 
-//  },0)
 
-//   console.log(Number(sum))
-
-   
-
-
-
-
- 
 
     const categories = await Category.find({ isDeleted: false, isListed: true });
 
@@ -101,6 +90,10 @@ let totalStock = 0;
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Load Product Error");
   }
 };
+
+
+
+
 
 
 

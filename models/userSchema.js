@@ -106,8 +106,6 @@ const userSchema = new Schema({
 
 
 
-
-
   orderHistory: [{ type: Schema.Types.ObjectId, ref: "Order" }],
 
   createdOn: { type: Date, default: Date.now },

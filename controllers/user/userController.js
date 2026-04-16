@@ -6,10 +6,7 @@ const Coupon = require("../../models/couponSchema")
 const Category = require("../../models/categorySchema")
 const Brand = require("../../models/brandSchema")
 const StatusCodes = require("../../routes/utils/statusCodes")
-
-
 const env = require("dotenv").config()
-
 const nodemailer = require("nodemailer")
 const bcrypt = require("bcrypt");
 const { removeFromWishlist } = require("./wishlistController");
@@ -18,12 +15,12 @@ const loadHomepage = async (req, res) => {
   try {
     const userData = res.locals.user;
 
+  
 
     if (userData && userData.isBlocked) {
       req.session.user = null;
       return res.redirect('/login?isBlocked=true')
     }
-
 
     console.log(req.session.user)
 
@@ -141,7 +138,7 @@ const googleCallback = async (req, res) => {
       return res.redirect("/complete-profile");
     }
 
-    res.redirect("/");
+    res.redirect("/");rf
 
   } catch (error) {
     console.log("Google callback Error", error);
@@ -390,6 +387,7 @@ const signup = async (req, res) => {
     if (password !== confirmPassword) {
       return res.render("signup", { message: "Password does not match", formData: req.body });
     }
+
 
     const findUser = await User.findOne({ email });
 

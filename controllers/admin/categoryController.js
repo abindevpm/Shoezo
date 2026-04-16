@@ -43,6 +43,7 @@ const addCategory = async (req, res) => {
 
     let { name, description } = req.body;
 
+
     name = name?.trim();
     description = description?.trim();
 
@@ -52,6 +53,14 @@ const addCategory = async (req, res) => {
         message: "All fields are required"
       });
     }
+
+    if (description.length < 10) {
+      return res.json({
+        success: false,
+        message: "Description must be at least 10 characters"
+      });
+    }
+
 
     const exists = await Category.findOne({
       name: { $regex: `^${name}$`, $options: "i" }

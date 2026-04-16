@@ -13,6 +13,7 @@ const loadlogin = (req, res) => {
 
 
 
+
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -73,6 +74,5 @@ module.exports = {
   login,
   dashboard,
   logout,
-
 
 }
