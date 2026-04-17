@@ -292,6 +292,20 @@
     .input-error {
       border: 1px solid red !important;
     }
+
+    .address-box {
+  width: 100%;
+  min-height: 150px;   
+  padding: 12px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  font-size: 13px;
+  resize: vertical;
+}
+
+
+
+
   </style>
 </head>
 
@@ -328,7 +342,8 @@
           <!-- ADDRESS -->
           <div class="input-group">
             <label>Address</label>
-            <textarea name="addressLine" rows="3"></textarea>
+            <!-- <textarea name="addressLine" rows="3"></textarea> -->
+              <textarea name="addressLine" class="address-box"></textarea>
             <small class="error"></small>
           </div>
 

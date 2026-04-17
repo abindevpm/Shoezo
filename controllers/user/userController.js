@@ -138,7 +138,7 @@ const googleCallback = async (req, res) => {
       return res.redirect("/complete-profile");
     }
 
-    res.redirect("/");rf
+    res.redirect("/");
 
   } catch (error) {
     console.log("Google callback Error", error);
