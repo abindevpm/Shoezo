@@ -344,30 +344,41 @@ async function sendVerificationEmail(email, otp) {
 
 const resendOtp = async (req, res) => {
   try {
-    if (!req.session.userData) {
+    let email;
+    let isResetFlow = false;
+
+    if (req.session.userData) {
+      email = req.session.userData.email;
+    } else if (req.session.resetEmail) {
+      email = req.session.resetEmail;
+      isResetFlow = true;
+    }
+
+    if (!email) {
       return res.status(400).json({ success: false, message: "Session expired" });
     }
 
     const newOtp = generateOtp();
-    req.session.userOtp = newOtp;
 
-    req.session.otpExpiry = Date.now() + (101 * 1000);
-
-    const email = req.session.userData.email;
+    if (isResetFlow) {
+      req.session.resetOtp = newOtp;
+      req.session.resetOtpExpiry = Date.now() + 60 * 1000; // 1 minute
+    } else {
+      req.session.userOtp = newOtp;
+      req.session.otpExpiry = Date.now() + (101 * 1000);
+    }
 
     const sent = await sendVerificationEmail(email, newOtp);
-
-
 
     if (!sent) {
       return res.status(500).json({ success: false, message: "Email failed" });
     }
 
-    console.log("Resent OTP:", newOtp);
-
+    console.log(`Resent OTP to ${email}: ${newOtp}`);
     res.json({ success: true });
 
   } catch (err) {
+    console.error("Resend OTP error:", err);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: "Server error" });
   }
 };
@@ -396,6 +407,7 @@ const signup = async (req, res) => {
 
     }
 
+  
     if (referalCode) {
       const referrer = await User.findOne({ referalCode });
       if (!referrer) {
@@ -808,6 +820,7 @@ const sendResetOTP = async (req, res) => {
 
     req.session.resetEmail = email;
     req.session.resetOtp = otp;
+    req.session.resetOtpExpiry = Date.now() + 60 * 1000; 
 
 
     const transporter = nodemailer.createTransport({
@@ -836,6 +849,7 @@ const sendResetOTP = async (req, res) => {
 };
 
 
+
 const loadOtpPage = (req, res) => {
   const email = req.session.resetEmail || "";
   const maskedEmail = email.replace(/(.{2}).+(@.+)/, "$1****$2");
@@ -847,22 +861,28 @@ const loadOtpPage = (req, res) => {
 const verifyOtp = (req, res) => {
   const enteredOtp = req.body.otp;
   const storedOtp = req.session.resetOtp;
+  const expiry = req.session.resetOtpExpiry;
   const email = req.session.resetEmail;
 
   if (!email) {
-    return res.redirect("/forgot-password");
+    return res.status(400).json({ success: false, message: "Session expired. Please start over." });
   }
 
-  const maskedEmail = email.replace(/(.{2}).+(@.+)/, "$1****$2");
+  if (!storedOtp || !expiry || Date.now() > expiry) {
+    req.session.resetOtp = null;
+    req.session.resetOtpExpiry = null;
+    return res.status(400).json({ success: false, message: "OTP has expired. Please request a new one." });
+  }
 
   if (enteredOtp !== storedOtp) {
-    return res.render("verify-otp", {
-      message: "Invalid OTP",
-      maskedEmail
-    });
+    return res.status(400).json({ success: false, message: "Invalid OTP" });
   }
 
-  return res.redirect("/reset-password");
+  // Clear OTP from session after successful verification
+  req.session.resetOtp = null;
+  req.session.resetOtpExpiry = null;
+
+  return res.json({ success: true, redirectUrl: "/reset-password" });
 };
 
 

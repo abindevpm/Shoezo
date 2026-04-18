@@ -113,9 +113,20 @@ const updateOrderStatus = async (req, res) => {
 
         if (!order) return res.status(404).json({ success: false, message: "Order not found" });
 
+
+        if (order.status === "Cancelled") {
+    return res.status(400).json({
+        success: false,
+        message: "Cancelled order cannot be modified"
+    });
+}
+
+
         if (order.status === "Failed") {
             return res.status(400).json({ success: false, message: "Failed orders cannot be modified." });
         }
+
+        
 
 
         const oldStatus = order.status;
@@ -126,6 +137,7 @@ const updateOrderStatus = async (req, res) => {
         Processing:["Shipped","Cancelled"],
         Shipped:["Delivered"],
         Delivered:[],
+        Cancelled:[],
        }
 
         if(
@@ -156,7 +168,7 @@ const updateOrderStatus = async (req, res) => {
             });
         }
 
-        if (status === "Returned" || status === "Cancelled") {
+       if ((status === "Returned" || status === "Cancelled") && oldStatus !== "Cancelled") {
 
             for (const item of order.items) {
                 
