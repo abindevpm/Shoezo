@@ -55,17 +55,14 @@ const dashboard = (req, res) => {
 }
 
 
+
 const logout = (req, res) => {
+  delete req.session.admin; 
+  res.redirect("/admin/login");
+};
 
-  req.session.destroy(err => {
-    if (err) {
-      console.log(err, "Error in server")
-      return res.redirect("/pageNotFound")
-    }
-    res.redirect("/admin/login")
-  })
 
-}
+
 
 
 module.exports = {

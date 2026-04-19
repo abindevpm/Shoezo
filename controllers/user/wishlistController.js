@@ -235,9 +235,6 @@ const getWishlistCount = async(req,res)=>{
 
       res.json({count});
 
-
-
-
       
     } catch (error) {
       console.log(error,"wishlist Count Error")
@@ -245,15 +242,6 @@ const getWishlistCount = async(req,res)=>{
       
     }
 }
-
-
-
-
-
-
-
-
-
 
 
 

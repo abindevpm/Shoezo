@@ -13,8 +13,6 @@ const cartCountMiddleware = require("./middlewares/cartCount");
 const errorHandler = require("./middlewares/errorHandler")
 const User = require("./models/userSchema");
 const methodOverride = require('method-override');
-
-
 const AppError = require('./routes/utils/AppError');
 
 
@@ -47,7 +45,7 @@ app.use(methodOverride('_method'));
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
 
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URI
@@ -60,7 +58,6 @@ app.use(session({
   }
 
 }))
-
 
 
 

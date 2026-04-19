@@ -8,6 +8,7 @@ const StatusCodes = require("../../routes/utils/statusCodes")
 const getMatchCondition = (reportType, fromDate, toDate) => {
   
   let matchCondition = { "items.itemStatus": "Delivered" };
+
   const now = new Date();
   let startDate;
   let endDate = new Date();
@@ -44,6 +45,7 @@ const getMatchCondition = (reportType, fromDate, toDate) => {
   endDate.setHours(23, 59, 59, 999);
 
   const today = new Date();
+  today.setHours(23, 59, 59, 999);
 
   if (startDate > endDate) {
     throw new Error("From Date cannot be greater than To Date");
@@ -99,7 +101,7 @@ const loadSalesReport = async (req, res) => {
   try {
 
     const page = parseInt(req.query.page) || 1;
-    const limit = 5;
+    const limit = 7;
     const skip = (page - 1) * limit;
 
     const { reportType, fromDate, toDate } = req.query;
@@ -115,20 +117,31 @@ const loadSalesReport = async (req, res) => {
 
 
       
-    const allOrders = await Order.find(matchCondition).lean();
+    
+    const reportTotals = await Order.aggregate([
+      { $match: matchCondition },
+      { $unwind: "$items" },
+      { $match: { "items.itemStatus": "Delivered" } },
+      {
+        $group: {
+          _id: null,
+          totalSalesAmount: { $sum: "$items.finalPrice" },
+          totalCouponDiscount: { $sum: "$items.couponDiscount" },
+          totalOfferDiscount: { $sum: "$items.offerDiscount" }
+        }
+      }
+    ]);
 
-    let totalSalesAmount = 0;
-    let totalCouponDiscount = 0;
-    let totalOfferDiscount = 0;
+    const totals = reportTotals[0] || {
+      totalSalesAmount: 0,
+      totalCouponDiscount: 0,
+      totalOfferDiscount: 0
+    };
 
-    allOrders.forEach(order => {
-      const totals = getDeliveredTotals(order);
-      totalSalesAmount += totals.salesAmount;
-      totalCouponDiscount += totals.couponDiscount;
-      totalOfferDiscount += totals.offerDiscount;
-    });
+    const { totalSalesAmount, totalCouponDiscount, totalOfferDiscount } = totals;
 
     const totalPages = Math.ceil(totalOrders / limit);
+
 
     res.render("salesReport", {
       orders,

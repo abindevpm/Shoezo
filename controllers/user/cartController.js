@@ -59,6 +59,8 @@ const loadCart = async (req, res) => {
         v => String(v.size) === String(item.size)
       );
 
+
+
       if (!variant) return null;
 
       let appliedDiscount = 0;
@@ -158,8 +160,6 @@ const addToCart = async (req, res) => {
         })
        }
       
-
-
     if (!product) {
       return res.status(404).json({
         success: false,
@@ -297,6 +297,7 @@ const updateCartQty = async (req, res) => {
     }
 
 
+  
     await cart.save();
 
     const populatedCart = await Cart.findById(cart._id).populate({

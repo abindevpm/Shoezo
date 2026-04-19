@@ -8,17 +8,16 @@ const loadCouponPage = async (req, res) => {
 
         const {search,status,type,startDate,endDate} = req.query
         
-
         let query = {}
 
         query.isReferralCoupon = false
-
+            
+    
         if(search){
             query.code = {$regex:search,$options:"i"}
         }
         
 
-        
   const today = new Date();
 
 if (status === "Active") {
@@ -194,8 +193,6 @@ const deleteCoupon = async(req,res)=>{
         await coupon.findByIdAndDelete(couponId);
 
         res.status(200).json({success:true})
-
-
 
         
     } catch (error) {

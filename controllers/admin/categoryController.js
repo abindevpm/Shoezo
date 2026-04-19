@@ -6,25 +6,31 @@ const StatusCodes = require("../../routes/utils/statusCodes");
 const categoryInfo = async (req, res) => {
   try {
     let search = req.query.search || "";
-    let page = parseInt(req.query.page) || 1;
-    let limit = 3;
+    const page = parseInt(req.query.page) || 1
+    const limit = 3;
+    const skip = (page-1)*limit
+
 
     const query = {
       isDeleted: false,
       name: { $regex: search, $options: "i" }
     }
 
-    const total = await Category.countDocuments(query);
+  
+      const totalCategory = await Category.countDocuments(query)
+      const totalPages = Math.ceil(totalCategory/limit)
+
+
     const categories = await Category.find(query)
       .populate("categoryOffer")
       .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit);
+       .skip(skip)
+       .limit(limit)
 
     res.render("category", {
       categories,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page,
+       currentPage:page,
+       totalPages,
       search
     })
 

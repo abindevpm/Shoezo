@@ -9,7 +9,8 @@ const customerinfo = async (req, res) => {
     const limit = 10;
 
     const searchQuery = {
-      isAdmin: false,
+      isAdmin: false, 
+     
       $or: [
         { name: { $regex: search, $options: "i" } },
         { email: { $regex: search, $options: "i" } }

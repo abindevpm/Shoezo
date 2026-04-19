@@ -19,12 +19,12 @@ const loadProducts = async (req, res) => {
     let limit = 5;
     let skip = (page - 1) * limit;
 
-
+    const lowStock = req.query.lowStock || "false";
+    
     let query = { 
       isDeleted: false,
-      
-      
     };
+
 
   
     if (search) {
@@ -49,6 +49,13 @@ const loadProducts = async (req, res) => {
       if (maxPrice !== null) query.price.$lte = maxPrice;
     }
 
+    
+    if (lowStock === "true") {
+      query.variants = { 
+        $elemMatch: { stock: { $lt: 10 } } 
+      };
+    }
+
     const totalProducts = await Product.countDocuments(query);
     const totalPages = Math.ceil(totalProducts / limit);
 
@@ -70,7 +77,6 @@ const loadProducts = async (req, res) => {
 let totalStock = 0;
 
 
-
     const categories = await Category.find({ isDeleted: false, isListed: true });
 
     res.render("products", {
@@ -82,6 +88,7 @@ let totalStock = 0;
       categoryFilter,
       minPrice: req.query.minPrice || "",
       maxPrice: req.query.maxPrice || "",
+      lowStock,
       totalStock
     });
 

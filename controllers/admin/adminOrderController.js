@@ -11,13 +11,12 @@ const loadOrders = async (req, res) => {
         const limit = 10;
         const skip = (page - 1) * limit;
 
-        let query = {   
 
-          
+        let query = {   
+  
         };
 
-     
-
+    
         if (search) {
             if (search.startsWith('ORD-')) {
                 query.orderId = { $regex: search, $options: 'i' };  
@@ -44,7 +43,7 @@ const loadOrders = async (req, res) => {
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
-        
+
 
         res.render("orderlist", {
             orders,
@@ -61,7 +60,6 @@ const loadOrders = async (req, res) => {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internal Server Error");
     }
 };
-
 
 
 
@@ -355,6 +353,7 @@ const cancelItemAdmin = async (req, res) => {
         const { orderId, itemId } = req.params;
         const { reason } = req.body;
 
+
         const order = await Order.findById(orderId).populate("items.productId");
         if (!order) return res.status(404).json({ success: false, message: "Order not found" });
 
@@ -391,11 +390,15 @@ const cancelItemAdmin = async (req, res) => {
                 user.wallet = { balance: 0, transactions: [] };
             }
 
-            user.wallet.balance += reductionAmount;
+            // EXAM TIP: Adding a service fee/restocking fee logic
+            const serviceFee = 50; 
+            const refundAmount = reductionAmount > serviceFee ? reductionAmount - serviceFee : 0;
+
+            user.wallet.balance += refundAmount;
             user.wallet.transactions.push({
                 type: "credit",
-                amount: reductionAmount,
-                description: `Refund for item cancelled by admin: ${item.productId.name || 'Product'} (${order.orderId})`,
+                amount: refundAmount,
+                description: `Refund (after ₹${serviceFee} fee) for item cancelled by admin: ${item.productId.name || 'Product'} (${order.orderId})`,
                 orderId: order._id,
                 date: new Date()
             });

@@ -11,6 +11,9 @@ const loadAddresses = async (req, res) => {
       addresses: user.addresses || [],
       activePage: "address"
     });
+
+
+
   } catch (err) {
     console.log(err);
     res.redirect("/profile");

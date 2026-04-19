@@ -12,7 +12,7 @@ const userAuth = async (req, res, next) => {
 
     if (!user || user.isBlocked) {
       delete req.session.user;
-      return res.redirect("/login");
+      return res.redirect("/login");  
     }
 
 
@@ -24,7 +24,6 @@ const userAuth = async (req, res, next) => {
     return res.redirect("/login");
   }
 };
-
 
 
 

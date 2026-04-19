@@ -714,16 +714,9 @@ const login = async (req, res) => {
 
 
 const logout = async (req, res) => {
-
-  req.session.destroy(err => {
-    if (err) {
-      console.log(err)
-      return res.redirect("/pageNotFound")
-    }
-    res.redirect("/login")
-  })
-
-}
+  delete req.session.user; 
+  res.redirect("/login");
+};
 
 const productlist = async (req, res) => {
 
