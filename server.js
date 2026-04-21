@@ -78,8 +78,7 @@ app.use(async (req, res, next) => {
     }
  
     if (user && user.isBlocked) {
-      delete req.session.user;
-      // req.logout && req.logout(() => {}); 
+      delete req.session.user;  
       req.session.user = null;   
       res.locals.user = null;
     } else {

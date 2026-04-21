@@ -57,8 +57,17 @@ const dashboard = (req, res) => {
 
 
 const logout = (req, res) => {
-  delete req.session.admin; 
-  res.redirect("/admin/login");
+  const userId = req.session.user;
+  const passportData = req.session.passport;
+  
+  req.session.regenerate((err) => {
+    if (err) {
+      console.log("Admin logout regeneration error:", err);
+    }
+    if (userId) req.session.user = userId;
+    if (passportData) req.session.passport = passportData;
+    res.redirect("/admin/login");
+  });
 };
 
 

@@ -125,8 +125,6 @@ const updateOrderStatus = async (req, res) => {
         }
 
         
-
-
         const oldStatus = order.status;
 
 

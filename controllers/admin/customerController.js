@@ -39,8 +39,7 @@ const customerinfo = async (req, res) => {
 
 
 
- const blockUser = async(req,res)=>{
-  
+ const blockUser = async(req,res)=>{ 
    try {
 
      let id = req.query.id;

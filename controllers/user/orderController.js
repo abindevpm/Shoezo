@@ -29,6 +29,7 @@ const loadorders = async (req, res) => {
       }
     }
 
+
     const orders = await Order.find(query)
       .populate("items.productId")
       .sort({ createdAt: -1 })
@@ -46,6 +47,11 @@ const loadorders = async (req, res) => {
     res.status(StatusCodes.NOT_FOUND).redirect("pageNotFound")
   }
 }
+
+
+
+
+
 
 const getOrderDetails = async (req, res) => {
   try {

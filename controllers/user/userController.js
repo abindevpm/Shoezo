@@ -15,14 +15,13 @@ const loadHomepage = async (req, res) => {
   try {
     const userData = res.locals.user;
 
-  
-
     if (userData && userData.isBlocked) {
       req.session.user = null;
       return res.redirect('/login?isBlocked=true')
     }
 
     console.log(req.session.user)
+  
 
 
     const activeCategories = await Category.find({ isListed: true, isDeleted: false }).distinct("_id");
@@ -362,7 +361,7 @@ const resendOtp = async (req, res) => {
 
     if (isResetFlow) {
       req.session.resetOtp = newOtp;
-      req.session.resetOtpExpiry = Date.now() + 60 * 1000; // 1 minute
+      req.session.resetOtpExpiry = Date.now() + 60 * 1000; 
     } else {
       req.session.userOtp = newOtp;
       req.session.otpExpiry = Date.now() + (101 * 1000);
@@ -714,9 +713,23 @@ const login = async (req, res) => {
 
 
 const logout = async (req, res) => {
-  delete req.session.user; 
-  res.redirect("/login");
+  const adminId = req.session.admin;
+  req.session.regenerate((err) => {
+    if (err) {
+      console.log("Logout regeneration error:", err);
+    }
+    if (adminId) {
+      req.session.admin = adminId;
+    }
+    res.redirect("/login");
+  });
 };
+
+
+
+
+
+
 
 const productlist = async (req, res) => {
 

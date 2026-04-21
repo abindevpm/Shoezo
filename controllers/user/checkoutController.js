@@ -239,6 +239,13 @@ const placeOrder = async (req, res) => {
 
     const totalAmount = subtotal - discountAmount;
 
+  if(paymentMethod && paymentMethod.toUpperCase()==="COD" && totalAmount>1000){
+    return res.json({
+      success:false,
+      message:"COD is not available for orders above ₹1000"  
+    })
+  }
+    
     let updatedOrderItems = [];
     let totalDistributed = 0;
 

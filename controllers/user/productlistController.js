@@ -13,6 +13,8 @@ const loadShopPage = async (req, res) => {
   try {
     const userData = res.locals.user;
 
+   
+
     console.log("QUERY =>", req.query);
 
 
@@ -194,6 +196,7 @@ const loadShopPage = async (req, res) => {
 
     pipeline.push({ $skip: skip }, { $limit: limit });
 
+      
 
 
     let products = await Product.aggregate(pipeline);
@@ -203,6 +206,7 @@ const loadShopPage = async (req, res) => {
       { path: "brand" },
       { path: "productOffer" }
     ]);
+ 
 
 
     products.forEach(p => {
@@ -258,6 +262,8 @@ const loadShopPage = async (req, res) => {
       isDeleted: false,
       isListed: true
     });
+
+
 
 
     res.render("productlist", {
