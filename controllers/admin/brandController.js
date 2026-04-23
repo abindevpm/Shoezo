@@ -30,6 +30,7 @@ const loadBrands = async (req, res) => {
       brands,
       currentPage: page,
       totalPages,
+      limit,
       search
     });
 

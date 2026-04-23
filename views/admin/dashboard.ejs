@@ -2,50 +2,687 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SHOEZO - Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHOEZO - Admin Dashboard</title>
+    <!-- CSS Dependencies -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
 
-    .sidebar-link {
-      transition: all 0.3 s ease;
-      position: relative;
-      overflow: hidden;
-    }
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
 
-    .sidebar-link:hover {
-      background-color: #1f2937;
-      transform: translateX(4 px);
-    }
+        /* Essential Layout Spacing (Matching Project Pattern) */
+        .content-area {
+            margin-left: 260px;
+            margin-top: 80px;
+            padding: 31px;
+            min-height: 100vh;
+        }
 
-    .sidebar-link:active {
-      transform: scale(0.98);
-    }
+        @media (max-width: 991px) {
+            .content-area {
+                margin-left: 0;
+            }
+        }
 
-    .page-btn:focus,
-    .logout-btn:focus {
-      outline: 2 px solid #3b82f6;
-      outline-offset: 2 px;
-    }
-  </style>
+        /* Professional Design Tokens */
+        .card-stat {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.2s ease;
+        }
+
+        .card-stat:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .table-professional thead th {
+            background-color: #f8fafc;
+            color: #64748b;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 12px 24px;
+        }
+
+        .table-professional tbody td {
+            padding: 16px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.875rem;
+            color: #334155;
+        }
+
+        /* Chart Controls */
+        .chart-filter {
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 8px;
+        }
+
+        .filter-btn {
+            border: none;
+            background: transparent;
+            padding: 6px 16px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: #ffffff;
+            color: #0f172a;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Rank Badges */
+        .rank-badge {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        /* Progress Bars */
+        .progress-sm {
+            height: 6px;
+            border-radius: 10px;
+            background-color: #f1f5f9;
+        }
+
+        .progress-bar-indigo { background-color: #4f46e5; }
+
+        /* Custom Scrollbar */
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+    </style>
 </head>
 
-<body class="bg-gray-100">
+<body>
+    <!-- Navbar & Sidebar Partials -->
+    <%- include('../partials/admin/navbar.ejs') %>
+    <%- include('../partials/admin/sidebar.ejs') %>
 
-  <div class="flex h-screen">
+    <% 
+        // Self-contained EJS Data (Prevents errors when controller doesn't pass data)
+        const overallStats = locals.overallStats || { revenue: 0, orders: 0, products: 0, customers: 0 };
+        const topProducts = locals.topProducts || [];
+        const topCategories = locals.topCategories || [];
+        const topBrands = locals.topBrands || [];
+        const recentOrders = locals.recentOrders || [];
+        
+        // Process raw MongoDB aggregation arrays into objects for easy access
+        const itemStatusStats = {};
+        if (locals.itemStatusStats) {
+            locals.itemStatusStats.forEach(s => itemStatusStats[s._id] = s.count);
+        }
 
-      <%- include("../../views/partials/admin/sidebar.ejs"); %>
-  
-    <div class="flex-1 overflow-y-auto">
-      <!-- Top Navbar -->
+        const orderStatusStats = {};
+        if (locals.orderStatusData) {
+            locals.orderStatusData.forEach(s => orderStatusStats[s._id] = s.count);
+        }
+
+        const paymentStats = { ONLINE: 0, COD: 0, WALLET: 0 };
+        if (locals.paymentData) {
+            locals.paymentData.forEach(s => paymentStats[s._id] = s.count);
+        }
+
+        const offerPerformance = locals.offerStats?.[0] || { productOfferRevenue: 0, categoryOfferRevenue: 0 };
+    %>
+
+    <main class="content-area">
+        <!-- Header -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
+            <div>
+                <h1 class="h2 fw-bold text-slate-800 m-0">Admin Dashboard</h1>
+                <p class="text-secondary small m-0">Analyze business growth and operational performance</p>
+            </div>
+            <div class="d-flex gap-2">
+                <!-- <button class="btn btn-outline-secondary btn-sm rounded-3">
+                    <i class="fas fa-download me-2"></i>Export Report
+                </button> -->
+            </div>
+        </div>
+
+        <!-- Quick Stats Row -->
+        <div class="row g-4 mb-5">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card-stat">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="small text-secondary fw-semibold uppercase tracking-wider">Revenue</span>
+                        <i class="fas fa-indian-rupee-sign text-indigo-500"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1">₹<%= overallStats.revenue.toLocaleString() %></h3>
+                    <div class="small">
+                        <span class="text-success fw-bold">All Time</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card-stat">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="small text-secondary fw-semibold uppercase tracking-wider">Total Orders</span>
+                        <i class="fas fa-shopping-bag text-emerald-500"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1"><%= overallStats.orders %></h3>
+                    <div class="small">
+                        <span class="text-success fw-bold">Active</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card-stat">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="small text-secondary fw-semibold uppercase tracking-wider">Products</span>
+                        <i class="fas fa-box text-blue-500"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1"><%= overallStats.products %></h3>
+                    <div class="small">
+                        <span class="text-muted">Total Stock</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card-stat">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="small text-secondary fw-semibold uppercase tracking-wider">Customers</span>
+                        <i class="fas fa-users text-amber-500"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1"><%= overallStats.customers %></h3>
+                    <div class="small">
+                        <span class="text-indigo-600 fw-bold">Verified Users</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: Analytics Row -->
+        <div class="row g-4 mb-5">
+            <div class="col-12">
+                <div class="section-card p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="h5 fw-bold m-0 text-slate-800">Revenue Analytics</h2>
+                        <div class="chart-filter d-flex">
+                            
+                            <button class="filter-btn <%= currentFilter === 'weekly' ? 'active' : '' %>" 
+        onclick="updateChart('weekly')">Week</button>
+
+<button class="filter-btn <%= currentFilter === 'monthly' ? 'active' : '' %>" 
+        onclick="updateChart('monthly')">Month</button>
+
+<button class="filter-btn <%= currentFilter === 'yearly' ? 'active' : '' %>" 
+        onclick="updateChart('yearly')">Year</button>
+
+
+                        </div>
+                    </div>
+                    <div style="height: 350px;">
+                        <canvas id="mainSalesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 3: Triple Analytics Row (Matched to Image) -->
+        <div class="row g-4 mb-5">
+            <!-- Customer Growth -->
+            <div class="col-12 col-xl-4">
+                <div class="section-card p-4 h-100">
+                    <div class="mb-4">
+                        <h2 class="h5 fw-bold m-0 text-slate-800">Customer Growth</h2>
+                        <p class="text-secondary small m-0">New customers over time</p>
+                    </div>
+                    <div style="height: 250px;">
+                        <canvas id="customerGrowthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders Overview -->
+            <div class="col-12 col-xl-4">
+                <div class="section-card p-4 h-100">
+                    <div class="mb-4">
+                        <h2 class="h5 fw-bold m-0 text-slate-800">Orders Overview</h2>
+                        <p class="text-secondary small m-0">Orders placed per period</p>
+                    </div>
+                    <div style="height: 250px;">
+                        <canvas id="ordersOverviewChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Methods -->
+            <div class="col-12 col-xl-4">
+                <div class="section-card p-4 h-100">
+                    <div class="mb-4">
+                        <h2 class="h5 fw-bold m-0 text-slate-800">Payment Methods</h2>
+                        <p class="text-secondary small m-0">Orders by payment type</p>
+                    </div>
+                    <div style="height: 250px;">
+                        <canvas id="paymentMethodChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 4: Offer Performance Section -->
+        <div class="row g-4 mb-5">
+            <div class="col-12 col-xl-4">
+              <div class="section-card p-4 h-100">
+                <div class="mb-4">
+                    <h2 class="h5 fw-bold m-0 text-slate-800">Offer Performance</h2>
+                    <p class="text-secondary small m-0">Revenue by offer type</p>
+                </div>
+                <div style="height: 250px;">
+                    <canvas id="offerTypeChart"></canvas>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Item Status Breakdown Section (Matched to Image) -->
+            <div class="col-12 col-xl-8">
+                <div class="section-card p-4 h-100">
+                    <div class="mb-4">
+                        <h2 class="h5 fw-bold m-0 text-slate-800">Item Status Breakdown</h2>
+                        <p class="text-secondary small m-0">Across all order items</p>
+                    </div>
+                    <div class="row g-2 mb-4">
+                        <% const iStats = itemStatusStats || {}; %>
+                        <div class="col-4 col-md-2">
+                            <div class="p-2 rounded-3 bg-slate-50 border text-center">
+                                <span class="text-secondary small font-600 d-block mb-1">Cancelled</span>
+                                <h5 class="fw-bold m-0"><%= iStats.Cancelled || 0 %></h5>
+                                <span class="badge bg-danger-subtle text-danger px-1" style="font-size: 8px;">Items</span>
+                            </div>
+                        </div>
+                        <div class="col-4 col-md-2">
+                          <div class="p-2 rounded-3 bg-slate-50 border text-center">
+                              <span class="text-secondary small font-600 d-block mb-1">Delivered</span>
+                              <h5 class="fw-bold m-0"><%= iStats.Delivered || 0 %></h5>
+                              <span class="badge bg-success-subtle text-success px-1" style="font-size: 8px;">Items</span>
+                          </div>
+                      </div>
+                      <div class="col-4 col-md-2">
+                        <div class="p-2 rounded-3 bg-slate-50 border text-center">
+                            <span class="text-secondary small font-600 d-block mb-1">Pending</span>
+                            <h5 class="fw-bold m-0"><%= iStats.Placed || 0 %></h5>
+                            <span class="badge bg-warning-subtle text-warning px-1" style="font-size: 8px;">Items</span>
+                        </div>
+                    </div>
+                    <div class="col-4 col-md-2">
+                          <div class="p-2 rounded-3 bg-slate-50 border text-center">
+                              <span class="text-secondary small font-600 d-block mb-1">Returned</span>
+                              <h5 class="fw-bold m-0"><%= iStats.Returned || 0 %></h5>
+                              <span class="badge bg-dark-subtle text-dark px-1" style="font-size: 8px;">Items</span>
+                          </div>
+                      </div>
+                    </div>
+                    <p class="text-secondary small fw-800 mb-2">Order Status Summary</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <% const oStats = orderStatusStats || {}; %>
+                        <span class="badge bg-danger-subtle text-danger px-2 py-1">Cancelled <%= oStats.Cancelled || 0 %></span>
+                        <span class="badge bg-info-subtle text-info px-2 py-1">Confirmed <%= oStats.Processing || 0 %></span>
+                        <span class="badge bg-success-subtle text-success px-2 py-1">Delivered <%= oStats.Delivered || 0 %></span>
+                        <span class="badge bg-warning-subtle text-warning px-2 py-1">Pending <%= oStats.Placed || 0 %></span>
+                        <span class="badge bg-primary-subtle text-primary px-2 py-1">Shipped <%= oStats.Shipped || 0 %></span>
+                        <span class="badge bg-dark-subtle text-dark px-2 py-1">Returned <%= oStats.Returned || 0 %></span>
+                    </div>
+                </div>
+            </div>
+        </div>  
+
+        <!-- Ranking Tables Section -->
+        <div class="row g-4 mb-5">
+            <div class="col-12 col-xl-7">
+                <div class="section-card h-100">
+                    <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+                        <h2 class="h5 fw-bold m-0">Best Selling Products</h2>
+                        <span class="badge bg-light text-dark rounded-pill px-3">Top 10 Selling</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-professional table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Product</th>
+                                    <th class="text-end">Sales</th>
+                                    <th class="text-end">Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% topProducts.forEach((product, i) => { %>
+                                <tr>
+                                    <td><span class="text-muted"><%= i + 1 %></span></td>
+
+                                    <td>
+  <div class="d-flex align-items-center gap-2">
+
+   <img src="/uploads/product-images/<%= product.productInfo.images?.[0] %>"
+      width="40" 
+      height="40" 
+      style="object-fit: cover; border-radius: 6px;"
+    >
+
+    <span class="fw-semibold text-slate-800">
+      <%= product.productInfo?.name %>
+    </span>
+
+  </div>
+</td>
+
+                                    <td class="text-end"><%= product.totalSales %></td>
+                                    <td class="text-end fw-bold">₹<%= product.totalRevenue.toLocaleString() %></td>
+                                </tr>
+                                <% }) %>
+                                <% if (topProducts.length === 0) { %>
+                                    <tr><td colspan="4" class="text-center text-muted py-4">No sales data available</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-xl-5">
+                <div class="row g-4 h-100">
+                    <div class="col-12">
+                        <div class="section-card p-4">
+                            <h2 class="h5 fw-bold mb-4">Top Categories</h2>
+                            <div class="space-y-4 custom-scroll" style="max-height: 380px; overflow-y: auto; padding-right: 8px;">
+                                <% topCategories.forEach((cat, i) => { %>
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="small fw-bold text-slate-700"><%= cat.categoryInfo.name %></span>
+                                        <span class="small text-muted"><%= cat.totalSales %> Sold</span>
+                                    </div>
+                                    <div class="progress progress-sm">
+                                        <div class="progress-bar progress-bar-indigo" style="width: <%= Math.min((cat.totalSales / (topCategories[0]?.totalSales || 1)) * 100, 100) %>%"></div>
+                                    </div>
+                                </div>
+                                <% }) %>
+                            </div>
+                        </div>
+                    </div>
+
+
+   <div class="col-12">
+            <div class="section-card p-4">
+                <h2 class="h5 fw-bold mb-4">Top Brands</h2>
+
+                <div class="space-y-4 custom-scroll" style="max-height: 380px; overflow-y: auto; padding-right: 8px;">
+                    <% topBrands.forEach((brand, i) => { %>
+                    <div class="mb-3">
+
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="small fw-bold text-slate-700">
+                                <%= brand.brandInfo?.name %>
+                            </span>
+                            <span class="small text-muted">
+                                <%= brand.totalSales %> Sold
+                            </span>
+                        </div>
+
+                        <div class="progress progress-sm">
+                            <div class="progress-bar progress-bar-indigo"
+                                 style="width: <%= Math.min((brand.totalSales / (topBrands[0]?.totalSales || 1)) * 100, 100) %>%">
+                            </div>
+                        </div>
+
+                    </div>
+                    <% }) %>
+
+                    <% if (topBrands.length === 0) { %>
+                        <p class="text-muted text-center">No brand data available</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+
+
+
+                </div>
+
+            </div>
+
+
+        </div> <!-- Recent Orders Section -->
+        <div class="row g-4 pb-12">
+            <div class="col-12">
+                <div class="section-card h-100">
+                    <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+                        <h2 class="h5 fw-bold m-0">Recent Orders</h2>
+                        <a href="/admin/orders" class="btn btn-sm btn-outline-primary px-3 rounded-3">View All Activity</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-professional table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% recentOrders.forEach(order => { %>
+                                <tr>
+                                    <td><span class="fw-bold text-slate-700">#<%= order.orderId %></span></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-indigo-50 text-indigo-600 rounded-circle d-flex align-items-center justify-content-center me-2 fw-bold" style="width: 28px; height: 28px; font-size: 10px;">
+                                                <%= order.userId?.name?.charAt(0) || 'U' %>
+                                            </div>
+                                            <span><%= order.userId?.name || 'Unknown' %></span>
+                                        </div>
+                                    </td>
+                                    <td><span class="fw-800 text-slate-900">₹<%= order.totalAmount.toLocaleString() %></span></td>
+                                    <td>
+                                        <% const pm = order.paymentMethod; %>
+                                        <span class="badge 
+                                            <%= pm === 'ONLINE' ? 'bg-primary-subtle text-primary' : 
+                                               pm === 'WALLET' ? 'bg-info-subtle text-info' : 
+                                               pm === 'COD' ? 'bg-warning-subtle text-warning' : 'bg-light text-secondary' %> border px-2 py-1">
+                                            <%= pm %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <% const s = order.status; %>
+                                        <span class="badge 
+                                            <%= s === 'Delivered' ? 'bg-success-subtle text-success' : 
+                                               s === 'Cancelled' ? 'bg-danger-subtle text-danger' : 
+                                               s === 'Shipped' ? 'bg-primary-subtle text-primary' : 
+                                               ['Processing', 'Placed'].includes(s) ? 'bg-info-subtle text-info' : 'bg-warning-subtle text-warning' %> px-2 py-1">
+                                            <%= s %>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                                <% if (recentOrders.length === 0) { %>
+                                    <tr><td colspan="5" class="text-center text-muted py-4">No recent orders found</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
       
-          <%- include("../../views/partials/admin/navbar.ejs"); %>
 
+        let mainChart;
+
+        function initCharts() {
+            initSalesChart();
+            initCustomerGrowthChart();
+            initOrdersOverviewChart();
+            initPaymentChart();
+            initOfferChart();
+        }
+function initSalesChart() {
+    const ctx = document.getElementById('mainSalesChart').getContext('2d');
+
+    mainChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: <%- JSON.stringify(salesLabels) %>,
+            datasets: [{
+                label: 'Revenue',
+                data: <%- JSON.stringify(salesValues) %>,
+                borderColor: '#4f46e5',
+                borderWidth: 3,
+                fill: true,
+                backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } }
+        }
+    });
+}
+
+        function initCustomerGrowthChart() {
+            const ctx = document.getElementById('customerGrowthChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [new Date().toISOString().slice(0, 7)],
+                    datasets: [{ label: 'New Customers', data: [<%= overallStats.customers %>], backgroundColor: '#f472b6', borderRadius: 8, barThickness: 100 }]
+                },
+                options: { 
+                  responsive: true, maintainAspectRatio: false, 
+                  plugins: { legend: { position: 'top', labels: { usePointStyle: true, font: { size: 11, weight: '600' } } } },
+                  scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                }
+            });
+        }
+
+        function initOrdersOverviewChart() {
+            const ctx = document.getElementById('ordersOverviewChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [new Date().toISOString().slice(0, 7)],
+                    datasets: [{ label: 'Total Orders', data: [<%= overallStats.orders %>], backgroundColor: '#22d3ee', borderRadius: 8, barThickness: 100 }]
+                },
+                options: { 
+                  responsive: true, maintainAspectRatio: false,
+                  plugins: { legend: { position: 'top', labels: { usePointStyle: true, font: { size: 11, weight: '600' } } } },
+                  scales: { y: { beginAtZero: true, ticks: { stepSize: 5 } } }
+                }
+            });
+        }
+
+        function initPaymentChart() {
+            const ctx = document.getElementById('paymentMethodChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Razorpay', 'COD', 'Wallet'],
+                    datasets: [{ 
+                        label: 'Orders', 
+                        data: [
+                            <%= paymentStats.ONLINE || 0 %>, 
+                            <%= paymentStats.COD || 0 %>, 
+                            <%= paymentStats.WALLET || 0 %>
+                        ], 
+                        backgroundColor: ['#5494f1', '#f7b750', '#48c78e'], 
+                        borderRadius: 8, 
+                        barThickness: 40 
+                    }]
+                },
+                options: { 
+                  responsive: true, maintainAspectRatio: false,
+                  plugins: { legend: { position: 'top', labels: { usePointStyle: true, font: { size: 11, weight: '600' } } } },
+                  scales: { y: { beginAtZero: true, ticks: { stepSize: 2 } } }
+                }
+            });
+        }
+
+        function initOfferChart() {
+            const ctx = document.getElementById('offerTypeChart').getContext('2d');
+            
+            
+            const hasData = <%= offerPerformance.productOfferRevenue + offerPerformance.categoryOfferRevenue %> > 0;
+            const dataValues = hasData ? 
+                [<%= offerPerformance.productOfferRevenue %>, <%= offerPerformance.categoryOfferRevenue %>] : 
+                [1, 1]; 
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Product Offer', 'Category Offer'],
+                    datasets: [{ 
+                        data: dataValues, 
+                        backgroundColor: hasData ? ['#7c3aed', '#db2777'] : ['#f1f5f9', '#f1f5f9'], 
+                        borderWidth: 0 
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    cutout: '75%', 
+                    plugins: { 
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            enabled: hasData,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ₹' + context.raw.toLocaleString();
+                                }
+                            }
+                        }
+                    } 
+                }
+            });
+        }
+
+
+
+        function updateChart(type) {
+  window.location.href = `/admin/dashboard?type=${type}`;
+}
+
+
+
+
+       
+        document.addEventListener('DOMContentLoaded', initCharts);
+    </script>
 </body>
 
 </html>
+/html>

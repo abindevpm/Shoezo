@@ -31,6 +31,7 @@ const categoryInfo = async (req, res) => {
       categories,
        currentPage:page,
        totalPages,
+       limit,
       search
     })
 

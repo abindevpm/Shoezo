@@ -201,7 +201,8 @@
         <label class="fw-bold">Existing Images</label>
         <div class="d-flex gap-3 mb-3">
           <% product.images.forEach(img => { %>
-            <div style="position:relative">
+            <div style="position:relative" class="existing-image-wrapper">
+              <input type="hidden" name="existingImages" value="<%= img %>">
               <img src="/uploads/product-images/<%= img %>"
      style="
        width:90px;
@@ -209,8 +210,12 @@
        object-fit:contain;
        image-rendering: auto;
      ">
-
-
+              <button type="button"
+                      class="btn btn-primary btn-sm"
+                      onclick="changeImage(this)"
+                      style="position:absolute;top:-5px;right:25px">
+                <i class="fas fa-sync-alt"></i>
+              </button>
 
               <button type="button"
                       class="btn btn-danger btn-sm delete-image-btn"
@@ -266,9 +271,9 @@
 
 
 
-   <script>
-  const existingImageCount = <%= product.images.length %>;
-</script>
+  <script>
+    let existingImageCount = <%= product.images.length %>;
+  </script>
 
 
 
@@ -279,7 +284,7 @@
 
 
   <script>
-  /* ========= IMAGE CROP LOGIC ========= */
+  
 
 
 
@@ -294,15 +299,25 @@
   const cropModal = document.getElementById("cropModal");
   const cropImage = document.getElementById("cropImage");
 
-  /* FILE SELECT */
+  
   input.addEventListener("change", e => {
-    filesToCrop = Array.from(e.target.files);
-     
+    const newFiles = Array.from(e.target.files);
+    if (newFiles.length === 0) return;
+
+    const totalNow = existingImageCount + selectedFiles.length + newFiles.length;
+    if (totalNow > 3) {
+      document.getElementById("imageError").innerText = "Maximum 3 images allowed";
+      e.target.value = "";
+      return;
+    }
+
+    document.getElementById("imageError").innerText = "";
+    filesToCrop = newFiles;
     cropIndex = 0;
     startCropping();
   });
 
-  /* START CROPPING */
+  
   function startCropping() {
     if (cropIndex >= filesToCrop.length) {
       syncInput();
@@ -332,13 +347,13 @@
    
   });
 
-      cropModal.style.display = "flex"; // ✅ OPEN MODAL
+      cropModal.style.display = "flex"; 
     };
 
     reader.readAsDataURL(filesToCrop[cropIndex]);
   }
 
-  /* APPLY CROP */
+
   document.getElementById("applyCrop").onclick = () => {
     if (!cropper) return;
 
@@ -363,7 +378,7 @@
     }, "image/jpeg", 0.9);
   };
 
-  /* CANCEL CROP */
+  
   document.getElementById("cancelCrop").onclick = () => {
     cropModal.style.display = "none";
     if (cropper) {
@@ -372,7 +387,7 @@
     }
   };
 
-  /* PREVIEW */
+  
   function renderPreview() {
     preview.innerHTML = "";
     selectedFiles.forEach(file => {
@@ -387,128 +402,60 @@
     });
   }
 
-  /* SYNC FILE INPUT */
+  
   function syncInput() {
     const dt = new DataTransfer();
     selectedFiles.forEach(f => dt.items.add(f));
     input.files = dt.files;
   }
 
-  /* DELETE EXISTING IMAGE */
+  
+  function changeImage(btn) {
+    
+    
+    document.getElementById('imagesInput').click();
+    
+    
+    btn.closest(".existing-image-wrapper").remove();
+    existingImageCount--;
+  }
+
   document.querySelectorAll(".delete-image-btn").forEach(btn => {
     btn.onclick = async () => {
-      await fetch(
-        `/admin/delete-product-image/<%= product._id %>/${btn.dataset.img}`,
-        { method: "DELETE" }
-      );
-      location.reload();
+    
+      const currentImages = document.querySelectorAll(".existing-image-wrapper").length + selectedFiles.length;
+      
+      if (currentImages <= 3) {
+        Swal.fire({
+          icon: "warning",
+          title: "Requirement",
+          text: "Minimum 3 images are required for a product."
+        });
+        return;
+      }
+
+      
+      const confirmResult = await Swal.fire({
+        title: "Remove image?",
+        text: "This image will be marked for removal and deleted when you save the product.",
+        icon: "info",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#aaa",
+        confirmButtonText: "Remove",
+        cancelButtonText: "Cancel"
+      });
+
+      if (confirmResult.isConfirmed) {
+        btn.closest(".existing-image-wrapper").remove();
+        existingImageCount--;
+      }
     };
   });
 
 
 
-   //  validation 
-
-   function validateForm() {
-
-  // Clear old errors
-  document.querySelectorAll("small.text-danger")
-    .forEach(el => el.innerText = "");
-
-  let isValid = true;
-
-  const name = document.querySelector("input[name='name']").value.trim();
-  const category = document.querySelector("select[name='category']").value;
-  const brand = document.querySelector("select[name='brand']").value;
-  const description = document.querySelector("textarea[name='description']").value.trim();
-  const price = document.querySelector("input[name='price']").value;
-  const offerPrice = document.querySelector("input[name='offerPrice']").value;
-
-  // NAME
-  if (!name) {
-    document.getElementById("nameError").innerText = "Product name is required";
-    isValid = false;
-  }
-
-  // CATEGORY
-  if (!category) {
-    document.getElementById("categoryError").innerText = "Category is required";
-    isValid = false;
-  }
-
-  // BRAND
-  if (!brand) {
-    document.getElementById("brandError").innerText = "Brand is required";
-    isValid = false;
-  }
-
-  // DESCRIPTION
-  if (!description) {
-    document.getElementById("descriptionError").innerText = "Description is required";
-    isValid = false;
-  }
-
-  // PRICE
-  if (!price || price <= 0) {
-    document.getElementById("priceError").innerText = "Enter a valid price";
-    isValid = false;
-  }
-
-  // OFFER PRICE
-  if (!offerPrice || offerPrice <= 0) {
-    document.getElementById("offerPriceError").innerText = "Enter a valid offer price";
-    isValid = false;
-  } else if (Number(offerPrice) >= Number(price)) {
-    document.getElementById("offerPriceError").innerText =
-      "Offer price must be less than price";
-    isValid = false;
-  }
-
-  // VARIANTS VALIDATION
-  const variantRows = document.querySelectorAll(".variant-row");
-
-  variantRows.forEach((row, index) => {
-    const size = row.querySelector("input[name*='[size]']").value.trim();
-    const color = row.querySelector("input[name*='[color]']").value.trim();
-    const stock = row.querySelector("input[name*='[stock]']").value;
-
-    if (!size) {
-      row.querySelector(".sizeError").innerText = "Size required";
-      isValid = false;
-    }
-
-    if (!color) {
-      row.querySelector(".colorError").innerText = "Color required";
-      isValid = false;
-    }
-
-    if (stock === "" || stock < 0) {
-      row.querySelector(".stockError").innerText = "Stock must be 0 or more";
-      isValid = false;
-    }
-  });
-
-
-
-
-  const totalImages = existingImageCount + selectedFiles.length;
-
-if (totalImages < 3) {
-  document.getElementById("imageError").innerText =
-    "At least 3 product images are required";
-  isValid = false;
-} else {
-  document.getElementById("imageError").innerText = "";
-}
-
-
-  return isValid;
-}
-
-
-
-
-
+   
 function renderVariants() {
   const container = document.getElementById("variantList");
   container.innerHTML = "";
@@ -591,11 +538,11 @@ function validateForm() {
 
   let isValid = true;
 
-  // clear all errors
+  
   document.querySelectorAll("small.text-danger")
     .forEach(el => el.innerText = "");
 
-  /* ---------- BASIC DETAILS ---------- */
+  
   const name = document.querySelector("input[name='name']").value.trim();
   const category = document.querySelector("select[name='category']").value;
   const brand = document.querySelector("select[name='brand']").value;
@@ -622,7 +569,7 @@ function validateForm() {
     isValid = false;
   }
 
-  /* ---------- VARIANTS ---------- */
+  
   const variantRows = document.querySelectorAll(".variant-row");
 
   if (variantRows.length < 1) {
@@ -663,13 +610,19 @@ function validateForm() {
     }
   });
 
-  /* ---------- IMAGES ---------- */
+  
   const totalImages = existingImageCount + selectedFiles.length;
 
   if (totalImages < 3) {
     document.getElementById("imageError").innerText =
       "Minimum 3 product images required";
     isValid = false;
+  } else if (totalImages > 3) {
+    document.getElementById("imageError").innerText =
+      "Maximum 3 images allowed";
+    isValid = false;
+  } else {
+    document.getElementById("imageError").innerText = "";
   }
 
   return isValid;
@@ -678,6 +631,26 @@ function validateForm() {
 
 
 
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get("status");
+
+    if (status === "minImages") {
+      Swal.fire({
+        icon: "warning",
+        title: "Requirement",
+        text: "At least 3 images are required for this product."
+      });
+    } else if (status === "maxImages") {
+      Swal.fire({
+        icon: "warning",
+        title: "Limit",
+        text: "Maximum 3 images are allowed for this product."
+      });
+    }
+
+    if (status) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   </script>
 
  

@@ -16,7 +16,7 @@ const loadProducts = async (req, res) => {
 
 
     let page = search ? 1 : parseInt(req.query.page) || 1;
-    let limit = 5;
+    let limit = 10;
     let skip = (page - 1) * limit;
 
     const lowStock = req.query.lowStock || "false";
@@ -44,9 +44,9 @@ const loadProducts = async (req, res) => {
 
     
     if (minPrice !== null || maxPrice !== null) {
-      query.price = {};
-      if (minPrice !== null) query.price.$gte = minPrice;
-      if (maxPrice !== null) query.price.$lte = maxPrice;
+      query["variants.price"] = {};
+      if (minPrice !== null) query["variants.price"].$gte = minPrice;
+      if (maxPrice !== null) query["variants.price"].$lte = maxPrice;
     }
 
     
@@ -84,6 +84,7 @@ let totalStock = 0;
       categories,
       currentPage: page,
       totalPages,
+      limit,
       search,
       categoryFilter,
       minPrice: req.query.minPrice || "",
@@ -124,9 +125,21 @@ const AddProducts = async (req, res) => {
 
 
     const images = [];
-    if (req.files && req.files.length > 0) {
-      req.files.forEach(file => images.push(file.filename));
+    const files = req.files;
+
+    if (Array.isArray(files)) {
+      files.forEach(file => images.push(file.filename));
+    } else if (files && files.images) {
+      files.images.forEach(file => images.push(file.filename));
     }
+
+    if (images.length > 10) {
+      return res.redirect("/admin/add-products?status=maxImages");
+    }
+
+
+
+
 
     const rawVariants = data.variants
       ? Object.values(data.variants)
@@ -237,39 +250,62 @@ const updateProduct = async (req, res) => {
     if (!product) {
       return res.status(404).send("Product not found");
     }
+    
+        let existingImages = req.body.existingImages || [];
 
+        
+
+         if (!Array.isArray(existingImages)) {
+      existingImages = [existingImages];
+    }
+  
+    const files = req.files;
+    const newFilesNames = [];
+    if (Array.isArray(files)) {
+      files.forEach(f => newFilesNames.push(f.filename));
+    } else if (files && files.images) {
+      files.images.forEach(f => newFilesNames.push(f.filename));
+    }
+
+    const totalImages = (existingImages ? existingImages.length : 0) + newFilesNames.length;
+
+    if (totalImages < 3) {
+      return res.redirect(`/admin/edit-product/${id}?status=minImages`);
+    }
+    if (totalImages > 3) {
+      return res.redirect(`/admin/edit-product/${id}?status=maxImages`);
+    }
 
     let variants = [];
-
     if (data.variants) {
       const rawVariants = Array.isArray(data.variants)
         ? data.variants
         : Object.values(data.variants);
-
-    
+      
       variants = rawVariants.map(v => ({
         ...v,
         salePrice: Number(v.offerPrice) || Number(v.price)
       }));
     }
 
+    const imagesToDelete = product.images.filter(img => !existingImages.includes(img));
+    imagesToDelete.forEach(imgName => {
+      const imagePath = path.join(__dirname, "../../public/uploads/product-images", imgName);
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    });
+
     const updateData = {
       name: data.name,
       brand: data.brand,
       description: data.description,
-      price: data.price,
-      offerPrice: data.offerPrice,
       category: data.category,
-      variants: variants
+      variants: variants,
+      images: [...existingImages, ...newFilesNames]
     };
 
-
-    if (req.files && req.files.length > 0) {
-      const newImages = req.files.map(file => file.filename);
-      updateData.images = [...product.images, ...newImages];
-    }
-
-    await Product.findByIdAndUpdate(id, updateData);
+    await Product.findByIdAndUpdate(id, { $set: updateData });
 
     res.redirect("/admin/products");
 
@@ -304,7 +340,17 @@ const deleteProduct = async (req, res) => {
 const deleteProductImage = async (req, res) => {
   try {
     const { productId, imgName } = req.params;
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.json({ success: false, message: "Product not found" });
+    }
 
+    if (product.images.length <= 3) {
+      return res.json({ 
+        success: false, 
+        message: "Cannot delete. A minimum of 3 images is required for this product." 
+      });
+    }
 
     const updatedProduct = await Product.findByIdAndUpdate(
       productId,

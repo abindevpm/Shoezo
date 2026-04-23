@@ -151,6 +151,7 @@ const loadSalesReport = async (req, res) => {
       totalOfferDiscount,
       currentPage: page,
       totalPages,
+      limit,
       reportType: reportType || "all",
       fromDate: fromDate || "",
       toDate: toDate || "",

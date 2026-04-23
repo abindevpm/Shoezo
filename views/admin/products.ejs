@@ -117,7 +117,7 @@
                   <% products.forEach((product, index)=> { %>
                     <tr>
                       <td>
-                        <%= index + 1 %>
+                        <%= ((currentPage - 1) * limit) + index + 1 %>
                       </td>
 
                       <td class="text-start fw-bold">
@@ -231,11 +231,12 @@
               </tbody>
 
             </table>
+
           </div>
         </div>
 
 
-        <!-- PAGINATION (BOTTOM ONLY) -->
+        
         <div class="pagination-wrapper d-flex justify-content-center mt-4">
           <nav>
             <ul class="pagination gap-2">

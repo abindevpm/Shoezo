@@ -62,6 +62,7 @@ else if (status === "Expired") {
             coupons,
             currentPage:page,
             totalPages : Math.ceil(total/limit),
+            limit,
             queryParams:req.query
         })
     } catch (error) {

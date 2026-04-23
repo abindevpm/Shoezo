@@ -179,8 +179,17 @@ const loadShopPage = async (req, res) => {
           }
         }
       },
+   
+      
 
     ];
+
+
+    
+
+
+
+
 
     if (nameSort === "name_asc") {
       pipeline.push({ $sort: { name: 1 } });
@@ -207,6 +216,7 @@ const loadShopPage = async (req, res) => {
       { path: "productOffer" }
     ]);
  
+     
 
 
     products.forEach(p => {
@@ -246,6 +256,8 @@ const loadShopPage = async (req, res) => {
       }
     });
 
+     const pip = [...pipeline]
+     
 
 
     const totalProducts = await Product.countDocuments(filter);

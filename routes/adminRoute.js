@@ -52,9 +52,9 @@ router.patch("/toggle-brand/:id", adminAuth, brandController.toggleBrand);
 // product managemant
 router.get("/products", adminAuth, productController.loadProducts);
 router.get("/add-products", adminAuth, productController.loadAddProducts)
-router.post("/add-product", adminAuth, uploadProduct.array("images", 3), productController.AddProducts);
+router.post("/add-product", adminAuth, uploadProduct.array("images", 10), productController.AddProducts);
 router.get("/edit-product/:id", adminAuth, productController.loadEditProduct)
-router.put("/edit-product/:id", adminAuth, uploadProduct.array("images", 3), productController.updateProduct);
+router.put("/edit-product/:id", adminAuth, uploadProduct.array("images", 10), productController.updateProduct);
 router.patch("/delete-product/:id", adminAuth, productController.deleteProduct)
 router.delete("/delete-product-image/:productId/:imgName", adminAuth, productController.deleteProductImage);
 router.patch("/toggle-product/:id", adminAuth, productController.toggleProduct);

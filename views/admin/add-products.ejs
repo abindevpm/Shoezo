@@ -300,17 +300,18 @@
 
 
         <script>
-            /* ------------------ GLOBAL VARIABLES ------------------ */
+          
             let selectedFiles = [];
 let cropper = null;
 let cropIndex = 0;
+let filesToCrop = [];
 
 const input = document.getElementById("imagesInput");
 const preview = document.getElementById("previewContainer");
 const cropModal = document.getElementById("cropModal");
 const cropImage = document.getElementById("cropImage");
 
-/* ------------------ OPEN / CLOSE CUSTOM MODAL ------------------ */
+
 function openCropModal() {
     cropModal.style.display = "flex";
 }
@@ -320,36 +321,48 @@ function closeCropModal() {
     if (cropper) cropper.destroy();
 }
 
-/* CLOSE MODAL ON CANCEL BUTTON */
+
 document.getElementById("cancelCrop").onclick = closeCropModal;
 
-/* ------------------ WHEN USER SELECTS FILE(S) ------------------ */
-input.addEventListener("change", function (event) {
-    const files = Array.from(event.target.files);
-    if (files.length === 0) return;
 
+input.addEventListener("change", function (event) {
+    const newFiles = Array.from(event.target.files);
+    if (newFiles.length === 0) return;
+
+    if ((selectedFiles.length + newFiles.length) > 3) {
+        // Clear all other errors first
+        document.querySelectorAll("small.text-danger")
+            .forEach(el => el.innerText = "");
+            
+        document.getElementById("imageError").innerText = "Maximum 3 images allowed";
+        event.target.value = ""; 
+        return;
+    }
+
+    document.getElementById("imageError").innerText = ""; 
+    filesToCrop = newFiles;
     cropIndex = 0;
-    startCropping(files);
+    startCropping();
 });
 
-/* ------------------ CROP LOGIC ------------------ */
-function startCropping(files) {
-    if (cropIndex >= files.length) {
+
+function startCropping() {
+    if (cropIndex >= filesToCrop.length) {
         updatePreview();
         updateInputFiles();
         return;
     }
 
-    const file = files[cropIndex];
+    const file = filesToCrop[cropIndex];
     const reader = new FileReader();
 
     reader.onload = function (e) {
         cropImage.src = e.target.result;
 
-        // Destroy old cropper
+  
         if (cropper) cropper.destroy();
 
-        // Create new cropper
+      
         cropper = new Cropper(cropImage, {
             aspectRatio: 1,
             viewMode: 1,
@@ -362,7 +375,7 @@ function startCropping(files) {
     reader.readAsDataURL(file);
 }
 
-/* ------------------ APPLY CROP ------------------ */
+
 document.getElementById("applyCrop").onclick = function () {
     const canvas = cropper.getCroppedCanvas({
         width: 500,
@@ -379,14 +392,14 @@ document.getElementById("applyCrop").onclick = function () {
         closeCropModal();
         cropIndex++;
 
-        startCropping(Array.from(input.files));
+        startCropping();
 
 
-        updateInputFiles();
+
     });
 };
 
-/* ------------------ SHOW THUMBNAILS ------------------ */
+
    function updatePreview() {
     preview.innerHTML = "";
 
@@ -404,7 +417,7 @@ document.getElementById("applyCrop").onclick = function () {
         img.style.borderRadius = "6px";
         img.style.border = "1px solid #ccc";
 
-        // ❌ REMOVE BUTTON
+  
         const removeBtn = document.createElement("span");
         removeBtn.innerHTML = "&times;";
         removeBtn.style.position = "absolute";
@@ -416,9 +429,9 @@ document.getElementById("applyCrop").onclick = function () {
         removeBtn.style.fontWeight = "bold";
 
         removeBtn.onclick = function () {
-            selectedFiles.splice(index, 1);   // remove from array
-            updatePreview();                  // refresh thumbnails
-            updateInputFiles();               // refresh input.files
+            selectedFiles.splice(index, 1);  
+            updatePreview();                  
+            updateInputFiles();               
         };
 
         wrapper.appendChild(img);
@@ -430,12 +443,12 @@ document.getElementById("applyCrop").onclick = function () {
 
 
 
-  //  validation 
+  
 
 
   function validateForm() {
 
-  // clear old errors
+  
   document.querySelectorAll("small.text-danger")
     .forEach(el => el.innerText = "");
 
@@ -445,84 +458,52 @@ document.getElementById("applyCrop").onclick = function () {
   const category = document.querySelector("select[name='category']").value;
   const brand = document.querySelector("select[name='brand']").value;
   const description = document.querySelector("input[name='description']").value.trim();
-  // const price = document.querySelector("input[name='price']").value;
-  // const offerPrice = document.querySelector("input[name='offerPrice']").value;
-  // const size = document.querySelector("input[name='size']").value.trim();
-  // const color = document.querySelector("input[name='color']").value.trim();
-  // const stock = document.querySelector("input[name='stock']").value;
+ 
 
-  // PRODUCT NAME
+  
   if (!name) {
     document.getElementById("nameError").innerText = "Product name is required";
     isValid = false;
   }
 
-  // CATEGORY
+  
   if (!category) {
     document.getElementById("categoryError").innerText = "Category is required";
     isValid = false;
   }
 
-  // BRAND
+  
   if (!brand) {
     document.getElementById("brandError").innerText = "Brand is required";
     isValid = false;
   }
 
-  // DESCRIPTION
+  
   if (!description) {
     document.getElementById("descriptionError").innerText = "Description is required";
     isValid = false;
   }
 
-  // PRICE
-  // if (!price || price <= 0) {
-  //   document.getElementById("priceError").innerText = "Enter a valid price";
-  //   isValid = false;
-  // }
+  
 
-  // // OFFER PRICE
-  // if (!offerPrice || offerPrice <= 0) {
-  //   document.getElementById("offerpriceError").innerText = "Enter a valid offer price";
-  //   isValid = false;
-  // } else if (Number(offerPrice) >= Number(price)) {
-  //   document.getElementById("offerpriceError").innerText =
-  //     "Offer price must be less than price";
-  //   isValid = false;
-  // }
 
-  // SIZE
-  // if (!size) {
-  //   document.getElementById("sizeError").innerText = "Size is required";
-  //   isValid = false;
-  // }
 
-  // COLOR
-  // if (!color) {
-  //   document.getElementById("colorError").innerText = "Color is required";
-  //   isValid = false;
-  // }
 
-  // STOCK
-  // if (!stock || stock < 0) {
-  //   document.getElementById("stockError").innerText = "Stock must be 0 or more";
-  //   isValid = false;
-  // }
 
-  // IMAGES (MIN 1, MAX 10)
   if (selectedFiles.length < 3) {
     document.getElementById("imageError").innerText =
-      "At least 3 product image is required";
+      "Minimum 3 product images are required";
     isValid = false;
-  } else if (selectedFiles.length > 10) {
+  } else if (selectedFiles.length > 3) {
     document.getElementById("imageError").innerText =
-      "Maximum 10 images allowed";
+      "Maximum 3 images allowed";
     isValid = false;
+  } else {
+    document.getElementById("imageError").innerText = "";
   }
 
 
-
-  // VARIANTS
+  
 if (variants.length === 0) {
   document.getElementById("variantError").innerText =
     "Please add at least one variant";
@@ -548,7 +529,7 @@ function updateInputFiles() {
 
 
 
-//  sweat  alert validation
+
 
 const params = new URLSearchParams(window.location.search);
   const status = params.get("status");
@@ -580,32 +561,10 @@ const params = new URLSearchParams(window.location.search);
     });
   }
 
-  // clean URL
+  
   if (status) {
     window.history.replaceState({}, document.title, window.location.pathname);
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
   let variants = [];

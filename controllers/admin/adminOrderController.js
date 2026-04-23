@@ -49,11 +49,10 @@ const loadOrders = async (req, res) => {
             orders,
             currentPage: Number(page),
             totalPages,
+            limit,
             search: search || '',
             statusFilter: status || 'All Status',
             paymentFilter: paymentStatus || 'All Payments'
-            
-            
         });
     } catch (error) {
         console.error(error);
