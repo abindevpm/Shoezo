@@ -11,42 +11,35 @@
   image: 'https://placehold.co/400x300/60a5fa/fff?text=NIKE+SPARX' , rating: 4.5 } ]; const currentProduct=(typeof
   product !=='undefined' && product) ? product : demoProduct; const currentReviews=(typeof reviews !=='undefined' &&
   reviews) ? reviews : demoReviews; const currentSimilarProducts=(typeof similarProducts !=='undefined' &&
-  similarProducts) ? similarProducts : demoSimilar; /* Helpers */ function generateStars(rating, size='w-4 h-4' ) {
-  const full=Math.floor(rating || 0); const half=(rating || 0) - full>= 0.5;
-  let html = '';
-  for (let i = 0; i < 5; i++) { const color=(i < full) ? 'text-yellow-400' : (i===full && half)
-    ? 'text-yellow-400 opacity-50' : 'text-gray-300' ; html +=`<svg class="${size} ${color} inline-block fill-current"
-    viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>`;
-    }
-    return html;
+  similarProducts) ? similarProducts : demoSimilar; /* Helpers */
+    function generateStars(rating, size='w-4 h-4' ) {
+      const full=Math.floor(rating || 0);
+      const half=(rating || 0) - full>= 0.5;
+      let html = '';
+      for (let i = 0; i < 5; i++) {
+        const color=(i < full) ? 'text-yellow-400' : (i===full && half) ? 'text-yellow-400 opacity-50' : 'text-gray-300' ;
+        html +=`<svg class="${size} ${color} inline-block fill-current" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>`;
+      }
+      return html;
     }
 
     function ratingPercentFor(star) {
-    const map = { 5: 70, 4: 15, 3: 10, 2: 3, 1: 2 };
-    return map[star] || 0;
+      const map = { 5: 70, 4: 15, 3: 10, 2: 3, 1: 2 };
+      return map[star] || 0;
     }
 
     function fitPercent(rating) {
-    const r = (typeof rating === 'number') ? rating : (currentProduct.fitRating || 0);
-    return Math.round((r / 5) * 100);
+      const r = (typeof rating === 'number') ? rating : (currentProduct.fitRating || 0);
+      return Math.round((r / 5) * 100);
     }
 
-    /* Image URL helper:
-    - if `img` starts with '/' or 'http' treat as absolute URL already
-    - otherwise assume it's a filename under /uploads/product-images/
-    */
     function imgUrl(img) {
-    if (!img) return '/images/placeholder-500.png';
-    if (typeof img !== 'string') return '/images/placeholder-500.png';
-    if (img.startsWith('http') || img.startsWith('/')) return img;
-    return '/uploads/product-images/' + img;
+      if (!img) return '/images/placeholder-500.png';
+      if (typeof img !== 'string') return '/images/placeholder-500.png';
+      if (img.startsWith('http') || img.startsWith('/')) return img;
+      return '/uploads/product-images/' + img;
     }
     %>
-
-    <% function imgUrl(img) { if (!img) return '/images/placeholder-500.png' ; if (typeof img !=='string' )
-      return '/images/placeholder-500.png' ; if (img.startsWith('http') || img.startsWith('/')) return img;
-      return '/uploads/product-images/' + img; } %>
 
 
 
@@ -352,36 +345,69 @@
                   <div class="md:col-span-2 space-y-6">
                     <div class="bg-white p-6 rounded-lg shadow-lg space-y-6">
                       <h3 class="text-xl font-bold">Reviews</h3>
-                      <% (currentReviews || []).forEach(r=> { %>
-                        <article class="border-b pb-4 last:border-b-0">
-                          <div class="flex items-start gap-3">
-                            <div
-                              class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-gray-900 text-white rounded-full font-bold text-sm">
-                              <%= r.name[0] %>
-                            </div>
-                            <div class="flex-1">
-                              <div class="flex items-center gap-3">
-                                <span class="font-semibold text-base">
-                                  <%= r.name %>
-                                </span>
-                                <span class="text-xs text-gray-400">• <%= r.date %></span>
+                      <% if (reviews && reviews.length > 0) { %>
+                        <% reviews.forEach(r => { %>
+                          <article class="border-b pb-6 last:border-b-0 last:pb-0">
+                            <div class="flex items-start gap-4">
+                              <div class="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-black text-white rounded-full font-bold text-lg shadow-sm">
+                                <%= (r.user && r.user.name) ? r.user.name[0].toUpperCase() : 'U' %>
                               </div>
-                              <div class="flex text-yellow-400 mt-1 mb-2"><%- generateStars(r.rating) %></div>
-                              <p class="text-gray-700 leading-relaxed italic">"<%= r.comment %>"</p>
+                              <div class="flex-1">
+                                <div class="flex items-center justify-between mb-1">
+                                  <span class="font-bold text-gray-900">
+                                    <%= (r.user && r.user.name) ? r.user.name : 'Anonymous' %>
+                                  </span>
+                                  <span class="text-xs text-gray-500 font-medium bg-gray-100 px-2 py-1 rounded">
+                                    <%= new Date(r.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %>
+                                  </span>
+                                </div>
+                                <div class="flex text-yellow-400 mb-3">
+                                  <%- generateStars(r.rating, 'w-4 h-4') %>
+                                </div>
+                                <p class="text-gray-600 leading-relaxed text-sm bg-gray-50 p-3 rounded-lg border-l-4 border-gray-200">
+                                  "<%= r.comment %>"
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                        </article>
+                          </article>
                         <% }) %>
+                      <% } else { %>
+                        <div class="text-center py-10">
+                          <div class="text-gray-300 mb-2">
+                            <svg class="w-12 h-12 mx-auto fill-current" viewBox="0 0 24 24">
+                              <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z"/>
+                            </svg>
+                          </div>
+                          <p class="text-gray-500 font-medium">No reviews yet. Be the first to review this product!</p>
+                        </div>
+                      <% } %>
                     </div>
 
                     <div class="bg-white p-6 rounded-lg shadow-lg">
                       <h3 class="text-xl font-bold mb-3">Write a Review</h3>
-                      <form id="reviewForm" onsubmit="return false;">
-                        <textarea id="reviewText" rows="4" class="w-full border border-gray-300 rounded-lg p-3 text-sm"
-                          placeholder="Write your review..."></textarea>
-                        <div class="mt-4 flex justify-end">
-                          <button id="submitReviewBtn" class="px-6 py-2 bg-black text-white rounded-md">Submit
-                            Review</button>
+                      <form id="reviewForm" class="space-y-4">
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 mb-1">Your Rating</label>
+                          <div id="starRating" class="flex gap-1">
+                            <% for(let i=1; i<=5; i++) { %>
+                              <button type="button" data-value="<%= i %>" class="star-btn text-gray-300 hover:text-yellow-400 transition">
+                                <svg class="w-8 h-8 fill-current" viewBox="0 0 24 24">
+                                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                                </svg>
+                              </button>
+                            <% } %>
+                          </div>
+                          <input type="hidden" id="ratingValue" name="rating" value="0">
+                        </div>
+                        <div>
+                          <label for="reviewText" class="block text-sm font-medium text-gray-700 mb-1">Your Review</label>
+                          <textarea id="reviewText" rows="4" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-black focus:border-black"
+                            placeholder="Share your experience with this product..."></textarea>
+                        </div>
+                        <div class="flex justify-end">
+                          <button type="submit" id="submitReviewBtn" class="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition font-semibold">
+                            Submit Review
+                          </button>
                         </div>
                       </form>
                     </div>
@@ -389,41 +415,27 @@
                 </div>
               </section>
 
+
+
               <section class="mb-10">
-                <h2 class="text-2xl font-bold mb-4">Similar Products</h2>
-                <div class="flex overflow-x-auto scrollbar-hide space-x-6 pb-4 -mx-4 px-4">
-                  <% (currentSimilarProducts || []).forEach(sp=> { %>
-                    <a href="/product/<%= sp._id %>"
-                      class="flex-shrink-0 w-64 block bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition">
-                      <div class="relative overflow-hidden aspect-square">
 
+               <h3 class="mt-8 text-xl font-bold">Similar Products</h3>
 
-                        <img src="<%= sp.image %>" alt="<%= sp.name %>" class="w-full h-full object-cover"
-                          onerror="this.src='https://placehold.co/400x300/ddd/333?text=No+Image'">
-                      </div>
-                      <div class="p-4">
-                        <h4 class="font-bold text-lg mb-1 truncate">
-                          <%= sp.name %>
-                        </h4>
-                        <div class="flex items-center text-sm text-gray-500 mb-2">
-                          <span class="flex mr-1"><%- generateStars(sp.rating, 'w-4 h-4' ) %></span>
-                          <span class="font-medium text-black">
-                            <%= sp.rating.toFixed(1) %>
-                          </span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                          <p class="text-xl font-extrabold text-black">₹<%= sp.price %>
-                          </p>
-                          <p class="line-through text-sm text-gray-400">₹<%= sp.oldPrice %>
-                          </p>
-                          <span class="text-red-600 font-semibold text-sm">
-                            <%= sp.discount %>% off
-                          </span>
-                        </div>
-                      </div>
-                    </a>
-                    <% }) %>
-                </div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+  <% if(typeof similarProducts !== 'undefined' && similarProducts.length > 0){ %>
+    <% similarProducts.forEach(p => { %>
+      <div class="border p-3 rounded hover:shadow-md transition">
+        <a href="/productdetails/<%= p._id %>">
+          <img src="<%= (p.images && p.images.length > 0) ? imgUrl(p.images[0]) : '/images/placeholder-500.png' %>" class="w-full h-40 object-cover rounded mb-2">
+        </a>
+        <p class="font-medium text-sm truncate"><%= p.name %></p>
+        <p class="text-black font-bold">₹<%= (p.variants && p.variants.length > 0) ? (p.variants[0].offerPrice || p.variants[0].price).toLocaleString() : '0' %></p>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <p class="text-gray-500 text-sm italic">No similar products found.</p>
+  <% } %>
+</div>
               </section>
 
 
@@ -665,6 +677,87 @@
                         text: "Something went wrong. Please try again.",
                         icon: "error"
                       });
+                    }
+                  });
+                }
+
+                // --- REVIEW SUBMISSION ---
+                const starBtns = document.querySelectorAll(".star-btn");
+                const ratingInput = document.getElementById("ratingValue");
+
+                starBtns.forEach(btn => {
+                  btn.addEventListener("click", () => {
+                    const val = btn.dataset.value;
+                    ratingInput.value = val;
+                    
+                    // Update visual stars
+                    starBtns.forEach(s => {
+                      if (parseInt(s.dataset.value) <= parseInt(val)) {
+                        s.classList.remove("text-gray-300");
+                        s.classList.add("text-yellow-400");
+                      } else {
+                        s.classList.remove("text-yellow-400");
+                        s.classList.add("text-gray-300");
+                      }
+                    });
+                  });
+                });
+
+                const reviewForm = document.getElementById("reviewForm");
+                if (reviewForm) {
+                  reviewForm.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    
+                    const rating = ratingInput.value;
+                    const comment = document.getElementById("reviewText").value.trim();
+                    const productId = "<%= product._id %>";
+
+                    if (rating === "0") {
+                      return Swal.fire("Required", "Please select a star rating", "warning");
+                    }
+                    if (!comment) {
+                      return Swal.fire("Required", "Please write a comment", "warning");
+                    }
+
+                    try {
+                      const response = await fetch("/add-review", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ productId, rating, comment })
+                      });
+
+                      const data = await response.json();
+
+                      if (data.success) {
+                        Swal.fire({
+                          title: "Success!",
+                          text: data.message,
+                          icon: "success",
+                          confirmButtonColor: "#000"
+                        }).then(() => {
+                          window.location.reload();
+                        });
+                      } else {
+                        if (data.loginRedirect) {
+                          Swal.fire({
+                            title: "Login Required",
+                            text: data.message,
+                            icon: "info",
+                            showCancelButton: true,
+                            confirmButtonText: "Login",
+                            confirmButtonColor: "#000"
+                          }).then((result) => {
+                            if (result.isConfirmed) {
+                              window.location.href = "/login";
+                            }
+                          });
+                        } else {
+                          Swal.fire("Error", data.message, "error");
+                        }
+                      }
+                    } catch (error) {
+                      console.error("Review Error:", error);
+                      Swal.fire("Error", "Something went wrong. Please try again.", "error");
                     }
                   });
                 }

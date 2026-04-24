@@ -1,10 +1,17 @@
 
 const Product = require("../../models/productSchema");
+const Review = require("../../models/reviewSchema");
 const StatusCodes = require("../../routes/utils/statusCodes")
 
 const loadProductDetails = async (req, res) => {
   try {
     const { id } = req.params;
+
+
+    const reviews = await Review.find({ product: id })
+      .populate("user", "name")
+      .sort({ createdAt: -1 });
+
 
     const product = await Product.findOne({
       _id: id,
@@ -42,6 +49,7 @@ const loadProductDetails = async (req, res) => {
 
     product.discount = appliedDiscount;
 
+
     if (product.variants && product.variants.length > 0) {
       product.variants.forEach(v => {
         const basePrice = Number(v.salePrice || v.price);
@@ -53,10 +61,35 @@ const loadProductDetails = async (req, res) => {
       });
     }
 
+
+    const categoryId = product.category?._id;
+
+      let similarProducts = [];
+
+       if(categoryId){
+        similarProducts = await Product.find({
+          category:categoryId,
+          _id:{$ne:product._id},
+          isDeleted:false,
+          isListed:true
+        })
+        .limit(4)
+        .populate("category")
+        .populate("brand");
+       }
+
+         console.log(similarProducts)
+
+
+
+
+
+
+
     res.render("productDetails", {
       product,
-      reviews: [],
-      similarProducts: []
+      reviews,
+      similarProducts
     });
 
   } catch (error) {

@@ -12,6 +12,7 @@ const { uploadProfile } = require("../middlewares/multer")
 const paymentController = require("../controllers/user/paymentController")
 const WishlistController = require("../controllers/user/wishlistController")
 const WalletController = require("../controllers/user/walletController")
+const reviewController = require("../controllers/user/reviewController")
 
 
 
@@ -163,6 +164,9 @@ router.get("/wallet", userAuth, WalletController.loadWallet)
 router.get("/available-coupons", userAuth, userController.getAvailableCoupons);
 router.post("/apply-coupon", userAuth, userController.applyCoupon);
 router.delete("/remove-coupon", userAuth, userController.removeCoupon);
+
+// review
+router.post('/add-review',reviewController.addReview)
 
 
 

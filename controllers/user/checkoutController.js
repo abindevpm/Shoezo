@@ -88,6 +88,8 @@ const loadCheckout = async (req, res) => {
       return res.redirect("/cart");
     }
 
+ 
+
 
     const discountAmount = req.session.discountAmount || 0;
     const offerDiscount = baseSubtotal - subtotal;
