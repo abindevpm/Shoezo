@@ -1,6 +1,7 @@
 
 const Product = require("../../models/productSchema");
 const Review = require("../../models/reviewSchema");
+const Wishlist = require("../../models/wishlist");
 const StatusCodes = require("../../routes/utils/statusCodes")
 
 const loadProductDetails = async (req, res) => {
@@ -78,10 +79,17 @@ const loadProductDetails = async (req, res) => {
         .populate("brand");
        }
 
+        let isInWishlist = false;
+        const sessionUser = req.session.user;
+        if (sessionUser) {
+          const userId = sessionUser._id || sessionUser;
+          const wishlist = await Wishlist.findOne({ userId });
+          if (wishlist) {
+            isInWishlist = wishlist.products.some(pId => pId.toString() === id);
+          }
+        }
+
          console.log(similarProducts)
-
-
-
 
 
 
@@ -89,7 +97,8 @@ const loadProductDetails = async (req, res) => {
     res.render("productDetails", {
       product,
       reviews,
-      similarProducts
+      similarProducts,
+      isInWishlist
     });
 
   } catch (error) {

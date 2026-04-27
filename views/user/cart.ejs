@@ -438,33 +438,9 @@
     try {
 
 
-
-
       const currentQty = Number(
         document.getElementById(`qty-${itemId}`).innerText
       );
-
-
-      if (action === "inc" && currentQty >= 10) {
-        Swal.fire({
-          icon: "warning",
-          title: "Maximum limit reached",
-          text: "You can only add up to 10 quantities of this product",
-          confirmButtonColor: "#000"
-        });
-        return;
-      }
-
-
-      if (action === "dec" && currentQty <= 1) {
-        Swal.fire({
-          icon: "info",
-          title: "Minimum quantity",
-          text: "Quantity cannot be less than 1",
-          confirmButtonColor: "#000"
-        });
-        return;
-      }
 
 
 
@@ -489,6 +465,25 @@
         }
         return;
       }
+
+       if(data.quantity>=10 && action === "inc"){
+        Swal.fire({
+          icon:"warning",
+          title:"Maximum Limit Reached",
+          text:"You can only add up to 10 quantities",
+          confirmButtonColor:"#000"
+        })
+       }
+
+       if(data.quantity<=1 && action === "dec"){
+        Swal.fire({
+          icon:"info",
+          title:"Minumum Quantity",
+          text:"Quantity cannot be less than 1",
+          confirmButtonColor:"#000"
+        })
+       }
+
 
 
       document.getElementById(`qty-${itemId}`).innerText = data.quantity;

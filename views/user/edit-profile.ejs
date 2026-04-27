@@ -250,6 +250,31 @@
       margin-top: 4px;
       display: block;
     }
+
+    /* Eye icon toggle */
+    .pw-wrapper {
+      position: relative;
+      display: block;
+      width: 100%;
+    }
+    .pw-wrapper input {
+      padding-right: 40px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .pw-eye {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #888;
+      font-size: 15px;
+      user-select: none;
+    }
+    .pw-eye:hover {
+      color: #333;
+    }
   </style>
 </head>
 
@@ -349,7 +374,10 @@
 
             <div class="input-group">
               <label>Current Password</label>
-              <input type="password" id="currentPassword" name="currentPassword">
+              <div class="pw-wrapper">
+                <input type="password" id="currentPassword" name="currentPassword">
+                <span class="pw-eye" onclick="togglePw('currentPassword', this)"><i class="fa fa-eye"></i></span>
+              </div>
               <small class="error" id="currentPasswordError"></small>
             </div>
             <small>
@@ -361,13 +389,19 @@
 
             <div class="input-group">
               <label>New Password</label>
-              <input type="password" id="newPassword" name="newPassword">
+              <div class="pw-wrapper">
+                <input type="password" id="newPassword" name="newPassword">
+                <span class="pw-eye" onclick="togglePw('newPassword', this)"><i class="fa fa-eye"></i></span>
+              </div>
               <small class="error" id="newPasswordError"></small>
             </div>
 
             <div class="input-group">
               <label>Confirm Password</label>
-              <input type="password" id="confirmPassword" name="confirmPassword">
+              <div class="pw-wrapper">
+                <input type="password" id="confirmPassword" name="confirmPassword">
+                <span class="pw-eye" onclick="togglePw('confirmPassword', this)"><i class="fa fa-eye"></i></span>
+              </div>
               <small class="error" id="confirmPasswordError"></small>
             </div>
 
@@ -509,18 +543,33 @@
   }
 
 
-
-
-
-
+  function togglePw(inputId, icon) {
+    const input = document.getElementById(inputId);
+    const isHidden = input.type === 'password';
+    input.type = isHidden ? 'text' : 'password';
+    const i = icon.querySelector('i');
+    i.classList.toggle('fa-eye', !isHidden);
+    i.classList.toggle('fa-eye-slash', isHidden);
+  }
 
   window.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams(window.location.search);
+    const error = params.get("error");
 
-    if (params.get("error") === "currentPassword") {
-      document.getElementById("currentPasswordError").innerText =
-        "Current password is incorrect";
-    }
+    if (error === "currentPassword") {
+      document.getElementById("currentPasswordError").innerText = "Current password is incorrect";
+    } else if (error === "mismatch") {
+      document.getElementById("confirmPasswordError").innerText = "Passwords do not match";
+    } else if (error === "shortPassword") {
+      document.getElementById("newPasswordError").innerText = "Password must be at least 6 characters";
+    } else if (error === "allFields") {
+      document.getElementById("currentPasswordError").innerText = "All password fields are required";
+    } else if (error === "serverError") {
+      document.getElementById("currentPasswordError").innerText = "Something went wrong. Please try again.";
+    } else if (error === "samePassword") {
+  document.getElementById("newPasswordError").innerText =
+    "New password must be different from current password";
+}
   });
 
 
@@ -599,13 +648,6 @@
 
 
      })
-
-
-
-
-
-
-
 
 
 

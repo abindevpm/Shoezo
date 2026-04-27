@@ -67,7 +67,7 @@ router.get("/orders", adminAuth, adminOrderController.loadOrders);
 router.get("/orders/details/:id", adminAuth, adminOrderController.getOrderDetailsAdmin);
 router.get("/orders/edit/:id", adminAuth, adminOrderController.getEditOrderAdmin);
 router.patch("/orders/update-status", adminAuth, adminOrderController.updateOrderStatus);
-router.patch("/orders/update-payment", adminAuth, adminOrderController.updatePaymentStatus);
+
 
 // return requests
 router.get("/return-requests", adminAuth, adminOrderController.loadReturnRequests);

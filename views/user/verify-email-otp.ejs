@@ -239,10 +239,16 @@
           </form>
 
 
-
           <div class="text-center mt-3">
-            <button class="btn btn-link text-muted" onclick="handleResendOTP()">Resend OTP</button>
-          </div>
+  <p id="timerText" class="text-muted timer-pulse">Resend OTP in 60s</p>
+
+  <button id="resendBtn" class="btn btn-link text-muted" onclick="handleResendOTP()" disabled>
+    Resend OTP
+  </button>
+</div>
+
+
+         
 
       </div>
     </div>
@@ -250,6 +256,38 @@
 
 
   <script>
+
+let countdown = 60;
+let interval;
+
+const timerText = document.getElementById("timerText");
+const resendBtn = document.getElementById("resendBtn");
+
+function startTimer() {
+  countdown = 60;
+  resendBtn.disabled = true;
+  timerText.classList.add("timer-pulse");
+
+  interval = setInterval(() => {
+    countdown--;
+    timerText.innerText = `Resend OTP in ${countdown}s`;
+
+    if (countdown <= 0) {
+      clearInterval(interval);
+      timerText.innerText = "You can resend OTP now";
+      timerText.classList.remove("timer-pulse");
+      resendBtn.disabled = false;
+    }
+  }, 1000);
+}
+
+
+startTimer();
+
+
+
+
+
     const inputs = document.querySelectorAll(".otp-input");
     const finalOtpInput = document.getElementById("finalOtp");
 
@@ -260,7 +298,7 @@
     }
 
     inputs.forEach((input, index) => {
-      // Auto-next on input
+      
       input.addEventListener("input", (e) => {
         const val = e.target.value;
         if (!/^\d*$/.test(val)) e.target.value = "";
@@ -271,14 +309,14 @@
         updateFinalOtp();
       });
 
-      // Backspace support
+    
       input.addEventListener("keydown", (e) => {
         if (e.key === "Backspace" && !e.target.value && index > 0) {
           inputs[index - 1].focus();
         }
       });
 
-      // Paste support
+    
       input.addEventListener("paste", (e) => {
         e.preventDefault();
         const pasteData = (e.clipboardData || window.clipboardData).getData("text");
@@ -290,7 +328,7 @@
 
         updateFinalOtp();
 
-        // Focus the last filled input or the first empty one
+      
         const nextToFocus = inputs[digits.length] || inputs[inputs.length - 1];
         if (nextToFocus) nextToFocus.focus();
       });
@@ -303,6 +341,11 @@
 
       if (!otp || otp.length !== 4) {
         Swal.fire("Error", "Please enter all 4 digits", "error");
+        return;
+      }
+
+      if (countdown <= 0) {
+        Swal.fire("Error", "OTP has expired. Please resend OTP.", "error");
         return;
       }
 
@@ -328,24 +371,42 @@
     });
 
     async function handleResendOTP() {
-      const res = await fetch("/user/resend-email-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" }
+  try {
+    const res = await fetch("/user/resend-email-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      Swal.fire({
+        icon: "success",
+        title: "OTP Sent",
+        text: "A new OTP has been sent to your email"
       });
 
-      const data = await res.json();
-      if (data.success) {
-        Swal.fire({
-          icon: "success",
-          title: "OTP Sent",
-          text: "A new OTP has been sent to your email"
-        });
+    
+      inputs.forEach(i => i.value = "");
+      finalOtpInput.value = "";
+      inputs[0].focus();
 
-        inputs.forEach(i => i.value = "");
-        finalOtpInput.value = "";
-        inputs[0].focus();
-      } else {
-        Swal.fire("Error", data.message, "error");
-      }
+      
+      clearInterval(interval);
+      startTimer();
+
+    } else {
+      Swal.fire("Error", data.message, "error");
     }
+
+  } catch (error) {
+    Swal.fire("Error", "Something went wrong", "error");
+  }
+}
+
+
+
+
+    
+    
   </script>

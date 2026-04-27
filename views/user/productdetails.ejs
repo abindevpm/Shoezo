@@ -63,6 +63,17 @@
           /* Zoom level */
           cursor: zoom-out;
         }
+
+        @keyframes heartbeat {
+          0% { transform: scale(1); }
+          25% { transform: scale(1.3); }
+          50% { transform: scale(1); }
+          75% { transform: scale(1.3); }
+          100% { transform: scale(1); }
+        }
+        .heart-pulse {
+          animation: heartbeat 0.4s ease-in-out;
+        }
       </style>
 
       <!doctype html>
@@ -167,9 +178,10 @@
                         </h1>
                         <!-- <p class="text-sm text-gray-500 mt-1"><%= currentProduct.model || 'Product' %></p> -->
                       </div>
-                      <button class="wishlist-btn p-2 text-gray-400 hover:text-red-500 transition"
+                      <button class="wishlist-btn p-2 transition <%= isInWishlist ? 'text-red-500' : 'text-gray-400 hover:text-red-500' %>"
                         data-id="<%= currentProduct._id %>">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24"
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" 
+                          fill="<%= isInWishlist ? 'currentColor' : 'none' %>" viewBox="0 0 24 24"
                           stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4.318 6.318C5.8 4.836 8.2 4.836 9.682 6.318L12 8.636l2.318-2.318c1.482-1.482 3.882-1.482 5.364 0 1.482 1.482 1.482 3.882 0 5.364L12 20.364 4.318 11.682c-1.482-1.482-1.482-3.882 0-5.364z" />
@@ -569,6 +581,8 @@
                 if (wishlistBtn) {
                   wishlistBtn.addEventListener("click", async () => {
                     const productId = wishlistBtn.dataset.id;
+                    const icon = wishlistBtn.querySelector("svg");
+                    
                     try {
                       const response = await fetch("/wishlist/add", {
                         method: "POST",
@@ -578,31 +592,65 @@
                       });
                       const data = await response.json();
                       if (data.success) {
-                        Swal.fire({
-                          title: "Added to Wishlist!",
-                          text: "The product has been added to your wishlist.",
-                          icon: "success",
-                          showCancelButton: true,
-                          confirmButtonText: "Go to Wishlist",
-                          cancelButtonText: "Continue Shopping",
-                          confirmButtonColor: "#000",
-                          cancelButtonColor: "#6c757d"
-                        }).then((result) => {
-                          if (result.isConfirmed) {
-                            window.location.href = "/wishlist";
-                          }
-                        });
+                        if (data.status === "added") {
+                          wishlistBtn.classList.remove("text-gray-400");
+                          wishlistBtn.classList.add("text-red-500");
+                          icon.setAttribute("fill", "currentColor");
+                          icon.classList.add("heart-pulse");
+                          setTimeout(() => icon.classList.remove("heart-pulse"), 400);
 
+                          const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 2000,
+                            timerProgressBar: true,
+                          });
+                          Toast.fire({
+                            icon: 'success',
+                            title: 'Added to wishlist'
+                          });
+                        } else {
+                          wishlistBtn.classList.remove("text-red-500");
+                          wishlistBtn.classList.add("text-gray-400");
+                          icon.setAttribute("fill", "none");
+                          
+                          const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 2000,
+                            timerProgressBar: true,
+                          });
+                          Toast.fire({
+                            icon: 'info',
+                            title: 'Removed from wishlist'
+                          });
+                        }
 
                         if (typeof loadWishlistCount === 'function') {
                           loadWishlistCount();
                         }
                       } else {
-                        Swal.fire("Error", data.message || "Could not add to wishlist", "error");
+                        if (data.message === "Login required") {
+                          Swal.fire({
+                            title: "Login Required",
+                            text: "Please login to add products to wishlist",
+                            icon: "info",
+                            showCancelButton: true,
+                            confirmButtonText: "Login",
+                            confirmButtonColor: "#000"
+                          }).then((result) => {
+                            if (result.isConfirmed) {
+                              window.location.href = "/login";
+                            }
+                          });
+                        } else {
+                          Swal.fire("Error", data.message || "Could not update wishlist", "error");
+                        }
                       }
                     } catch (error) {
                       console.error("Wishlist Error:", error);
-                      Swal.fire("Error", "An unexpected error occurred", "error");
                     }
                   });
                 }
@@ -681,7 +729,7 @@
                   });
                 }
 
-                // --- REVIEW SUBMISSION ---
+            
                 const starBtns = document.querySelectorAll(".star-btn");
                 const ratingInput = document.getElementById("ratingValue");
 
@@ -690,7 +738,7 @@
                     const val = btn.dataset.value;
                     ratingInput.value = val;
                     
-                    // Update visual stars
+                  
                     starBtns.forEach(s => {
                       if (parseInt(s.dataset.value) <= parseInt(val)) {
                         s.classList.remove("text-gray-300");

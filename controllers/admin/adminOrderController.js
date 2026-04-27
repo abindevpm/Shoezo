@@ -135,20 +135,19 @@ const updateOrderStatus = async (req, res) => {
         Cancelled:[],
        }
 
-        if(
-            allowedTransactions[oldStatus] &&   
-            !allowedTransactions[oldStatus].includes(status)
-        ){
-            return res.status(400).json({
-                success:false,
-                message:`Cannot change status from ${oldStatus} to ${status}`
-            })
-        }
+       
+
+        if (!allowedTransactions[oldStatus]?.includes(status)) {
+  return res.status(400).json({
+    success: false,
+    message: `Cannot change status from ${oldStatus} to ${status}`
+  });
+}
 
 
-        if (newPaymentStatus) {
-            order.paymentStatus = newPaymentStatus;
-        }
+        // if (newPaymentStatus) {
+        //     order.paymentStatus = newPaymentStatus;
+        // }
 
         if (order.paymentStatus === "Refunded" && (status === "Returned" || status === "Cancelled")) {
             return res.status(400).json({ success: false, message: "Order already refunded" });
@@ -239,16 +238,7 @@ const updateOrderStatus = async (req, res) => {
 
 
 
-const updatePaymentStatus = async (req, res) => {
-    try {
-        const { orderId, paymentStatus } = req.body;
-        await Order.findByIdAndUpdate(orderId, { paymentStatus });
-        res.json({ success: true, message: "Payment status updated" });
-    } catch (error) {
-        console.error(error,"update payment Status error");
-        res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "updatepayment status error" });
-    }
-};
+
 
 
 const approveItemReturn = async (req, res) => {
@@ -484,7 +474,6 @@ module.exports = {
     getOrderDetailsAdmin,
     getEditOrderAdmin,
     updateOrderStatus,
-    updatePaymentStatus,
     approveItemReturn,
     rejectItemReturn,
     cancelItemAdmin,

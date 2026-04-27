@@ -938,9 +938,20 @@
     else if (!/^\d{10}$/.test(data.phone)) setError("phone", "Enter valid 10-digit phone");
 
     if (!data.addressLine.trim()) setError("addressLine", "Address line is required");
-    if (!data.city.trim()) setError("city", "City is required");
-    if (!data.state.trim()) setError("state", "State is required");
 
+    if (!data.city.trim()) {
+  setError("city", "City is required");
+} else if (!/^[A-Za-z ]+$/.test(data.city.trim())) {
+  setError("city", "City must contain only letters");
+}
+
+if (!data.state.trim()) {
+  setError("state", "State is required");
+} else if (!/^[A-Za-z ]+$/.test(data.state.trim())) {
+  setError("state", "State must contain only letters");
+}
+
+   
     if (!data.pincode.trim()) setError("pincode", "Pincode is required");
     else if (!/^\d{6}$/.test(data.pincode)) setError("pincode", "Enter valid 6-digit pincode");
 

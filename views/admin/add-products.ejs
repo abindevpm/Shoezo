@@ -330,12 +330,12 @@ input.addEventListener("change", function (event) {
     if (newFiles.length === 0) return;
 
     if ((selectedFiles.length + newFiles.length) > 3) {
-        // Clear all other errors first
+        
         document.querySelectorAll("small.text-danger")
             .forEach(el => el.innerText = "");
             
         document.getElementById("imageError").innerText = "Maximum 3 images allowed";
-        event.target.value = ""; 
+        updateInputFiles();
         return;
     }
 
@@ -394,9 +394,7 @@ document.getElementById("applyCrop").onclick = function () {
 
         startCropping();
 
-
-
-    });
+    }, "image/jpeg", 0.9);
 };
 
 

@@ -3,6 +3,7 @@ const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const User = require("../../models/userSchema");
 const Brand = require("../../models/brandSchema")
+const Wishlist = require("../../models/wishlist")
 const mongoose = require("mongoose")
 const StatusCodes = require("../../routes/utils/statusCodes")
 const AppError = require("../../routes/utils/AppError")
@@ -12,9 +13,6 @@ const AppError = require("../../routes/utils/AppError")
 const loadShopPage = async (req, res) => {
   try {
     const userData = res.locals.user;
-
-   
-
     console.log("QUERY =>", req.query);
 
 
@@ -41,39 +39,15 @@ const loadShopPage = async (req, res) => {
         ? req.query.category
         : [req.query.category];
 
-      const categoryDocs = await Category.find({
-        name: { $in: selected.map(c => new RegExp("^" + c + "$", "i")) },
-        isDeleted: false,
-        isListed: true
-      });
-
-      const categoryIds = categoryDocs.map(c => c._id);
-      if (categoryIds.length > 0) {
-        filter.category = { $in: categoryIds.filter(id => activeCategories.some(ac => ac.equals(id))) };
-      }
+      filter.category = { $in: selected.map(id => new mongoose.Types.ObjectId(id)) };
     }
-
-
 
     if (req.query.brand) {
       const selectedBrands = Array.isArray(req.query.brand)
         ? req.query.brand
         : [req.query.brand];
 
-      const brandDocs = await Brand.find({
-        name: {
-          $in: selectedBrands.map(b =>
-            new RegExp("^" + b.trim() + "$", "i")
-          )
-        },
-        isDeleted: false,
-        isListed: true
-      });
-
-      if (brandDocs.length > 0) {
-        const brandIds = brandDocs.map(b => b._id);
-        filter.brand = { $in: brandIds.filter(id => activeBrands.some(ab => ab.equals(id))) };
-      }
+      filter.brand = { $in: selectedBrands.map(id => new mongoose.Types.ObjectId(id)) };
     }
 
 
@@ -185,12 +159,6 @@ const loadShopPage = async (req, res) => {
     ];
 
 
-    
-
-
-
-
-
     if (nameSort === "name_asc") {
       pipeline.push({ $sort: { name: 1 } });
     } else if (nameSort === "name_desc") {
@@ -204,9 +172,6 @@ const loadShopPage = async (req, res) => {
     }
 
     pipeline.push({ $skip: skip }, { $limit: limit });
-
-      
-
 
     let products = await Product.aggregate(pipeline);
 
@@ -256,13 +221,19 @@ const loadShopPage = async (req, res) => {
       }
     });
 
-     const pip = [...pipeline]
-     
+    
+    if (userData) {
+      const wishlist = await Wishlist.findOne({ userId: userData._id || userData });
+      const wishlistProductIds = wishlist ? wishlist.products.map(id => id.toString()) : [];
+      products.forEach(p => {
+        p.isInWishlist = wishlistProductIds.includes(p._id.toString());
+      });
+    }
 
+     const pip = [...pipeline]
 
     const totalProducts = await Product.countDocuments(filter);
     const totalPages = Math.ceil(totalProducts / limit);
-
 
 
     const categories = await Category.find({
@@ -274,6 +245,11 @@ const loadShopPage = async (req, res) => {
       isDeleted: false,
       isListed: true
     });
+
+
+    if (req.headers.accept && req.headers.accept.includes("application/json")) {
+  return res.json({ products, page, totalPages });
+}
 
 
 

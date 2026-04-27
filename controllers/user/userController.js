@@ -5,6 +5,7 @@ const Order = require("../../models/orderSchema");
 const Coupon = require("../../models/couponSchema")
 const Category = require("../../models/categorySchema")
 const Brand = require("../../models/brandSchema")
+const Wishlist = require("../../models/wishlist")
 const StatusCodes = require("../../routes/utils/statusCodes")
 const env = require("dotenv").config()
 const nodemailer = require("nodemailer")
@@ -80,6 +81,15 @@ const loadHomepage = async (req, res) => {
       }
       return productObj;
     });
+
+    // Mark products as wishlisted if user is logged in
+    if (userData) {
+      const wishlist = await Wishlist.findOne({ userId: userData._id || userData });
+      const wishlistProductIds = wishlist ? wishlist.products.map(id => id.toString()) : [];
+      featuredProducts.forEach(p => {
+        p.isInWishlist = wishlistProductIds.includes(p._id.toString());
+      });
+    }
 
     return res.render("home", {
       user: userData,
@@ -884,7 +894,7 @@ const verifyOtp = (req, res) => {
     return res.status(400).json({ success: false, message: "Invalid OTP" });
   }
 
-  // Clear OTP from session after successful verification
+  
   req.session.resetOtp = null;
   req.session.resetOtpExpiry = null;
 
@@ -965,20 +975,26 @@ const getAvailableCoupons = async (req, res) => {
     const subtotalValue = subtotal ? Number(subtotal) : 0;
     const userId = req.user._id;
 
-    const query = {
-      isActive: true,
-      startDate: { $lte: today },
-      expiryDate: { $gt: today },
-      $expr: { $lt: ["$usedCount", "$usageLimit"] },
-      minPurchase: { $lte: subtotalValue },
-      $or: [
-        { userId: null },
-        { userId: userId }
-      ]
-    };
+    const query = { isActive: true };
 
-    const coupons = await Coupon.find(query)
-      .select("code discountValue discountType minPurchase expiryDate");
+    const activeCoupons = await Coupon.find(query);
+
+    const coupons = activeCoupons.filter(c => {
+      if (c.usedCount >= c.usageLimit) return false;
+      if (c.minPurchase > subtotalValue) return false;
+      if (c.userId && c.userId.toString() !== userId.toString()) return false;
+
+    
+      const startBuffer = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+      if (c.startDate && new Date(c.startDate) > startBuffer) return false;
+      
+      const expiryBuffer = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+      if (c.expiryDate && new Date(c.expiryDate) < expiryBuffer) return false;
+
+      return true;
+    });
+
+    console.log("Coupons after filter:", coupons.length);
 
     res.json({ success: true, coupons });
 

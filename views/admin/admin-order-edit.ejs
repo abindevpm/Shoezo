@@ -276,15 +276,14 @@
                                                 >Shipped</option>
                                             <option value="Delivered" <%=order.status==='Delivered' ? 'selected' : '' %>
                                                 >Delivered</option>
-                                            <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected' : '' %>
+                                            <!-- <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected' : '' %>
                                                 >Cancelled</option>
                                             <option value="Return Requested" <%=order.status==='Return Requested'
                                                 ? 'selected' : '' %>
                                                 >Return Requested</option>
                                             <option value="Returned" <%=order.status==='Returned' ? 'selected' : '' %>
-                                                >Returned</option>
-                                            <option value="Failed" <%=order.status==='Failed' ? 'selected' : '' %>
-                                                >Failed</option>
+                                                >Returned</option> -->
+                                          
                                         </select>
                                         <div class="form-text mt-2" style="font-size: 0.8rem;">Controls overall status
                                             visibility for the customer.</div>
@@ -299,19 +298,14 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <% } %>
+                                        <% } %> 
                                             <div class="col-md-6">
                                                 <label class="form-label">Payment Status</label>
-                                                <select id="paymentStatus" class="form-select form-select-custom w-100">
-                                                    <option value="Pending" <%=order.paymentStatus==='Pending' ? 'selected' : '' %>
-                                                >Pending</option>
-                                            <option value="Paid" <%=order.paymentStatus==='Paid' ? 'selected' : '' %>
-                                                >Paid</option>
-                                            <option value="Failed" <%=order.paymentStatus==='Failed' ? 'selected' : '' %>
-                                                >Failed</option>
-                                            <option value="Refunded" <%=order.paymentStatus==='Refunded' ? 'selected' : '' %>
-                                                >Refunded</option>
-                                                </select>
+
+                                             <label class="form-label">Payment Status</label>
+<p class="fw-bold"><%= order.paymentStatus %></p>
+                                           
+                                           
                                             </div>
                                 </div>
 
@@ -361,15 +355,15 @@
                                                     <td>
                                                         <% let statusClass='status-' +
                                                             item.itemStatus.toLowerCase().replace(' ', ' -'); %>
-                                                            <span class="badge-status <%= statusClass %>">
+                                                            <!-- <span class="badge-status <%= statusClass %>">
                                                                 <i class="fas fa-circle" style="font-size: 6px;"></i>
                                                                 <%= item.itemStatus %>
-                                                            </span>
+                                                            </span> -->
                                                             <% if (item.cancelReason) { %>
-                                                                <div class="mt-1 x-small text-danger"
+                                                                <!-- <div class="mt-1 x-small text-danger"
                                                                     title="<%= item.cancelReason %>">
                                                                     <i class="fas fa-info-circle"></i> Item Cancelled
-                                                                </div>
+                                                                </div> -->
                                                                 <% } %>
                                                                     <% if (item.returnReason) { %>
                                                                         <div class="mt-1 x-small text-warning"
@@ -385,7 +379,7 @@
                                                             ].includes(item.itemStatus)) { %>
                                                             <div
                                                                 class="d-flex gap-2 justify-content-end align-items-center">
-                                                                <select
+                                                                <!-- <select
                                                                     onchange="updateItemStatus('<%= order._id %>', '<%= item._id %>', this.value)"
                                                                     class="form-select form-select-sm border-0 bg-light rounded-pill"
                                                                     style="width: 100px; font-size: 11px; height: 32px;">
@@ -400,14 +394,14 @@
                                                                     <option value="Delivered"
                                                                         <%=item.itemStatus==='Delivered' ? 'selected'
                                                                         : '' %>>Delivered</option>
-                                                                </select>
-                                                                <button
+                                                                </select> -->
+                                                                <!-- <button
                                                                     onclick="cancelItem('<%= order._id %>', '<%= item._id %>')"
                                                                     class="btn btn-sm btn-outline-danger border-0 rounded-circle"
                                                                     title="Cancel Item"
                                                                     style="width: 32px; height: 32px; padding: 0;">
                                                                     <i class="fas fa-times"></i>
-                                                                </button>
+                                                                </button> -->
                                                             </div>
                                                             <% } %>
 
@@ -645,7 +639,7 @@
 
             async function saveChanges() {
                 const orderStatus = document.getElementById('orderStatus').value;
-                const paymentStatus = document.getElementById('paymentStatus').value;
+              
                 const orderId = '<%= order._id %>';
 
                 Swal.fire({
@@ -661,7 +655,7 @@
                         body: JSON.stringify({ 
                             orderId, 
                             status: orderStatus,
-                            paymentStatus: paymentStatus
+                          
                         })
                     });
 

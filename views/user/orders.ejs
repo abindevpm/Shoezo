@@ -392,8 +392,10 @@
                                                                 <% } %> -->
                                             <div
                                                 style="display: flex; justify-content: flex-end; padding-top: 15px; border-top: 1px solid #f5f5f5; margin-top: 10px; gap: 10px; align-items: center;">
-                                                <a href="/orders/invoice/<%= order._id %>" class="btn btn-invoice"><i
-                                                        class="fas fa-file-invoice"></i> Invoice</a>
+                                                 
+                                                <button onclick="downloadInvoice('<%= order._id %>')" class="btn btn-invoice">
+  <i class="fas fa-file-pdf"></i> Invoice
+</button>
 
                                                 <% if (order.status==='Delivered' ) { %>
                                                     <button onclick="returnOrder('<%= order._id %>')"
@@ -470,29 +472,6 @@
                         }
                     }
                 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -675,6 +654,45 @@
                         Swal.fire('Error!', 'Something went wrong', 'error');
                     }
                 }
+
+
+                async function downloadInvoice(orderId){
+                    try {
+                         
+                    const response = await fetch(`/orders/invoice/${orderId}`);
+
+                      if(!response.ok){
+                        const errorText = await response.text();
+
+                        Swal.fire({
+                            icon:'error',
+                            title:'Oops',
+                            text:errorText
+
+                        })
+                        return;
+                      }
+                       const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `invoice-${orderId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove()
+
+                        
+                    } catch (error) {
+                        
+                    }
+                    
+                }
+
+
+
+
+
             </script>
 </body>
 

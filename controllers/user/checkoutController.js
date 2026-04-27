@@ -1,4 +1,5 @@
 const User = require("../../models/userSchema");
+const Coupon = require("../../models/couponSchema");
 const Cart = require("../../models/cartSchema");
 const Order = require("../../models/orderSchema")
 const StatusCodes = require("../../routes/utils/statusCodes")
@@ -26,6 +27,9 @@ const loadCheckout = async (req, res) => {
     let subtotal = 0;
     let baseSubtotal = 0;
     let totalItems = 0;
+
+
+
 
     cart.items.forEach(item => {
       const product = item.productId;
@@ -68,9 +72,10 @@ const loadCheckout = async (req, res) => {
         appliedDiscount = Math.max(appliedDiscount, Number(product.category.categoryOffer.discountValue) || 0);
       }
 
-      const currentPrice = variant.offerPrice && variant.offerPrice > 0
-        ? variant.offerPrice
-        : variant.price;
+      const basePrice = Number(variant.salePrice || variant.price);
+      const currentPrice = appliedDiscount > 0 
+        ? Math.floor(basePrice * (1 - appliedDiscount / 100)) 
+        : basePrice;
 
       const saleBase = variant.salePrice || variant.offerPrice || variant.price;
       const quantity = Number(item.quantity);
@@ -88,8 +93,22 @@ const loadCheckout = async (req, res) => {
       return res.redirect("/cart");
     }
 
- 
+    const query = { isActive: true };
+    const activeCoupons = await Coupon.find(query);
+    
+    const coupons = activeCoupons.filter(c => {
+      if (c.usedCount >= c.usageLimit) return false;
+      if (c.minPurchase > subtotal) return false;
+      if (c.userId && c.userId.toString() !== userId.toString()) return false;
+      
+      const startBuffer = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+      if (c.startDate && new Date(c.startDate) > startBuffer) return false;
+      
+      const expiryBuffer = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+      if (c.expiryDate && new Date(c.expiryDate) < expiryBuffer) return false;
 
+      return true;
+    });
 
     const discountAmount = req.session.discountAmount || 0;
     const offerDiscount = baseSubtotal - subtotal;
@@ -106,7 +125,7 @@ const loadCheckout = async (req, res) => {
     res.render("checkout", {
       user,
       cartItems: cart.items,
-
+       coupons,
       subtotal: baseSubtotal,
       offerDiscount,
       totalItems,
@@ -199,9 +218,10 @@ const placeOrder = async (req, res) => {
         appliedDiscount = Math.max(appliedDiscount, Number(product.category.categoryOffer.discountValue) || 0);
       }
 
-      const currentPrice = variant.offerPrice && variant.offerPrice > 0
-        ? variant.offerPrice
-        : (variant.salePrice || variant.price);
+      const basePrice = Number(variant.salePrice || variant.price);
+      const currentPrice = appliedDiscount > 0 
+        ? Math.floor(basePrice * (1 - appliedDiscount / 100)) 
+        : basePrice;
 
       const saleBase = variant.salePrice || variant.offerPrice || variant.price;
       const offerDiscountAmount = (variant.price - currentPrice) * item.quantity;

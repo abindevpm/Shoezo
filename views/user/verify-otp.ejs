@@ -247,7 +247,7 @@
     
     updateTimer();
 
-    // SHIFT-UP handling
+    
     (function () {
       const formWrap = document.querySelector('.form-wrap');
       if (!formWrap) return;
@@ -266,7 +266,7 @@
       });
     })();
 
-    // OTP inputs handling
+    
     otpInputs.forEach((input, index) => {
       input.addEventListener('input', (e) => {
         const v = e.target.value;
@@ -286,7 +286,7 @@
       });
     });
 
-    // Verification Logic (AJAX)
+  
     function validateOTPForm() {
       const enteredOtp = [...otpInputs].map(i => i.value).join('');
 
@@ -299,13 +299,18 @@
         return false;
       }
 
+      if (timeLeft <= 0) {
+        Swal.fire({
+          icon: 'error',
+          title: 'OTP Expired',
+          text: 'The OTP has expired. Please resend the OTP.'
+        });
+        return false;
+      }
+
       $.post('/verify-otp', { otp: enteredOtp })
         .done((response) => {
-          // Note: In Forgot Password flow, verifyOtp controller redirects on success.
-          // Since we use AJAX now, we handle the redirect manually if the controller returns success JSON,
-          // OR if it returns HTML/Redirect we might need to adjust.
-          // Given the previous controllers, verifyOtp redirected to /reset-password.
-          // To keep it clean, let's assume it returns { success: true } for AJAX.
+          
           
           if (response.success || !response.includes('Invalid OTP')) {
              Swal.fire({
@@ -330,7 +335,7 @@
       return false;
     }
 
-    // Resend Logic
+    
     function handleResendOTP() {
       if (timeLeft > 0) return;
       

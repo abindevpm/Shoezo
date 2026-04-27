@@ -172,11 +172,46 @@ const manageCategoryOffer = async (req, res) => {
       return res.json({ success: false, message: "Category not found" });
     }
 
+
+
+
+     const today = new Date();
+     today.setHours(0,0,0,0)
+
+     const start = new Date(startDate)
+     const end = new Date(endDate)
+
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+  return res.json({ success: false, message: "Invalid date format" });
+}
+
+
+
+
+
+if (discount <= 0 || discount > 100) {
+  return res.json({ success: false, message: "Invalid discount value" });
+}
+
+
+      
+     if(start<today){
+      return res.json({success:false,message:"Start date cannot be in the past"})
+     }
+
+     if(end<=start){
+      return res.json({success:false,message:"End date must be after start date"})
+     }
+
+
+     
+
+
     if (category.categoryOffer) {
       await Offer.findByIdAndUpdate(category.categoryOffer._id, {
         discountValue: discount,
-        startDate,
-        endDate,
+       startDate: start,
+       endDate: end,
         isActive: true
       });
     } else {
@@ -185,8 +220,8 @@ const manageCategoryOffer = async (req, res) => {
         discountType: "percentage",
         discountValue: discount,
         category: categoryId,
-        startDate,
-        endDate,
+       startDate: start,
+       endDate: end,
         isActive: true
       });
       category.categoryOffer = newOffer._id;
@@ -224,6 +259,7 @@ const manageCategoryOffer = async (req, res) => {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: "Manage Category Offer Error" });
   }
 }
+
 
 
 const removeCategoryOffer = async (req, res) => {

@@ -405,13 +405,31 @@
 
 </html>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
   function copyReferralCode() {
-    const code = document.getElementById('referralCode').innerText;
+    const code = document.getElementById('referralCode').innerText.trim();
     navigator.clipboard.writeText(code).then(() => {
-      alert('Referral code copied to clipboard!');
-    }).catch(err => {
-      console.error('Failed to copy: ', err);
-    });
+      const Toast = Swal.mixin({
+        toast: true, position: 'top-end',
+        showConfirmButton: false, timer: 2000, timerProgressBar: true,
+      });
+      Toast.fire({ icon: 'success', title: 'Referral code copied!' });
+    }).catch(err => console.error('Failed to copy:', err));
   }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("success") === "passwordChanged") {
+      Swal.fire({
+        icon: 'success',
+        title: 'Password Changed!',
+        text: 'Your password has been updated successfully.',
+        confirmButtonColor: '#000',
+        timer: 3000,
+        timerProgressBar: true
+      });
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  });
 </script>

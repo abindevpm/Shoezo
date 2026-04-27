@@ -322,6 +322,14 @@ const downloadInvoice = async (req, res) => {
     const order = await Order.findOne({ _id: req.params.orderId, userId }).populate("items.productId");
     if (!order) return res.status(StatusCodes.NOT_FOUND).send("Order not found");
 
+
+
+if (!["Delivered", "Returned"].includes(order.status)) {
+  return res.status(400).send("Invoice not available yet");
+}
+
+
+
     const doc = new PDFDocument({ margin: 50 });
     const filename = `Invoice-${order.orderId}.pdf`;
 
@@ -350,14 +358,6 @@ const downloadInvoice = async (req, res) => {
 
     
     const top = 220;
-    doc.fontSize(12).text("Bill To:", 50, top, { underline: true });
-    doc.fontSize(10)
-       .text(order.address.fullName, 50, top + 20)
-       .text(order.address.addressLine, 50, top + 35)
-       .text(`${order.address.city}, ${order.address.state} - ${order.address.pincode}`, 50, top + 50)
-       .text(`Phone: ${order.address.phone}`, 50, top + 65)
-       .moveDown();
-
     
     let statusColor = "#3b82f6"; 
     if (order.status === "Delivered") statusColor = "#10b981"; 
@@ -367,8 +367,16 @@ const downloadInvoice = async (req, res) => {
     doc.fillColor("#FFFFFF").fontSize(10).text(`STATUS: ${order.status.toUpperCase()}`, 400, top + 8, { align: "center", width: 150 });
     doc.fillColor("#000000");
 
+    doc.fontSize(12).text("Bill To:", 50, top, { underline: true });
+    doc.fontSize(10);
+    doc.text(order.address.fullName, 50, top + 20);
+    doc.text(order.address.addressLine, { width: 300 });
+    doc.text(`${order.address.city}, ${order.address.state} - ${order.address.pincode}`);
+    doc.text(`Phone: ${order.address.phone}`);
+    doc.moveDown();
+
     
-    const tableTop = 320;
+    const tableTop = Math.max(320, doc.y + 10);
     doc.fontSize(10).font("Helvetica-Bold");
     doc.text("Sl", 50, tableTop);
     doc.text("Product Name", 80, tableTop);

@@ -74,6 +74,7 @@ const editProfile = async (req, res) => {
   }
 };
 
+
 const uploadProfileImage = async (req, res) => {
 
   try {
@@ -108,44 +109,57 @@ const changePassword = async (req, res) => {
     const { currentPassword, newPassword, confirmPassword } = req.body;
     const userId = req.user._id;
 
-
     if (!currentPassword || !newPassword || !confirmPassword) {
-      return res.redirect("edit-profile");
+      return res.redirect("/user/edit-profile?error=allFields");
     }
-
 
     if (newPassword.length < 6) {
-      return res.redirect("edit-profile");
+      return res.redirect("/user/edit-profile?error=shortPassword");
     }
 
-
     if (newPassword !== confirmPassword) {
-      return res.redirect("edit-profile");
+      return res.redirect("/user/edit-profile?error=mismatch");
     }
 
     const user = await User.findById(userId);
 
 
-    const isMatch = await bcrypt.compare(
-      currentPassword,
-      user.password
-    );
-
-    if (!isMatch) {
-      return res.redirect("edit-profile?error=currentPassword");
+    if (user.password) {
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res.redirect("/user/edit-profile?error=currentPassword");
+      }
     }
+
+    const isSamePassword = await bcrypt.compare(newPassword,user.password);
+     if(isSamePassword){
+      return res.redirect("/user/edit-profile?error=samePassword")
+     }
+
+
+
 
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
-    await user.save();
 
 
-    return res.redirect("/profile");
+    // await user.save()
+    await user.save({ validateBeforeSave: false });
+
+
+    console.log("Entered:", currentPassword);
+console.log("DB:", user.password);
+
+const isMatch = await bcrypt.compare(currentPassword, user.password);
+console.log("Match:", isMatch);
+
+
+    return res.redirect("/user/profile?success=passwordChanged");
 
   } catch (error) {
     console.log("Change password error:", error);
-    return res.redirect("/edit-profile");
+    return res.redirect("/user/edit-profile?error=serverError");
   }
 };
 
@@ -159,7 +173,7 @@ const sendEmailOtp = async (req, res) => {
 
     req.session.emailOtp = otp;
     req.session.newEmail = email;
-    req.session.emailOtpExpiry = Date.now() + 5 * 60 * 1000;
+    req.session.emailOtpExpiry = Date.now() + 1 * 60 * 1000;
 
     console.log(otp)
 
@@ -250,7 +264,7 @@ const resendEmailOtp = async (req, res) => {
     const otp = Math.floor(1000 + Math.random() * 9000);
 
     req.session.emailOtp = otp;
-    req.session.emailOtpExpiry = Date.now() + 2 * 60 * 1000;
+    req.session.emailOtpExpiry = Date.now() + 1 * 60 * 1000;
 
     await transporter.sendMail({
       to: req.session.newEmail,

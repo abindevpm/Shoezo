@@ -50,7 +50,9 @@ const addAdress = async (req, res) => {
       isDefault
     } = req.body;
 
-   if(!fullName || !phone || !addressLine || !city || !state || !pincode){
+    
+
+   if(!fullName || !phone || !addressLine ||  !state || !pincode){
     return res.status(400).json({
       success:false,
       message:"All fields are Required"
@@ -233,12 +235,6 @@ const updateAddress = async (req, res) => {
   }
 
 }
-
-
-
-
-
-
 
 
 const setDefaultAddress = async (req, res) => {

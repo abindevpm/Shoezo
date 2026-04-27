@@ -3,7 +3,14 @@ const User = require("../models/userSchema");
 
 const userAuth = async (req, res, next) => {
   try {
+    const isAjax = req.xhr || 
+                   (req.headers.accept && req.headers.accept.includes('application/json')) || 
+                   (req.headers['content-type'] && req.headers['content-type'].includes('application/json'));
+
     if (!req.session.user) {
+      if (isAjax) {
+        return res.json({ success: false, loginRedirect: true, message: "Login required" });
+      }
       return res.redirect("/login");
     }
 
@@ -11,7 +18,12 @@ const userAuth = async (req, res, next) => {
     const user = await User.findById(userId);
 
     if (!user || user.isBlocked) {
+
       delete req.session.user;
+      
+      if (isAjax) {
+        return res.json({ success: false, loginRedirect: true, message: "Account is blocked or unavailable" });
+      }
       return res.redirect("/login");  
     }
 
@@ -21,6 +33,12 @@ const userAuth = async (req, res, next) => {
 
   } catch (error) {
     console.log("userAuth error:", error);
+    const isAjax = req.xhr || 
+                   (req.headers.accept && req.headers.accept.includes('application/json')) || 
+                   (req.headers['content-type'] && req.headers['content-type'].includes('application/json'));
+    if (isAjax) {
+      return res.json({ success: false, loginRedirect: true, message: "Authentication error" });
+    }
     return res.redirect("/login");
   }
 };

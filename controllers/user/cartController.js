@@ -81,9 +81,10 @@ const loadCart = async (req, res) => {
         appliedDiscount = Math.max(appliedDiscount, Number(product.category.categoryOffer.discountValue) || 0);
       }
 
-      const currentPrice = variant.offerPrice && variant.offerPrice > 0
-        ? variant.offerPrice
-        : variant.price;
+      const basePrice = Number(variant.salePrice || variant.price);
+      const currentPrice = appliedDiscount > 0 
+        ? Math.floor(basePrice * (1 - appliedDiscount / 100)) 
+        : basePrice;
 
       const saleBase = variant.salePrice || variant.offerPrice || variant.price;
       baseSubtotal += item.quantity * saleBase;
@@ -132,6 +133,12 @@ const addToCart = async (req, res) => {
   try {
     const productId = req.params.id;
     const userId = req.user._id;
+
+
+     if (!userId) {
+      return res.redirect("/login");
+    }
+
 
     const { variant } = req.body;
     if (!variant) {
@@ -326,9 +333,10 @@ const updateCartQty = async (req, res) => {
         appliedDiscount = Math.max(appliedDiscount, Number(product.category.categoryOffer.discountValue) || 0);
       }
 
-      const currentPrice = variant.offerPrice && variant.offerPrice > 0
-        ? variant.offerPrice
-        : variant.price;
+      const basePrice = Number(variant.salePrice || variant.price);
+      const currentPrice = appliedDiscount > 0 
+        ? Math.floor(basePrice * (1 - appliedDiscount / 100)) 
+        : basePrice;
 
       const saleBase = variant.salePrice || variant.offerPrice || variant.price;
       baseSubtotal += i.quantity * saleBase;
@@ -350,9 +358,10 @@ const updateCartQty = async (req, res) => {
         disc = Math.max(disc, Number(p.productOffer.discountValue) || 0);
       if (p.category?.categoryOffer?.isActive && p.category.categoryOffer.startDate <= today && p.category.categoryOffer.endDate >= today)
         disc = Math.max(disc, Number(p.category.categoryOffer.discountValue) || 0);
-      const cp = v.offerPrice && v.offerPrice > 0
-        ? v.offerPrice
-        : v.price;
+      const bp = Number(v.salePrice || v.price);
+      const cp = disc > 0 
+        ? Math.floor(bp * (1 - disc / 100)) 
+        : bp;
 
       itemTotal = updatedItem.quantity * cp;
     }
@@ -418,9 +427,10 @@ const removeCartItem = async (req, res) => {
         appliedDiscount = Math.max(appliedDiscount, Number(product.category.categoryOffer.discountValue) || 0);
       }
 
-      const currentPrice = variant.offerPrice && variant.offerPrice > 0
-        ? variant.offerPrice
-        : variant.price;
+      const basePrice = Number(variant.salePrice || variant.price);
+      const currentPrice = appliedDiscount > 0 
+        ? Math.floor(basePrice * (1 - appliedDiscount / 100)) 
+        : basePrice;
 
       const saleBase = variant.salePrice || variant.offerPrice || variant.price;
       baseSubtotal += i.quantity * saleBase;

@@ -133,7 +133,7 @@ const AddProducts = async (req, res) => {
       files.images.forEach(file => images.push(file.filename));
     }
 
-    if (images.length > 10) {
+    if (images.length > 3){
       return res.redirect("/admin/add-products?status=maxImages");
     }
 
@@ -412,7 +412,32 @@ const manageProductOffer = async (req, res) => {
     const { productId, discountValue, startDate, endDate } = req.body;
     const discount = Number(discountValue);
 
-    if (isNaN(discount) || discount < 0 || discount > 100) {
+
+     if(!discountValue || !startDate || !endDate){
+      return res.json({success:false,message:"All Fields Required"})
+     }
+
+
+
+     const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+const start = new Date(startDate);
+const end = new Date(endDate);
+
+if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+  return res.json({ success: false, message: "Invalid date format" });
+}
+
+if (start < today) {
+  return res.json({ success: false, message: "Start date cannot be in the past" });
+}
+
+if (end <= start) {
+  return res.json({ success: false, message: "End date must be after start date" });
+}
+
+    if (isNaN(discount) || discount <=0 || discount > 100) {
       return res.json({ success: false, message: "Invalid discount value" });
     }
 

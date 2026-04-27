@@ -82,18 +82,11 @@ const getWishlist = async (req, res) => {
 
 const addToWishlist = async (req, res) => {
   try {
-
     const sessionUser = req.session.user;
     if (!sessionUser) {
       return res.json({ success: false, message: "Login required" });
-
     }
     const userId = sessionUser._id || sessionUser;
-
-    if (!userId) {
-      return res.json({ success: false, message: "User ID not found" });
-
-    }
 
     const { productId } = req.body;
     let wishlist = await Wishlist.findOne({ userId });
@@ -103,19 +96,25 @@ const addToWishlist = async (req, res) => {
         userId: userId,
         products: [productId]
       });
+      await wishlist.save();
+      return res.json({ success: true, status: "added" });
     } else {
-      if (!wishlist.products.some(id => id.toString() === productId)) {
+      const productIndex = wishlist.products.indexOf(productId);
+      if (productIndex > -1) {
+
+        wishlist.products.splice(productIndex, 1);
+        await wishlist.save();
+        return res.json({ success: true, status: "removed" });
+      } else {
+      
         wishlist.products.push(productId);
+        await wishlist.save();
+        return res.json({ success: true, status: "added" });
       }
     }
-
-    await wishlist.save();
-
-    res.json({ success: true });
-
   } catch (error) {
     console.log("Add to Wishlist Error:", error);
-    res.json({ success: false });
+    res.json({ success: false, message: "Internal server error" });
   }
 };
 

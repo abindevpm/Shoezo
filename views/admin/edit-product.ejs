@@ -307,7 +307,7 @@
     const totalNow = existingImageCount + selectedFiles.length + newFiles.length;
     if (totalNow > 3) {
       document.getElementById("imageError").innerText = "Maximum 3 images allowed";
-      e.target.value = "";
+      syncInput();
       return;
     }
 
