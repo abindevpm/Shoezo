@@ -64,7 +64,8 @@ const loadProducts = async (req, res) => {
   
       .populate({
         path: "category",
-        match: { isListed: true, isDeleted: false }
+        match: { isListed: true, isDeleted: false },
+          populate: { path: "categoryOffer" } 
       })
       .populate("brand")
       .populate("productOffer")
@@ -78,6 +79,60 @@ let totalStock = 0;
 
 
     const categories = await Category.find({ isDeleted: false, isListed: true });
+
+
+const today = new Date();
+
+products.forEach(product => {
+
+  let appliedDiscount = 0;
+
+  
+  if (
+    product.productOffer &&
+    product.productOffer.isActive &&
+    new Date(product.productOffer.startDate) <= today &&
+    new Date(product.productOffer.endDate) >= today
+  ) {
+    appliedDiscount = Math.max(
+      appliedDiscount,
+      Number(product.productOffer.discountValue) || 0
+    );
+  }
+
+  
+  if (
+    product.category &&
+    product.category.categoryOffer &&
+    product.category.categoryOffer.isActive &&
+    new Date(product.category.categoryOffer.startDate) <= today &&
+    new Date(product.category.categoryOffer.endDate) >= today
+  ) {
+    appliedDiscount = Math.max(
+      appliedDiscount,
+      Number(product.category.categoryOffer.discountValue) || 0
+    );
+  }
+
+  product.appliedDiscount = appliedDiscount;
+
+  
+  if (product.variants && product.variants.length > 0) {
+    const variant = product.variants[0];
+
+    const basePrice = variant.salePrice || variant.price;
+
+    product.finalPrice = appliedDiscount > 0
+      ? Math.floor(basePrice - (basePrice * appliedDiscount / 100))
+      : basePrice;
+  }
+});
+
+
+
+
+
+
 
     res.render("products", {
       products,
@@ -209,8 +264,14 @@ const loadEditProduct = async (req, res) => {
       isDeleted: false,
 
     })
-      .populate("category")
-      .populate("brand");
+
+    .populate({
+  path: "category",
+  populate: { path: "categoryOffer" }
+})
+.populate("brand")
+.populate("productOffer")
+     
 
     if (!product) {
       return res.status(404).send("Product not found");
@@ -225,6 +286,46 @@ const loadEditProduct = async (req, res) => {
       isDeleted: false,
       isListed: true
     });
+
+
+const today = new Date();
+
+product.variants.forEach(v => {
+  let appliedDiscount = 0;
+
+  if (
+    product.productOffer &&
+    product.productOffer.isActive &&
+    new Date(product.productOffer.startDate) <= today &&
+    new Date(product.productOffer.endDate) >= today
+  ) {
+    appliedDiscount = Math.max(
+      appliedDiscount,
+      Number(product.productOffer.discountValue) || 0
+    );
+  }
+
+  if (
+    product.category &&
+    product.category.categoryOffer &&
+    product.category.categoryOffer.isActive &&
+    new Date(product.category.categoryOffer.startDate) <= today &&
+    new Date(product.category.categoryOffer.endDate) >= today
+  ) {
+    appliedDiscount = Math.max(
+      appliedDiscount,
+      Number(product.category.categoryOffer.discountValue) || 0
+    );
+  }
+
+  const basePrice = v.salePrice || v.price;
+
+  v.calculatedPrice = appliedDiscount > 0
+    ? Math.floor(basePrice - (basePrice * appliedDiscount / 100))
+    : basePrice;
+});
+
+
 
     res.render("edit-product", {
       product,
@@ -307,7 +408,8 @@ const updateProduct = async (req, res) => {
 
     await Product.findByIdAndUpdate(id, { $set: updateData });
 
-    res.redirect("/admin/products");
+    res.redirect("/admin/products?status=updated");
+
 
   } catch (error) {
     console.log("Product Update Error:", error);

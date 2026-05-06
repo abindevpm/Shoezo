@@ -13,8 +13,11 @@ const loadOrders = async (req, res) => {
 
 
         let query = {   
+           
+        
   
         };
+        console.log(query)
 
     
         if (search) {
@@ -43,6 +46,7 @@ const loadOrders = async (req, res) => {
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
+
 
 
         res.render("orderlist", {
@@ -145,10 +149,7 @@ const updateOrderStatus = async (req, res) => {
 }
 
 
-        // if (newPaymentStatus) {
-        //     order.paymentStatus = newPaymentStatus;
-        // }
-
+    
         if (order.paymentStatus === "Refunded" && (status === "Returned" || status === "Cancelled")) {
             return res.status(400).json({ success: false, message: "Order already refunded" });
         }

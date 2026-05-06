@@ -179,6 +179,17 @@ const moveToCart = async (req, res) => {
     }
 
     const defaultVariant = product.variants[0];
+
+    if(!defaultVariant || defaultVariant.stock<=0){
+      return res.json({
+        success:false,
+        message:"Product is out of stock"
+      })
+    }
+
+
+
+
     const size = defaultVariant.size;
     const price = defaultVariant.offerPrice || defaultVariant.price;
 
@@ -197,12 +208,32 @@ const moveToCart = async (req, res) => {
           String(item.size) === String(size)
       );
 
-      if (existingItem) {
+            if (existingItem) {
+
+        
+        if (existingItem.quantity + 1 > defaultVariant.stock) {
+          return res.json({
+            success: false,
+            message: `Only ${defaultVariant.stock} items available`
+          });
+        }
+
         existingItem.quantity += 1;
+
       } else {
+
+        
+        if (defaultVariant.stock < 1) {
+          return res.json({
+            success: false,
+            message: "Product is out of stock"
+          });
+        }
+
         cart.items.push({ productId, size, quantity: 1, price });
       }
     }
+
 
     await cart.save();
 
@@ -218,6 +249,8 @@ const moveToCart = async (req, res) => {
   }
 };
 
+
+
 const getWishlistCount = async(req,res)=>{
     try {
 
@@ -229,8 +262,11 @@ const getWishlistCount = async(req,res)=>{
        const userId = sessionUser._id || sessionUser;
 
        const wishlist = await Wishlist.findOne({userId})
+       .populate("products")
 
-      const count = wishlist ? wishlist.products.length : 0;
+      const count = wishlist
+  ? wishlist.products.filter(product => product).length
+  : 0;
 
       res.json({count});
 

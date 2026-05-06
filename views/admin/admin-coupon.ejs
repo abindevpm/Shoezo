@@ -189,11 +189,6 @@
                     </button>
                 </div>
 
-
-
-
-
-
                 <form method="GET" action="/admin/coupons" class="filter-form">
 
   <input type="text" name="search" placeholder="Search by code" />
@@ -217,15 +212,6 @@
   <button type="submit">Filter</button>
 
 </form>
-
-
-
-
-
-
-
-
-
 
 
 
@@ -437,13 +423,22 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Starting Date</label>
-                                        <input type="date" name="startDate" class="form-control"
-                                            style="border-radius: 10px;">
+                                        
+                                        <input type="date" 
+                                                                  name="startDate" 
+                                                                        class="form-control"
+                                                               min="<%= new Date().toISOString().split('T')[0] %>">
+
+                                
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Expiry Date</label>
-                                        <input type="date" name="expiryDate" class="form-control"
-                                            style="border-radius: 10px;">
+                                        <input type="date" 
+                                             name="expiryDate" 
+                                               class="form-control"
+                                                     min="<%= new Date().toISOString().split('T')[0] %>">
+
+                                    
                                     </div>
                                 </div>
                                 <div class="mt-4 text-end">
@@ -516,13 +511,22 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Starting Date</label>
-                                        <input type="date" id="editStartDate" name="startDate" class="form-control"
-                                            style="border-radius: 10px;">
+                                       <input type="date" 
+       id="editStartDate" 
+       name="startDate" 
+       class="form-control"
+       min="<%= new Date().toISOString().split('T')[0] %>">
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Expiry Date</label>
-                                        <input type="date" id="editExpiryDate" name="expiryDate" class="form-control"
-                                            style="border-radius: 10px;">
+
+                                        <input type="date" 
+       id="editExpiryDate" 
+       name="expiryDate" 
+       class="form-control"
+       min="<%= new Date().toISOString().split('T')[0] %>">
+
+                                       
                                     </div>
                                 </div>
                                 <div class="mt-4 text-end">
@@ -562,24 +566,6 @@ document.querySelector(".filter-form").addEventListener("submit", function(e) {
 
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 async function handleResponse(response) {
                     const contentType = response.headers.get("content-type");
                     if (contentType && contentType.indexOf("application/json") !== -1) {
@@ -597,6 +583,11 @@ document.querySelector(".filter-form").addEventListener("submit", function(e) {
 
                     const formData = new FormData(this);
                     const data = Object.fromEntries(formData.entries());
+
+                    if (data.discountType === 'fixed' && Number(data.discountValue) >= Number(data.minPurchase)) {
+                        Swal.fire("Error", "Discount value must be less than minimum purchase amount", "warning");
+                        return;
+                    }
 
                     try {
                         const response = await fetch('/admin/createCoupon', {
@@ -666,6 +657,11 @@ document.querySelector(".filter-form").addEventListener("submit", function(e) {
                     const id = document.getElementById('editCouponId').value;
                     const formData = new FormData(this);
                     const data = Object.fromEntries(formData.entries());
+
+                    if (data.discountType === 'fixed' && Number(data.discountValue) >= Number(data.minPurchase)) {
+                        Swal.fire("Error", "Discount value must be less than minimum purchase amount", "warning");
+                        return;
+                    }
 
                     try {
                         const response = await fetch(`/admin/updateCoupon/${id}`, {
@@ -767,10 +763,6 @@ async function deleteCoupon(id) {
     }
   }
 }
-
-
-
-
 
 function toggleMaxDiscount(mode) {
     const typeSelect = mode === 'add' ? document.getElementById("addDiscountType") : document.getElementById("editDiscountType");

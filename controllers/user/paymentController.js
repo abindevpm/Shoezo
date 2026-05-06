@@ -30,6 +30,13 @@ const createOrder = async (req, res) => {
       ]
     });
 
+
+    if(cart){
+   cart.items = cart.items.filter(item => item.productId);
+}
+
+
+
     if (!cart || cart.items.length === 0) {
       return res.status(StatusCodes.NOT_FOUND).json({ success: false, message: "Cart is empty" });
     }
@@ -56,42 +63,59 @@ const createOrder = async (req, res) => {
 
       let appliedDiscount = 0;
 
-      if (product.productOffer &&
-        product.productOffer.isActive &&
-        product.productOffer.startDate <= today &&
-        product.productOffer.endDate >= today) {
-        appliedDiscount = Math.max(appliedDiscount, Number(product.productOffer.discountValue) || 0);
-      }
+    
+      const basePrice = Number(variant.salePrice || variant.price);
 
 
-      if (product.category &&
-        product.category.categoryOffer &&
-        product.category.categoryOffer.isActive &&
-        product.category.categoryOffer.startDate <= today &&
-        product.category.categoryOffer.endDate >= today) {
-        appliedDiscount = Math.max(appliedDiscount, Number(product.category.categoryOffer.discountValue) || 0);
-      }
+if (
+  product.productOffer &&
+  product.productOffer.isActive &&
+  new Date(product.productOffer.startDate) <= today &&
+  new Date(product.productOffer.endDate) >= today
+) {
+  appliedDiscount = Math.max(
+    appliedDiscount,
+    Number(product.productOffer.discountValue) || 0
+  );
+}
 
 
-      const currentPrice = variant.offerPrice && variant.offerPrice > 0
-        ? variant.offerPrice
-        : (variant.salePrice || variant.price);
+if (
+  product.category &&
+  product.category.categoryOffer &&
+  product.category.categoryOffer.isActive &&
+  new Date(product.category.categoryOffer.startDate) <= today &&
+  new Date(product.category.categoryOffer.endDate) >= today
+) {
+  appliedDiscount = Math.max(
+    appliedDiscount,
+    Number(product.category.categoryOffer.discountValue) || 0
+  );
+}
+
+
+      const currentPrice = appliedDiscount > 0 
+        ? Math.floor(basePrice * (1 - appliedDiscount / 100)) 
+        : basePrice;
 
 
 
-      const saleBase = variant.salePrice || variant.offerPrice || variant.price;
+      
       const offerDiscountAmount = (variant.price - currentPrice) * item.quantity;
       totalOfferDiscount += offerDiscountAmount;
 
 
       subtotal += currentPrice * item.quantity;
-      baseSubtotal += Number(saleBase) * item.quantity;
+      // baseSubtotal += Number(saleBase) * item.quantity;
+  baseSubtotal += basePrice * item.quantity;
+
 
       orderItems.push({
         productId: product._id,
         size: item.size,
         quantity: item.quantity,
-        price: currentPrice
+        price: currentPrice,
+        offerDiscount: (variant.price - currentPrice) * item.quantity
       });
     }
 
@@ -111,8 +135,6 @@ const createOrder = async (req, res) => {
     }
 
     const totalAmount = subtotal - discountAmount;
-
-
     let updatedOrderItems = [];
     let totalDistributed = 0;
 
@@ -132,12 +154,10 @@ const createOrder = async (req, res) => {
 
         totalDistributed += couponShare;
       }
-
       const finalPrice = itemTotal - couponShare;
 
       updatedOrderItems.push({
         ...item,
-        offerDiscount: 0,
         couponDiscount: couponShare,
         finalPrice
       });
@@ -145,15 +165,16 @@ const createOrder = async (req, res) => {
 
 
 
-
-
     const options = {
-      amount: totalAmount * 100,
+      amount: Math.round(totalAmount * 100),
       currency: "INR",
       receipt: "order_" + Date.now(),
     };
 
     const razorpayOrder = await razorpay.orders.create(options);
+
+    const expectedDeliveryDate = new Date();
+expectedDeliveryDate.setDate(expectedDeliveryDate.getDate() + 5);
 
 
     const newOrder = new Order({
@@ -176,7 +197,8 @@ const createOrder = async (req, res) => {
       totalCouponDiscount: discountAmount,
 
       couponCode: req.session.appliedCoupon || null,
-      status: "Placed"
+      status: "Placed",
+        expectedDeliveryDate
     });
 
     await newOrder.save();
@@ -189,7 +211,7 @@ const createOrder = async (req, res) => {
 
   } catch (error) {
     console.log("Create Order Error:", error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false });
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message || "Unable to create order" });
   }
 };
 

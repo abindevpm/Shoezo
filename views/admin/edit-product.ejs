@@ -14,6 +14,8 @@
 
       <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
       body { background:#f8f9fa; padding-top:60px; }
       .sidebar-container { width:250px; position:fixed; top:60px; left:0; min-height:100vh; }
@@ -170,7 +172,7 @@
 
 <div class="col-md-3">
   <label class="form-label">Offer Price</label>
-  <input type="number" class="form-control" name="variants[<%= i %>][offerPrice]" value="<%= v.offerPrice %>">
+  <input type="number" class="form-control" name="variants[<%= i %>][offerPrice]" value="<%= v.calculatedPrice %>">
   <small class="text-danger offerPriceError"></small>
 </div>
 
@@ -240,7 +242,7 @@
 
         <div id="previewContainer" class="d-flex gap-2 mb-3"></div>
 
-        <input type="file" id="imagesInput" name="images" multiple hidden>
+        <input type="file" id="imagesInput" name="images" multiple accept="image/*" hidden>
 
         <button class="btn btn-dark px-5">UPDATE PRODUCT</button>
       </form>
@@ -249,7 +251,6 @@
 
 
 
-  
 
   <!-- CROP MODAL -->
   <div id="cropModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center">
@@ -302,6 +303,24 @@
   
   input.addEventListener("change", e => {
     const newFiles = Array.from(e.target.files);
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+
+     for(let file of newFiles){
+      if(!allowedTypes.includes(file.type)){
+        document.getElementById("imageError").innerText = "Only image files are allowed";
+        input.value = "";
+        return
+      }
+     }
+
+
+
+
+
+
+
+
     if (newFiles.length === 0) return;
 
     const totalNow = existingImageCount + selectedFiles.length + newFiles.length;
@@ -457,8 +476,9 @@
 
    
 function renderVariants() {
-  const container = document.getElementById("variantList");
-  container.innerHTML = "";
+const container = document.getElementById("variantList");
+if (!container) return;
+container.innerHTML = "";
 
   variants.forEach((v, i) => {
     container.innerHTML += `
@@ -631,26 +651,6 @@ function validateForm() {
 
 
 
-    const params = new URLSearchParams(window.location.search);
-    const status = params.get("status");
-
-    if (status === "minImages") {
-      Swal.fire({
-        icon: "warning",
-        title: "Requirement",
-        text: "At least 3 images are required for this product."
-      });
-    } else if (status === "maxImages") {
-      Swal.fire({
-        icon: "warning",
-        title: "Limit",
-        text: "Maximum 3 images are allowed for this product."
-      });
-    }
-
-    if (status) {
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
   </script>
 
  

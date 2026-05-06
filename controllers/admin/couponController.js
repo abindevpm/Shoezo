@@ -147,9 +147,16 @@ discountValue = Number(discountValue)
 
   minPurchase = minPurchase ? Number(minPurchase):0;
 
-  if(minPurchase<0){
-    return res.status(400).json({message:"Invalid minimum Purchase amount"})
+  if(minPurchase<=0){
+    return res.status(400).json({message:"Minimum Purchase should be greater than 0"})
   }
+
+  if (discountType === "fixed" && discountValue >= minPurchase) {
+    return res.status(400).json({ message: "Discount value must be less than minimum purchase amount" });
+  }
+
+
+
 
    if(maxDiscount){
     maxDiscount = Number(maxDiscount);
@@ -185,6 +192,10 @@ discountValue = Number(discountValue)
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Create Coupon error" })
     }
 }
+
+
+
+
 
 const updateCoupon = async (req, res) => {
     try {
@@ -239,8 +250,12 @@ const updateCoupon = async (req, res) => {
           }
 
           minPurchase = minPurchase ? Number(minPurchase) : 0;
-          if(minPurchase < 0){
-            return res.status(400).json({message:"Invalid minimum Purchase amount"})
+          if(minPurchase <=0){
+            return res.status(400).json({message:"Minimum Purchase should be greater than 0"})
+          }
+
+          if (discountType === "fixed" && discountValue >= minPurchase) {
+            return res.status(400).json({ message: "Discount value must be less than minimum purchase amount" });
           }
 
           if(maxDiscount){

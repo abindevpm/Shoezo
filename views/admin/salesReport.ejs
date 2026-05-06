@@ -287,12 +287,31 @@ width:110px;
 
                             <div class="col-md-3 date-range <%= reportType === 'custom' ? '' : 'd-none' %>">
                                 <label class="form-label small fw-bold">From</label>
-                                <input type="date" name="fromDate" value="<%= fromDate %>" class="form-control">
+
+                                <input 
+  type="date" 
+  name="fromDate" 
+  value="<%= fromDate %>" 
+  class="form-control"
+  max="<%= new Date().toISOString().split('T')[0] %>"
+>
+
+
+
+                              
                             </div>
 
                             <div class="col-md-3 date-range <%= reportType === 'custom' ? '' : 'd-none' %>">
                                 <label class="form-label small fw-bold">To</label>
-                                <input type="date" name="toDate" value="<%= toDate %>" class="form-control">
+
+                                <input 
+  type="date" 
+  name="toDate" 
+  value="<%= toDate %>" 
+  class="form-control"
+  max="<%= new Date().toISOString().split('T')[0] %>"
+>
+                               
                             </div>
 
                             <div class="col-md-2">

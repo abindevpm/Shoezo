@@ -6,6 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SHOEZOO - Account Settings</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  
+
   <style>
     /* KEEP ALL THIS CSS - Your partials do not have these styles */
     * {
@@ -628,26 +632,48 @@
     emailError.innerText = "";
   });
 
+  const fileInput = document.getElementById("profileImageInput");
 
-   const fileInput = document.getElementById("profileImageInput");
+fileInput.addEventListener("change", function () {
+  const file = this.files[0];
 
-     fileInput.addEventListener("change",function(){
-       const file = this.files[0];
+  if (!file) return;
 
-         if(!file) return ;
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
-         const allowedTypes = ["image/jpeg","image/png","image/webp"];
+  if (!allowedTypes.includes(file.type)) {
+    this.value = "";
 
-           if(!allowedTypes.includes(file.type)){
-            alert("Only JPG,PNG,WEBP images are allowed!");
-             this.value = "";
-             return ;
-           }
+    Swal.fire({
+      icon: "error",
+      title: "Invalid File",
+      text: "Only JPG, PNG, WEBP images are allowed!"
+    });
 
-           document.getElementById("profileForm").submit()
+    return;
+  }
+
+  document.getElementById("profileForm").submit();
+});
 
 
-     })
+
+
+
+//      window.addEventListener("DOMContentLoaded", () => {
+//   const params = new URLSearchParams(window.location.search);
+//   const status = params.get("status");
+
+//   if (status === "invalidFile") {
+//     Swal.fire({
+//       icon: "error",
+//       title: "Invalid File",
+//       text: "Only JPG, PNG, WEBP images are allowed!"
+//     });
+
+//     window.history.replaceState({}, document.title, window.location.pathname);
+//   }
+// });
 
 
 

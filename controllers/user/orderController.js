@@ -30,9 +30,12 @@ const loadorders = async (req, res) => {
     }
 
 
+
     const orders = await Order.find(query)
       .populate("items.productId")
       .sort({ createdAt: -1 })
+
+      
 
     const user = await User.findById(userId);
     res.render("orders", {
@@ -72,16 +75,38 @@ const getOrderDetails = async (req, res) => {
   }
 }
 
+
+
 const cancelOrder = async (req, res) => {
   try {
     const userId = req.session.user
     const { orderId } = req.params
-    const { reason } = req.body
+    const { reason,customReason } = req.body
+    let finalReason = "";
 
-    if (!reason || reason.trim() === "") {
-      return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Cancellation reason is mandatory" })
-    }
 
+
+    if ((!reason || reason.trim() === "") && (!customReason || customReason.trim() === "")) {
+  return res.status(StatusCodes.BAD_REQUEST).json({
+    success: false,
+    message: "Please select or enter a reason"
+  });
+}
+
+
+if (reason && reason.trim() !== "" && customReason && customReason.trim() !== "") {
+  return res.status(StatusCodes.BAD_REQUEST).json({
+    success: false,
+    message: "Choose either dropdown or type a reason, not both"
+  });
+}
+
+     if(customReason && customReason.trim()!==""){
+      finalReason = customReason
+     }else{
+      finalReason = reason
+     }
+    
     const order = await Order.findOne({ _id: orderId, userId })
     if (!order || ["Cancelled", "Shipped", "Delivered", "Returned", "Return Requested"].includes(order.status)) {
       return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Order cannot be cancelled at its current stage" })
@@ -98,11 +123,13 @@ const cancelOrder = async (req, res) => {
     }
 
     order.status = "Cancelled"
-    order.cancelReason = reason
-    order.items.forEach(item => {
-      item.itemStatus = "Cancelled"
-      item.cancelReason = reason
-    })
+
+    order.cancelReason = finalReason
+order.items.forEach(item => {
+  item.itemStatus = "Cancelled"
+  item.cancelReason = finalReason
+})
+
 
     const originalTotal = order.totalAmount;
     if (order.paymentStatus === "Paid" && order.totalAmount > 0) {
@@ -146,15 +173,39 @@ const cancelOrder = async (req, res) => {
   }
 }
 
+
+
+
 const cancelOrderItem = async (req, res) => {
   try {
     const userId = req.session.user
     const { orderId, itemId } = req.params
-    const { reason } = req.body
+    const { reason,customReason } = req.body
 
-    if (!reason || reason.trim() === "") {
-      return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Cancellation reason is mandatory" })
+    let finalReason = "";
+
+     if ((!reason || reason.trim() === "") && (!customReason || customReason.trim() === "")) {
+      return res.status(400).json({
+        success: false,
+        message: "Please select or enter a reason"
+      });
     }
+
+     if (reason && reason.trim() !== "" && customReason && customReason.trim() !== "") {
+      return res.status(400).json({
+        success: false,
+        message: "Choose either dropdown or type a reason, not both"
+      });
+    }
+
+
+        if (customReason && customReason.trim() !== "") {
+      finalReason = customReason.trim();
+    } else {
+      finalReason = reason.trim();
+    }
+
+
 
     const order = await Order.findOne({ _id: orderId, userId }).populate("items.productId")
     if (!order) return res.status(StatusCodes.NOT_FOUND).json({ success: false, message: "Order not found" })
@@ -177,7 +228,7 @@ const cancelOrderItem = async (req, res) => {
     )
 
     item.itemStatus = "Cancelled"
-    item.cancelReason = reason
+    item.cancelReason = finalReason
 
 
     const reductionAmount = Math.min(item.finalPrice, order.totalAmount);
@@ -203,12 +254,28 @@ const cancelOrderItem = async (req, res) => {
     const allCancelled = order.items.every(i => i.itemStatus === "Cancelled")
     if (allCancelled) {
       order.status = "Cancelled"
-      order.cancelReason = "All items cancelled: " + (reason || "")
+      order.cancelReason = "All items cancelled: " + finalReason
       order.totalAmount = 0;
       if (order.paymentStatus === "Paid") {
         order.paymentStatus = "Refunded"
       }
     }
+
+
+     if (
+  order.paymentMethod === "COD" &&
+  (order.couponApplied || order.totalCouponDiscount > 0)
+) {
+  return res.status(400).json({
+    success: false,
+    message: "Cannot cancel individual items when coupon is applied (COD orders)"
+  });
+}
+ 
+
+
+  
+
 
     await order.save()
 
@@ -226,16 +293,41 @@ const cancelOrderItem = async (req, res) => {
   }
 }
 
+
+
+
 const returnOrder = async (req, res) => {
   try {
     const userId = req.session.user
     const { orderId } = req.params
-    const { reason } = req.body
+    const { reason,customReason } = req.body
 
-    if (!reason || reason.trim() === "") {
-      return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Return reason is mandatory" })
+    let finalReason = "";
+
+    if ((!reason || reason.trim() === "") && (!customReason || customReason.trim() === "")) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "Please select or enter a reason"
+      })
     }
 
+      if (reason && reason.trim() !== "" && customReason && customReason.trim() !== "") {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "Choose either dropdown or type a reason, not both"
+      })
+    }
+
+     if (customReason && customReason.trim() !== "") {
+      finalReason = customReason.trim()
+    } else {
+      finalReason = reason.trim()
+    }
+
+
+
+
+  
     const order = await Order.findOne({ _id: orderId, userId })
     if (!order) {
       return res.status(StatusCodes.NOT_FOUND).json({ success: false, message: "Order not found" })
@@ -252,12 +344,12 @@ const returnOrder = async (req, res) => {
     }
 
     order.status = "Return Requested"
-    order.returnReason = reason
+    order.returnReason = finalReason
 
     order.items.forEach(item => {
       if (item.itemStatus === "Delivered") {
         item.itemStatus = "Return Requested"
-        item.returnReason = reason
+        item.returnReason = finalReason
       }
     })
 
@@ -269,15 +361,35 @@ const returnOrder = async (req, res) => {
   }
 }
 
+
+
+
+
 const returnOrderItem = async (req, res) => {
   try {
     const userId = req.session.user
     const { orderId, itemId } = req.params
-    const { reason } = req.body
+    const { reason,customReason } = req.body
 
-    if (!reason || reason.trim() === "") {
-      return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Return reason is mandatory" })
-    }
+    let finalReason = "";
+
+    if ((!reason || reason.trim() === "") && (!customReason || customReason.trim() === "")) {
+  return res.status(StatusCodes.BAD_REQUEST).json({
+    success: false,
+    message: "Please select or enter a reason"
+  })
+}
+if (reason && reason.trim() !== "" && customReason && customReason.trim() !== "") {
+  return res.status(StatusCodes.BAD_REQUEST).json({
+    success: false,
+    message: "Choose either dropdown or type a reason, not both"
+  })
+}
+if (customReason && customReason.trim() !== "") {
+  finalReason = customReason.trim()
+} else {
+  finalReason = reason.trim()
+}
 
     const order = await Order.findOne({ _id: orderId, userId })
     if (!order) {
@@ -301,7 +413,7 @@ const returnOrderItem = async (req, res) => {
     }
 
     item.itemStatus = "Return Requested"
-    item.returnReason = reason
+    item.returnReason = finalReason
 
 
     if (order.status === "Delivered") {
@@ -316,6 +428,8 @@ const returnOrderItem = async (req, res) => {
   }
 }
 
+
+
 const downloadInvoice = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -324,11 +438,9 @@ const downloadInvoice = async (req, res) => {
 
 
 
-if (!["Delivered", "Returned"].includes(order.status)) {
-  return res.status(400).send("Invoice not available yet");
-}
-
-
+if (["Cancelled", "Failed"].includes(order.status)) {
+  return res.status(400).send("Invoice not available for this order");
+} 
 
     const doc = new PDFDocument({ margin: 50 });
     const filename = `Invoice-${order.orderId}.pdf`;
@@ -371,7 +483,9 @@ if (!["Delivered", "Returned"].includes(order.status)) {
     doc.fontSize(10);
     doc.text(order.address.fullName, 50, top + 20);
     doc.text(order.address.addressLine, { width: 300 });
-    doc.text(`${order.address.city}, ${order.address.state} - ${order.address.pincode}`);
+    doc.text(
+  `${order.address.city || ""}, ${order.address.state || ""} - ${order.address.pincode || ""}`
+);
     doc.text(`Phone: ${order.address.phone}`);
     doc.moveDown();
 
@@ -413,9 +527,34 @@ if (!["Delivered", "Returned"].includes(order.status)) {
     doc.moveTo(50, y).lineTo(550, y).stroke();
     y += 20;
 
+    const calculatedTotal = order.items.reduce((acc, item) => {
+  if (["Cancelled", "Returned", "Failed", "Return Requested"].includes(item.itemStatus)) {
+    return acc;
+  }
+  return acc + (item.price * item.quantity);
+}, 0);
+
+
+const originalTotal = order.items.reduce((acc, item) => {
+  return acc + (item.price * item.quantity);
+}, 0);
+
+const deliveredTotal = calculatedTotal;
+
+const couponShare = originalTotal > 0 
+  ? (deliveredTotal / originalTotal) * (order.totalCouponDiscount || 0)
+  : 0;
+
+const finalTotal = deliveredTotal - couponShare;
+
+
+
+
+
+
     const summaryX = 350;
     doc.fontSize(10).text("Subtotal:", summaryX, y);
-    doc.text(`₹${order.subtotal.toLocaleString()}`, 500, y, { align: "right" });
+    doc.text(`₹${calculatedTotal.toLocaleString()}`, 500, y, { align: "right" });
 
     if (order.totalOfferDiscount > 0) {
       y += 15;
@@ -435,7 +574,7 @@ if (!["Delivered", "Returned"].includes(order.status)) {
        .font("Helvetica-Bold")
        .fontSize(12)
        .text("GRAND TOTAL:", 350, y)
-       .text(`₹${order.totalAmount.toLocaleString()}`, 500, y, { align: "right" });
+       .text(`₹${finalTotal.toLocaleString()}`, 500, y, { align: "right" });
 
     
     y += 60;
@@ -459,30 +598,65 @@ if (!["Delivered", "Returned"].includes(order.status)) {
   }
 }
 
+
+
+
 const loadTrackOrder = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    const { id: orderId, itemId } = req.params
-    const order = await Order.findOne({ _id: orderId, userId }).populate("items.productId")
+    const { id: orderId, itemId } = req.params;
+    const orderDoc = await Order.findOne({ _id: orderId, userId }).populate("items.productId");
+    if (!orderDoc) return res.redirect("/orders");
 
-    if (!order) return res.redirect("/orders")
+    const order = orderDoc.toObject();
 
-    let focusedItem = null
+    const originalTotal = order.items.reduce((acc, item) => {
+      return acc + (item.price * item.quantity);
+    }, 0);
+
+    order.items = order.items.map(item => {
+      const mrp = item.productId.regularPrice || item.price;
+      const offerPrice = item.price;
+
+      const itemTotal = offerPrice * item.quantity;
+      const mrpTotal = mrp * item.quantity;
+
+      const isCancelled = ["Cancelled", "Returned", "Failed", "Return Requested"].includes(item.itemStatus);
+
+      const productDiscount = mrpTotal - itemTotal;
+
+      const couponShare = originalTotal > 0
+        ? (itemTotal / originalTotal) * (order.totalCouponDiscount || 0)
+        : 0;
+
+      const finalPrice = isCancelled ? 0 : itemTotal - couponShare;
+
+      return {
+        ...item,
+        mrpTotal,
+        itemTotal,
+        productDiscount,
+        couponShare,
+        finalPrice
+      };
+    });
+
+    let focusedItem = null;
     if (itemId) {
-      focusedItem = order.items.find(item => item._id.toString() === itemId)
+      focusedItem = order.items.find(item => item._id.toString() === itemId);
     }
 
     res.render("track-order", {
       order,
       user: req.user || { name: order.address.fullName },
       focusedItem
-    })
+    });
   } catch (error) {
-    console.log(error, "Load track order error occured")
-    res.status(StatusCodes.NOT_FOUND).redirect("/orders")
+    console.log(error, "Load track order error occured");
+    res.status(StatusCodes.NOT_FOUND).redirect("/orders");
   }
-}
+};
 
 module.exports = {
   loadorders,

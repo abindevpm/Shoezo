@@ -1,3 +1,4 @@
+
 const Cart = require("../../models/cartSchema")
 const Product = require("../../models/productSchema")
 const StatusCodes = require("../../routes/utils/statusCodes")
@@ -28,11 +29,19 @@ const loadCart = async (req, res) => {
 
         const product = item.productId;
 
+        const variant = product?.variants?.find(
+          v=>String(v.size)===String(item.size)
+        );
+
+
+
         if(
           !product ||
           !product.isListed ||
           !product.category?.isListed ||
-          !product.brand?.isListed
+          !product.brand?.isListed ||
+          !variant ||
+          variant.stock<=0
         ){
           item.notAvailable = true;
         }else{
@@ -54,11 +63,16 @@ const loadCart = async (req, res) => {
     const today = new Date();
     let baseSubtotal = 0;
     const cartItems = cart.items.map(item => {
-      const product = item.productId;
-      const variant = product.variants.find(
-        v => String(v.size) === String(item.size)
-      );
 
+  const product = item.productId;
+
+  if (!product) return null;
+
+  const variant = product?.variants?.find(
+    v => String(v.size) === String(item.size)
+  );
+
+ 
 
 
       if (!variant) return null;

@@ -137,7 +137,7 @@
 
                         <td>
                           <% if(v){ %>
-                            ₹<%= v.offerPrice> 0 ? v.offerPrice : v.price %>
+                            ₹<%= product.finalPrice %>
                               <% if(v.offerPrice> 0){ %>
                                 <br>
                                 <small class="text-muted text-decoration-line-through">
@@ -150,15 +150,15 @@
                         </td>
 
                         <td>
-                          <% if (product.productOffer && product.productOffer.isActive) { %>
-                            <span class="badge bg-success">
-                              <%= product.productOffer.discountValue %>%
-                            </span>
-                            <% } else { %>
-                              <span class="badge bg-secondary">
-                                No Offer
-                              </span>
-                              <% } %>
+                        <% if (product.appliedDiscount > 0) { %>
+  <span class="badge bg-success">
+    <%= product.appliedDiscount %>%
+  </span>
+<% } else { %>
+  <span class="badge bg-secondary">
+    No Offer
+  </span>
+<% } %>
                         </td>
 
 
@@ -191,7 +191,7 @@
                             <a href="/admin/edit-product/<%= product._id %>" class="text-dark">
                               <i class="fas fa-pencil-alt"></i>
                             </a>
-
+<!-- 
 
 
                             <% if (product.productOffer && product.productOffer.isActive) { %>
@@ -209,7 +209,41 @@
                                   data-start="" data-end="" onclick="prepareOfferModal(this)">
                                   <i class="fa fa-plus"></i>
                                 </button>
-                                <% } %>
+                                <% } %> -->
+
+<% if (product.appliedDiscount > 0) { %>
+  <button class="btn btn-warning btn-sm"
+    data-bs-toggle="modal"
+    data-bs-target="#productOfferModal"
+    data-id="<%= product._id %>"
+    data-discount="<%= product.appliedDiscount %>"
+    data-start=""
+    data-end=""
+    onclick="prepareOfferModal(this)">
+    <i class="fa fa-percent"></i>
+  </button>
+<% } else { %>
+  <button class="btn btn-dark btn-sm"
+    data-bs-toggle="modal"
+    data-bs-target="#productOfferModal"
+    data-id="<%= product._id %>"
+    data-discount=""
+    data-start=""
+    data-end=""
+    onclick="prepareOfferModal(this)">
+    <i class="fa fa-plus"></i>
+  </button>
+<% } %>
+
+
+
+
+
+
+
+
+
+
 
                                   <!-- LIST / UNLIST TOGGLE -->
                                   <div class="form-check form-switch">
@@ -285,12 +319,29 @@
 
                   <div class="mb-3">
                     <label>Start Date</label>
-                    <input type="date" name="startDate" id="productOfferStartDate" class="form-control">
+
+                    <input 
+  type="date" 
+  name="startDate" 
+  id="productOfferStartDate" 
+  class="form-control"
+  min="<%= new Date().toISOString().split('T')[0] %>"
+>
+            
                   </div>
 
                   <div class="mb-3">
                     <label>End Date</label>
-                    <input type="date" name="endDate" id="productOfferEndDate" class="form-control">
+                    <input 
+  type="date" 
+  name="endDate" 
+  id="productOfferEndDate" 
+  class="form-control"
+  min="<%= new Date().toISOString().split('T')[0] %>"
+>
+
+
+     
                   </div>
 
                   <div class="d-flex gap-2">
@@ -516,6 +567,40 @@
           }
         });
       }
+
+
+
+
+    
+  document.addEventListener("DOMContentLoaded", () => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("status") === "updated") {
+      Swal.fire({
+        icon: "success",
+        title: "Product Updated",
+        text: "Product updated successfully",
+        timer: 2500,
+        showConfirmButton: false
+      });
+
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     </script>
 </body>
 

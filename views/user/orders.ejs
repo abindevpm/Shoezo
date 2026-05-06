@@ -429,167 +429,278 @@
         <%- include("../partials/userpartial/footer.ejs") %>
 
             <script>
-                async function cancelOrder(orderId) {
-                    const { value: reason } = await Swal.fire({
-                        title: 'Cancel Order',
-                        input: 'select',
-                        inputLabel: 'Reason for cancellation (optional)',
-                        inputOptions: {
-    'Changed my mind': 'Changed my mind',
-    'Ordered by mistake': 'Ordered by mistake',
-    'Found cheaper elsewhere': 'Found cheaper elsewhere',
-    'Delivery taking too long': 'Delivery taking too long',
-    'Wrong address selected': 'Wrong address selected'
-},
+        
+async function cancelOrder(orderId) {
+  const { value: formValues } = await Swal.fire({
+    title: 'Cancel Order',
+    html: `
+      <select id="reason" class="swal2-input">
+        <option value="">-- Select Reason --</option>
+        <option value="Changed my mind">Changed my mind</option>
+        <option value="Ordered by mistake">Ordered by mistake</option>
+        <option value="Found cheaper elsewhere">Found cheaper elsewhere</option>
+        <option value="Delivery taking too long">Delivery taking too long</option>
+        <option value="Wrong address selected">Wrong address selected</option>
+      </select>
 
-                        inputPlaceholder: 'Select Cancel Reason',
-                        showCancelButton: true,
-                        confirmButtonColor: '#000',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Yes, cancel it!',
-                        inputValidator: (value) => {
-                            if (!value || !value.trim()) {
-                                return 'You need to provide a reason!'
-                            }
-                        }
-                    });
+      <textarea id="customReason" class="swal2-textarea" placeholder="Or type your reason..."></textarea>
+    `,
+    showCancelButton: true,
+    confirmButtonText: "Cancel Order",
+    confirmButtonColor: "#000",
+    cancelButtonColor: "#d33",
 
-                    if (reason !== undefined) {
-                        try {
-                            const response = await fetch(`/orders/cancel/${orderId}`, {
-                                method: 'PATCH',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ reason })
-                            });
-                            const result = await response.json();
-                            if (result.success) {
-                                Swal.fire('Cancelled!', result.message, 'success').then(() => location.reload());
-                            } else {
-                                Swal.fire('Error!', result.message, 'error');
-                            }
-                        } catch (error) {
-                            Swal.fire('Error!', 'Something went wrong', 'error');
-                        }
-                    }
-                }
+    preConfirm: () => {
+      const reason = document.getElementById("reason").value;
+      const customReason = document.getElementById("customReason").value;
+
+    
+      if (!reason && !customReason) {
+        Swal.showValidationMessage("Please select or enter a reason");
+        return false;
+      }
 
 
+      if (reason && customReason) {
+        Swal.showValidationMessage("Choose either dropdown or type a reason, not both");
+        return false;
+      }
 
-                async function cancelItem(orderId, itemId) {
-                    const { value: reason } = await Swal.fire({
-                        title: 'Cancel Item',
-                        input: 'select',
-                        inputLabel: 'Reason for cancellation (optional)',
-                                           inputOptions: {
-    'Changed my mind': 'Changed my mind',
-    'Ordered by mistake': 'Ordered by mistake',
-    'Found cheaper elsewhere': 'Found cheaper elsewhere',
-    'Delivery taking too long': 'Delivery taking too long',
-    'Wrong address selected': 'Wrong address selected'
-},
+      return { reason, customReason };
+    }
+  });
 
-                        inputPlaceholder: 'Tell us why...',
-                        showCancelButton: true,
-                        confirmButtonColor: '#000',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Yes, cancel item',
-                        inputValidator: (value) => {
-                            if (!value || !value.trim()) {
-                                return 'You need to provide a reason!'
-                            }
-                        }
-                    });
+  if (formValues) {
+    try {
+      const response = await fetch(`/orders/cancel/${orderId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formValues)
+      });
 
-                    if (reason !== undefined) {
-                        try {
-                            const response = await fetch(`/orders/cancel-item/${orderId}/${itemId}`, {
-                                method: 'PATCH',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ reason })
-                            });
-                            const result = await response.json();
-                            if (result.success) {
-                                Swal.fire('Cancelled!', result.message, 'success').then(() => location.reload());
-                            } else {
-                                Swal.fire('Error!', result.message, 'error');
-                            }
-                        } catch (error) {
-                            Swal.fire('Error!', 'Something went wrong', 'error');
-                        }
-                    }
-                }
+      const result = await response.json();
+
+      if (result.success) {
+        Swal.fire('Cancelled!', result.message, 'success')
+          .then(() => location.reload());
+      } else {
+        Swal.fire('Error!', result.message, 'error');
+      }
+
+    } catch (error) {
+      Swal.fire('Error!', 'Something went wrong', 'error');
+    }
+  }
+}
+
+
+
+
+
+
+async function cancelItem(orderId, itemId) {
+  const { value: formValues } = await Swal.fire({
+    title: 'Cancel Item',
+    html: `
+      <select id="reason" class="swal2-input">
+        <option value="">-- Select Reason --</option>
+        <option value="Changed my mind">Changed my mind</option>
+        <option value="Ordered by mistake">Ordered by mistake</option>
+        <option value="Found cheaper elsewhere">Found cheaper elsewhere</option>
+        <option value="Delivery taking too long">Delivery taking too long</option>
+        <option value="Wrong address selected">Wrong address selected</option>
+      </select>
+
+      <textarea id="customReason" class="swal2-textarea" placeholder="Or type your reason..."></textarea>
+    `,
+    showCancelButton: true,
+    confirmButtonText: "Cancel Item",
+    confirmButtonColor: "#000",
+    cancelButtonColor: "#d33",
+
+    preConfirm: () => {
+      const reason = document.getElementById("reason").value;
+      const customReason = document.getElementById("customReason").value;
+
+      if (!reason && !customReason) {
+        Swal.showValidationMessage("Please select or enter a reason");
+        return false;
+      }
+
+    
+      if (reason && customReason) {
+        Swal.showValidationMessage("Choose either dropdown or type a reason, not both");
+        return false;
+      }
+
+      return { reason, customReason };
+    }
+  });
+
+  if (formValues) {
+    try {
+      const response = await fetch(`/orders/cancel-item/${orderId}/${itemId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formValues)
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        Swal.fire('Cancelled!', result.message, 'success')
+          .then(() => location.reload());
+      } else {
+        Swal.fire('Error!', result.message, 'error');
+      }
+
+    } catch (error) {
+      Swal.fire('Error!', 'Something went wrong', 'error');
+    }
+  }
+}
+
+
+              
 
                 async function returnOrder(orderId) {
-                    const { value: reason } = await Swal.fire({
-                        title: 'Return Order',
-                        input: 'text',
-                        inputLabel: 'Reason for return (Mandatory)',
-                        inputPlaceholder: 'Required...',
-                        showCancelButton: true,
-                        confirmButtonColor: '#000',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Submit Return',
-                        inputValidator: (value) => {
-                            if (!value) {
-                                return 'You need to write something!'
-                            }
-                        }
-                    });
+  const { value: formValues } = await Swal.fire({
+    title: 'Return Order',
+    html: `
+      <select id="reason" class="swal2-input">
+        <option value="">-- Select Reason --</option>
+        <option value="Product damaged">Product damaged</option>
+        <option value="Wrong item delivered">Wrong item delivered</option>
+        <option value="Size/fit issue">Size/fit issue</option>
+        <option value="Quality not as expected">Quality not as expected</option>
+      </select>
 
-                    if (reason) {
-                        try {
-                            const response = await fetch(`/orders/return/${orderId}`, {
-                                method: 'PATCH',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ reason })
-                            });
-                            const result = await response.json();
-                            if (result.success) {
-                                Swal.fire('Success!', result.message, 'success').then(() => location.reload());
-                            } else {
-                                Swal.fire('Error!', result.message, 'error');
-                            }
-                        } catch (error) {
-                            Swal.fire('Error!', 'Something went wrong', 'error');
-                        }
-                    }
-                }
+      <textarea id="customReason" class="swal2-textarea" placeholder="Or type your reason..."></textarea>
+    `,
+    showCancelButton: true,
+    confirmButtonText: "Submit Return",
+    confirmButtonColor: "#000",
+    cancelButtonColor: "#d33",
 
-                async function returnItem(orderId, itemId) {
-                    const { value: reason } = await Swal.fire({
-                        title: 'Return Item',
-                        input: 'text',
-                        inputLabel: 'Reason for return (Mandatory)',
-                        inputPlaceholder: 'Required...',
-                        showCancelButton: true,
-                        confirmButtonColor: '#000',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Submit Return',
-                        inputValidator: (value) => {
-                            if (!value) {
-                                return 'You need to write something!'
-                            }
-                        }
-                    });
+    preConfirm: () => {
+      const reason = document.getElementById("reason").value;
+      const customReason = document.getElementById("customReason").value;
 
-                    if (reason) {
-                        try {
-                            const response = await fetch(`/orders/return-item/${orderId}/${itemId}`, {
-                                method: 'PATCH',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ reason })
-                            });
-                            const result = await response.json();
-                            if (result.success) {
-                                Swal.fire('Success!', result.message, 'success').then(() => location.reload());
-                            } else {
-                                Swal.fire('Error!', result.message, 'error');
-                            }
-                        } catch (error) {
-                            Swal.fire('Error!', 'Something went wrong', 'error');
-                        }
-                    }
-                }
+    
+      if (!reason && !customReason) {
+        Swal.showValidationMessage("Please select or enter a reason");
+        return false;
+      }
+
+    
+      if (reason && customReason) {
+        Swal.showValidationMessage("Choose either dropdown or type a reason, not both");
+        return false;
+      }
+
+      return { reason, customReason };
+    }
+  });
+
+  if (formValues) {
+    try {
+      const response = await fetch(`/orders/return/${orderId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formValues)
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        Swal.fire('Success!', result.message, 'success')
+          .then(() => location.reload());
+      } else {
+        Swal.fire('Error!', result.message, 'error');
+      }
+
+    } catch (error) {
+      Swal.fire('Error!', 'Something went wrong', 'error');
+    }
+  }
+}
+
+
+
+
+async function returnItem(orderId, itemId) {
+  const { value: formValues } = await Swal.fire({
+    title: 'Return Item',
+    html: `
+      <select id="reason" class="swal2-input">
+        <option value="">-- Select Reason --</option>
+        <option value="Product damaged">Product damaged</option>
+        <option value="Wrong item delivered">Wrong item delivered</option>
+        <option value="Size/fit issue">Size/fit issue</option>
+        <option value="Quality not as expected">Quality not as expected</option>
+      </select>
+
+      <textarea id="customReason" class="swal2-textarea" placeholder="Or type your reason..."></textarea>
+    `,
+    showCancelButton: true,
+    confirmButtonText: "Submit Return",
+    confirmButtonColor: "#000",
+    cancelButtonColor: "#d33",
+
+    preConfirm: () => {
+      const reason = document.getElementById("reason").value;
+      const customReason = document.getElementById("customReason").value;
+
+    
+      if (!reason && !customReason) {
+        Swal.showValidationMessage("Please select or enter a reason");
+        return false;
+      }
+
+      if (reason && customReason) {
+        Swal.showValidationMessage("Choose either dropdown or type a reason, not both");
+        return false;
+      }
+
+      return { reason, customReason };
+    }
+  });
+
+  if (formValues) {
+    try {
+      const response = await fetch(`/orders/return-item/${orderId}/${itemId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formValues)
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        Swal.fire('Success!', result.message, 'success')
+          .then(() => location.reload());
+      } else {
+        Swal.fire('Error!', result.message, 'error');
+      }
+
+    } catch (error) {
+      Swal.fire('Error!', 'Something went wrong', 'error');
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
             </script>
             <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
             <script>

@@ -120,14 +120,78 @@ const loadSalesReport = async (req, res) => {
     
     const reportTotals = await Order.aggregate([
       { $match: matchCondition },
-      { $unwind: "$items" },
-      { $match: { "items.itemStatus": "Delivered" } },
+      {
+        $project: {
+          allDelivered: {
+            $allElementsTrue: {
+              $map: {
+                input: "$items",
+                as: "item",
+                in: { $eq: ["$$item.itemStatus", "Delivered"] }
+              }
+            }
+          },
+          totalAmount: 1,
+          totalOfferDiscount: 1,
+          totalCouponDiscount: 1,
+          items: 1
+        }
+      },
+      {
+        $project: {
+          salesAmount: {
+            $cond: [
+              "$allDelivered",
+              "$totalAmount",
+              {
+                $sum: {
+                  $map: {
+                    input: { $filter: { input: "$items", as: "i", cond: { $eq: ["$$i.itemStatus", "Delivered"] } } },
+                    as: "di",
+                    in: { $ifNull: ["$$di.finalPrice", { $multiply: ["$$di.price", "$$di.quantity"] }] }
+                  }
+                }
+              }
+            ]
+          },
+          offerDiscount: {
+            $cond: [
+              "$allDelivered",
+              "$totalOfferDiscount",
+              {
+                $sum: {
+                  $map: {
+                    input: { $filter: { input: "$items", as: "i", cond: { $eq: ["$$i.itemStatus", "Delivered"] } } },
+                    as: "di",
+                    in: { $ifNull: ["$$di.offerDiscount", 0] }
+                  }
+                }
+              }
+            ]
+          },
+          couponDiscount: {
+            $cond: [
+              "$allDelivered",
+              "$totalCouponDiscount",
+              {
+                $sum: {
+                  $map: {
+                    input: { $filter: { input: "$items", as: "i", cond: { $eq: ["$$i.itemStatus", "Delivered"] } } },
+                    as: "di",
+                    in: { $ifNull: ["$$di.couponDiscount", 0] }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
       {
         $group: {
           _id: null,
-          totalSalesAmount: { $sum: "$items.finalPrice" },
-          totalCouponDiscount: { $sum: "$items.couponDiscount" },
-          totalOfferDiscount: { $sum: "$items.offerDiscount" }
+          totalSalesAmount: { $sum: "$salesAmount" },
+          totalOfferDiscount: { $sum: "$offerDiscount" },
+          totalCouponDiscount: { $sum: "$couponDiscount" }
         }
       }
     ]);

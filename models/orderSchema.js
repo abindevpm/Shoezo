@@ -158,6 +158,10 @@ const orderSchema = new mongoose.Schema({
   deliveredAt: {
   type: Date
 },
+expectedDeliveryDate: {
+  type: Date,
+  required: true
+},
 
   cancelReason: String,
   returnReason: String,

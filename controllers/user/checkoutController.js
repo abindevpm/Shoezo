@@ -10,6 +10,7 @@ const loadCheckout = async (req, res) => {
     const user = req.user;
     const userId = user._id;
     const cart = await Cart.findOne({ userId }).populate({
+      
       path: "items.productId",
       populate: [
         { path: "productOffer" },
@@ -17,6 +18,10 @@ const loadCheckout = async (req, res) => {
         { path: "category", populate: { path: "categoryOffer" } }
       ]
     });
+
+if(cart){
+   cart.items = cart.items.filter(item => item.productId);
+}
 
 
     if (!cart || cart.items.length === 0) {
@@ -52,7 +57,10 @@ const loadCheckout = async (req, res) => {
         v => Number(v.size) === Number(item.size)
       );
 
-      if (!variant) return;
+        if(!variant || variant.stock === 0){
+          item.notAvailable = true;
+           return
+        }
 
       let appliedDiscount = 0;
 
@@ -161,6 +169,12 @@ const placeOrder = async (req, res) => {
       ]
     });
 
+    if(cart){
+   cart.items = cart.items.filter(item => item.productId);
+}
+
+
+
     if (!cart || cart.items.length === 0) {
       console.log("Order placement failed: Empty cart for user", userId);
       return res.json({ success: false, message: "Your cart is empty" });
@@ -229,20 +243,28 @@ const placeOrder = async (req, res) => {
 
       subtotal += currentPrice * item.quantity;
       baseSubtotal += Number(saleBase) * item.quantity;
-
       orderItems.push({
         productId: product._id,
         size: item.size,
         quantity: item.quantity,
-        price: currentPrice
+        price: currentPrice,
+        offerDiscount: (variant.price - currentPrice) * item.quantity
       });
     }
 
 
+
     for (const item of cart.items) {
-      const variant = item.productId.variants.find(
-        v => Number(v.size) === Number(item.size)
-      );
+
+  const product = item.productId;
+
+  if(!product) continue;
+
+  const variant = product?.variants?.find(
+    v => Number(v.size) === Number(item.size)
+  );
+
+  
       if (!variant || variant.stock < item.quantity) {
         return res.json({ success: false, message: `Insufficient stock for ${item.productId.name} (Size: ${item.size})` });
       }
@@ -289,7 +311,6 @@ const placeOrder = async (req, res) => {
 
       updatedOrderItems.push({
         ...item,
-        offerDiscount: 0,
         couponDiscount: couponShare,
         finalPrice
       });
@@ -347,6 +368,16 @@ const placeOrder = async (req, res) => {
       console.log("Wallet deducted for user", userId);
     }
 
+
+
+    const orderDate = new Date();
+const deliveryDays = 5;
+
+const expectedDeliveryDate = new Date(orderDate);
+expectedDeliveryDate.setDate(orderDate.getDate() + deliveryDays);
+
+
+
     const order = new Order({
       orderId: generatedOrderId,
       userId,
@@ -367,8 +398,10 @@ const placeOrder = async (req, res) => {
       totalCouponDiscount: discountAmount,
 
 
+
       couponCode: req.session.appliedCoupon || null,
-      totalAmount
+      totalAmount,
+       expectedDeliveryDate
     });
 
     await order.save();
@@ -406,9 +439,11 @@ const placeOrder = async (req, res) => {
 
 
 
-const loadOrderSuccess = (req, res) => {
-  res.render("order-success");
+const loadOrderSuccess = async (req, res) => {
+  const lastOrder = await Order.findOne({ userId: req.user._id }).sort({ createdAt: -1 });
+  res.render("order-success", { order: lastOrder });
 };
+
 
 const addAddressCheckout = async (req, res) => {
   try {

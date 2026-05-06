@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -119,6 +119,24 @@
             border-color: #f08c00;
             color: #f08c00;
             background: #fff9db;
+        }
+
+        .status-badge.return-requested {
+            border-color: #f59e0b;
+            color: #f59e0b;
+            background: #fffbeb;
+        }
+
+        .status-badge.return-rejected {
+            border-color: #ef4444;
+            color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .status-badge.failed {
+            border-color: #71717a;
+            color: #71717a;
+            background: #f4f4f5;
         }
 
         .focused-item {
@@ -385,12 +403,13 @@
                     </div>
 
                     <div class="track-card">
-                        <% const currentStatus=focusedItem ? focusedItem.itemStatus : order.status; const
-                            steps=['Placed', 'Processing' , 'Shipped' , 'Delivered' ]; const
-                            currentIndex=steps.indexOf(currentStatus); const isCancelled=currentStatus==='Cancelled' ;
-                            const isReturned=currentStatus==='Returned' ; const
-                            isReturnRequested=currentStatus==='Return Requested' ; const
-                            isReturnRejected=currentStatus==='Return Rejected' ; %>
+                        <% const currentStatus=focusedItem ? focusedItem.itemStatus : order.status; 
+                           const steps=['Placed', 'Processing' , 'Shipped' , 'Delivered' ]; 
+                           const currentIndex=steps.indexOf(currentStatus); 
+                           const isCancelled=currentStatus==='Cancelled' ;
+                           const isReturned=currentStatus==='Returned' ; 
+                           const isReturnRequested=currentStatus==='Return Requested' ; 
+                           const isReturnRejected=currentStatus==='Return Rejected' ; %>
 
                             <div class="track-header">
                                 <div class="order-meta">
@@ -406,7 +425,13 @@
                                             </p>
                                 </div>
                                 <span
-                                    class="status-badge <%= currentStatus === 'Cancelled' ? 'cancelled' : (currentStatus === 'Shipped' ? 'shipped' : (currentStatus === 'Delivered' ? 'delivered' : (currentStatus === 'Returned' ? 'returned' : ''))) %>">
+                                    class="status-badge <%= currentStatus === 'Cancelled' ? 'cancelled' : 
+                                                         (currentStatus === 'Shipped' ? 'shipped' : 
+                                                         (currentStatus === 'Delivered' ? 'delivered' : 
+                                                         (currentStatus === 'Returned' ? 'returned' : 
+                                                         (currentStatus === 'Return Requested' ? 'return-requested' : 
+                                                         (currentStatus === 'Return Rejected' ? 'return-rejected' : 
+                                                         (currentStatus === 'Failed' ? 'failed' : '')))))) %>">
                                     <%= focusedItem ? focusedItem.itemStatus : order.status %>
                                 </span>
                             </div>
@@ -438,7 +463,7 @@
                                                 <i class="fas fa-exclamation-circle"></i>
                                                 Return request has been rejected.
                                             </div>
-                                            <% } else { %>
+                                <% } else { %>
                                                 <div class="stepper-container">
                                                     <div class="stepper">
                                                         <% steps.forEach((step, index)=> { %>
@@ -464,6 +489,7 @@
                                                     </div>
                                                 </div>
                                                 <% } %>
+                                                
 
                                                     <div class="track-grid">
                                                         <div class="details-section">
@@ -475,6 +501,8 @@
                                                                         <img src="/uploads/product-images/<%= item.productId.images[0] %>"
                                                                             alt="<%= item.productId.name %>">
                                                                     </div>
+
+
                                                                     <div class="item-info">
                                                                         <h5>
                                                                             <%= item.productId.name %>
@@ -493,6 +521,40 @@
                                                                             style="font-size: 10px; font-weight: 700; color: #555; margin-top: 5px;">
                                                                             STATUS: <%= item.itemStatus %>
                                                                         </p>
+
+                                                                        <div class="price-details" style="margin-top: 10px; border-top: 1px dashed #eee; pt-2">
+                                                                            <% const isItemCancelled = ["Cancelled", "Returned", "Failed", "Return Requested"].includes(item.itemStatus); %>
+                                                                            
+                                                                            <p style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                                                                                <span>Item Subtotal:</span>
+                                                                                <span>₹<%= item.mrpTotal.toLocaleString() %></span>
+                                                                            </p>
+
+                                                                            <% if (!isItemCancelled && item.productDiscount > 0) { %>
+                                                                                <p style="display: flex; justify-content: space-between; margin-bottom: 2px; color: #2b8a3e;">
+                                                                                    <span>Offer Discount:</span>
+                                                                                    <span>-₹<%= item.productDiscount.toLocaleString() %></span>
+                                                                                </p>
+                                                                            <% } %>
+                                                                            
+                                                                            <% if (!isItemCancelled && item.couponShare > 0) { %>
+                                                                                <p style="display: flex; justify-content: space-between; margin-bottom: 2px; color: #2b8a3e;">
+                                                                                    <span>Coupon Discount:</span>
+                                                                                    <span>-₹<%= Math.round(item.couponShare).toLocaleString() %></span>
+                                                                                </p>
+                                                                            <% } %>
+                                                                            
+                                                                            <p style="display: flex; justify-content: space-between; font-weight: 700; color: #000; margin-top: 5px;">
+                                                                                <span>Final Price:</span>
+                                                                                <span>₹<%= isItemCancelled ? 0 : Math.round(item.finalPrice).toLocaleString() %></span>
+                                                                            </p>
+                                                                        </div>
+
+
+
+
+
+
                                                                     </div>
                                                                 </div>
                                                                 <% }) %>
@@ -537,6 +599,9 @@
                                                                 <p>Status: <strong>
                                                                         <%= order.paymentStatus || 'Successful' %>
                                                                     </strong></p>
+
+                                                                
+
                                                             </div>
                                                         </div>
                                                     </div>

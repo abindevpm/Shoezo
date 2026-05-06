@@ -211,6 +211,7 @@
          id="imagesInput"
          name="images"
          multiple
+          accept="image/*"
          hidden>
 
   <div id="previewContainer" class="d-flex flex-wrap gap-2 mt-3"></div>
@@ -327,6 +328,29 @@ document.getElementById("cancelCrop").onclick = closeCropModal;
 
 input.addEventListener("change", function (event) {
     const newFiles = Array.from(event.target.files);
+
+
+const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+
+for(let  file of newFiles){
+  if(!allowedTypes.includes(file.type)){
+    document.getElementById("imageError").innerText = "Only images are allowed";
+    input.value = "";
+    return;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
     if (newFiles.length === 0) return;
 
     if ((selectedFiles.length + newFiles.length) > 3) {

@@ -1,4 +1,5 @@
 const Review = require("../../models/reviewSchema")
+const Order = require("../../models/orderSchema")
 
 const addReview = async (req, res) => {
   try {
@@ -12,6 +13,22 @@ const addReview = async (req, res) => {
     if (!rating || !comment) {
       return res.status(400).json({ success: false, message: "Rating and comment are required" });
     }
+
+    const hasPurchased = await Order.findOne({
+      userId:userId,
+      "items.productId":productId,
+      "items.itemStatus":"Delivered"
+    })
+
+     if(!hasPurchased){
+      return res.status(400).json({
+        success:false,
+        message:"You can review only purchased Product"
+      })
+     }
+
+
+
 
     const alreadyReviewed = await Review.findOne({
       user: userId,

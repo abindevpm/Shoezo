@@ -80,7 +80,7 @@ const uploadProfileImage = async (req, res) => {
   try {
 
     if (!req.file) {
-      return res.redirect("login")
+     return res.redirect("/user/edit-profile?status=invalidFile");
 
     }
     const imagePath = "/uploads/profile-images/" + req.file.filename;

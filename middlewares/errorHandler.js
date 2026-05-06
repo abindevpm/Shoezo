@@ -1,7 +1,7 @@
 const errorHandler = (err, req, res, next) => {
     const statusCode = err.statusCode || 500;
 
-    // Check if it's an AJAX request or expects JSON
+    
     if (req.xhr || (req.headers.accept && req.headers.accept.includes('application/json'))) {
         return res.status(statusCode).json({
             success: false,
