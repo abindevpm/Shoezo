@@ -24,6 +24,7 @@ const loadShopPage = async (req, res) => {
       isListed: true,
       category: { $in: activeCategories },
       brand: { $in: activeBrands }
+    
     };
 
     if (req.query.search && req.query.search.trim() !== "") {
@@ -49,6 +50,7 @@ const loadShopPage = async (req, res) => {
 
       filter.brand = { $in: selectedBrands.map(id => new mongoose.Types.ObjectId(id)) };
     }
+
 
 
 
@@ -153,8 +155,16 @@ const loadShopPage = async (req, res) => {
           }
         }
       },
+
    
       
+
+
+      
+       
+
+
+    
 
     ];
 
@@ -234,6 +244,10 @@ const loadShopPage = async (req, res) => {
 
     const totalProducts = await Product.countDocuments(filter);
     const totalPages = Math.ceil(totalProducts / limit);
+
+
+    const p = await Product.aggregate([{$match:{brand:{$ne:"6943d697ad160b86f289441a"}}}])
+    console.log(p)
 
 
     const categories = await Category.find({

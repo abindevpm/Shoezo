@@ -20,16 +20,23 @@ const loadProducts = async (req, res) => {
     let skip = (page - 1) * limit;
 
     const lowStock = req.query.lowStock || "false";
+
+     
+
     
     let query = { 
       isDeleted: false,
     };
 
+   
 
+    
   
     if (search) {
       query.name = { $regex: search, $options: "i" };
     }
+
+    
 
     if (categoryFilter) {
       const listedCategoryIds = await Category.find({
@@ -59,6 +66,9 @@ const loadProducts = async (req, res) => {
     const totalProducts = await Product.countDocuments(query);
     const totalPages = Math.ceil(totalProducts / limit);
 
+    
+
+    
 
     const products = await Product.find(query)
   
@@ -129,11 +139,6 @@ products.forEach(product => {
 });
 
 
-
-
-
-
-
     res.render("products", {
       products,
       categories,
@@ -193,9 +198,6 @@ const AddProducts = async (req, res) => {
     }
 
 
-
-
-
     const rawVariants = data.variants
       ? Object.values(data.variants)
       : [];
@@ -224,8 +226,6 @@ const AddProducts = async (req, res) => {
     await newProduct.save();
 
     return res.redirect("/admin/add-products?status=success");
-
-
 
 
   } catch (error) {

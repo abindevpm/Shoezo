@@ -82,7 +82,7 @@ const loadHomepage = async (req, res) => {
       return productObj;
     });
 
-    // Mark products as wishlisted if user is logged in
+    
     if (userData) {
       const wishlist = await Wishlist.findOne({ userId: userData._id || userData });
       const wishlistProductIds = wishlist ? wishlist.products.map(id => id.toString()) : [];
@@ -409,14 +409,15 @@ const signup = async (req, res) => {
     }
 
 
-    const findUser = await User.findOne({ email });
+    const findUser = await User.findOne({email});
 
     if (findUser) {
       return res.render("signup", { message: "User already exists", formData: req.body });
 
     }
 
-  
+    
+
     if (referalCode) {
       const referrer = await User.findOne({ referalCode });
       if (!referrer) {

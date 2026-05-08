@@ -10,9 +10,10 @@ const loadCouponPage = async (req, res) => {
         const {search,status,type,startDate,endDate} = req.query
         
         let query = {}
-
+      
+       
         query.isReferralCoupon = false
-            
+
     
         if(search){
             query.code = {$regex:search,$options:"i"}
@@ -60,8 +61,7 @@ else if (status === "Expired") {
          }
 
 
-       
-
+      
 
         const page = parseInt(req.query.page) || 1;
         const limit = 5;
@@ -70,6 +70,7 @@ else if (status === "Expired") {
         const total = await coupon.countDocuments(query)
 
 
+  
         const coupons = await coupon.find(query)
         .sort({ createdAt: -1 })
         .skip(skip)

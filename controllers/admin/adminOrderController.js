@@ -13,11 +13,10 @@ const loadOrders = async (req, res) => {
 
 
         let query = {   
-           
         
-  
+         
+   
         };
-        console.log(query)
 
     
         if (search) {
@@ -40,6 +39,9 @@ const loadOrders = async (req, res) => {
 
         const totalOrders = await Order.countDocuments(query);
         const totalPages = Math.ceil(totalOrders / limit);
+
+      
+
 
         const orders = await Order.find(query)
             .populate("userId")
