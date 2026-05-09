@@ -236,6 +236,9 @@ const loadShopPage = async (req, res) => {
     const totalPages = Math.ceil(totalProducts / limit);
 
 
+   
+
+
     const categories = await Category.find({
       isDeleted: false,
       isListed: true

@@ -1,6 +1,17 @@
 const express = require("express");
+
+
+
 const connectDB = require("./config/db");
 const app = express();
+
+
+
+app.get("/test", (req, res) => {
+  res.send("Working");
+});
+
+
 const path = require("path");
 require("dotenv").config();
 const userRoute = require("./routes/userRoute")
@@ -116,10 +127,20 @@ app.use(errorHandler)
 
 // Server
 
+
+
+
+
+
 const PORT = 3000;
 // app.listen(process.env.PORT, () => {
 //   console.log("Server running on port " + process.env.PORT);
 // });
-app.listen(PORT, () => {
+app.listen(PORT,"0.0.0.0", () => {
   console.log("Server running on port " + PORT);
 });
+
+
+
+
+
