@@ -1,6 +1,6 @@
 const express = require("express");
 
-
+require("dotenv").config();
 
 const connectDB = require("./config/db");
 const app = express();
@@ -13,12 +13,12 @@ app.get("/test", (req, res) => {
 
 
 const path = require("path");
-require("dotenv").config();
+// require("dotenv").config();
 const userRoute = require("./routes/userRoute")
 const adminRoute = require("./routes/adminRoute");
 const session = require("express-session")
 const MongoStore = require("connect-mongo").default
-const passport = require("./config/passport")
+const passport = require("./config/passport") 
 const { userAuth, adminAuth } = require("./middlewares/auth");
 const cartCountMiddleware = require("./middlewares/cartCount");
 const errorHandler = require("./middlewares/errorHandler")
