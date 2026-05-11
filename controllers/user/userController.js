@@ -82,7 +82,7 @@ const loadHomepage = async (req, res) => {
       return productObj;
     });
 
-    // Mark products as wishlisted if user is logged in
+    
     if (userData) {
       const wishlist = await Wishlist.findOne({ userId: userData._id || userData });
       const wishlistProductIds = wishlist ? wishlist.products.map(id => id.toString()) : [];
@@ -435,6 +435,8 @@ const signup = async (req, res) => {
     req.session.otpExpiry = Date.now() + 102 * 1000;
 
     req.session.userData = { name, phone, email, password, referalCode };
+
+    
 
     res.render("otp", { email });
     console.log("OTP Sent to", email, ":", otp);
