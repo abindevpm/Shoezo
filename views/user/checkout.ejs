@@ -1037,13 +1037,17 @@ if (!data.state.trim()) {
     this.disabled = true;
     const addressId = document.getElementById("addressIdInput") ? document.getElementById("addressIdInput").value : "";
 
-    if (!addressId) {
-      return Swal.fire({
-        icon: "warning",
-        title: "Select Address",
-        text: "Please select delivery address"
-      });
-    }
+   if (!addressId) {
+
+  isRzpProcessing = false;
+  document.getElementById("rzp-button").disabled = false;
+
+  return Swal.fire({
+    icon: "warning",
+    title: "Select Address",
+    text: "Please select delivery address"
+  });
+}
 
     try {
       const response = await fetch("/create-order", {
