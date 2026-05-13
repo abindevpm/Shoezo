@@ -246,7 +246,7 @@
                             Order <span class="text-primary">#<%= order.orderId %></span>
                         </h1>
                         <p class="text-muted mb-0 mt-1">Placed on <%= new Date(order.createdAt).toLocaleString('en-IN',
-                                { dateStyle: 'long' , timeStyle: 'short' }) %>
+                                { timeZone:'Asia/Kolkata',dateStyle: 'long' , timeStyle: 'short' }) %>
                         </p>
                     </div>
                     <div class="d-flex gap-3">
